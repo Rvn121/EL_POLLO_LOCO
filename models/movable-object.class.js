@@ -3,6 +3,10 @@ class MovableObject extends DrawableObject {
     energy = 100;
     isCollidable = true;
     moveInterval;
+    animationInterval;
+    idleInterval;
+    deathInterval;
+    hurtTimeout;
 
     moveRight() {
         this.x += this.speed;
@@ -17,6 +21,14 @@ class MovableObject extends DrawableObject {
 
     stopMoving() {
         clearInterval(this.moveInterval);
+    }
+
+    clearTimers() {
+        clearInterval(this.moveInterval);
+        clearInterval(this.animationInterval);
+        clearInterval(this.idleInterval);
+        clearInterval(this.deathInterval);
+        clearTimeout(this.hurtTimeout);
     }
 
     isColliding(movableObject) {

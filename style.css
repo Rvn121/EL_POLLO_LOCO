@@ -1,13 +1,233 @@
+@font-face {
+    font-family: "Averia Sans Libre";
+    src: url("./fonts/AveriaSansLibre-Regular.ttf") format("truetype");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "Averia Sans Libre";
+    src: url("./fonts/AveriaSansLibre-Bold.ttf") format("truetype");
+    font-weight: 700;
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Averia Sans Libre", sans-serif;
+    background: linear-gradient(180deg, #f8d25b 0%, #e9bb43 100%);
+    color: #412100;
+}
+
+button,
+canvas {
+    font-family: inherit;
+}
+
+.page-shell {
+    min-height: 100vh;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    gap: 24px;
+    padding: 24px;
+}
+
+.control-panel {
+    width: 280px;
+    max-width: 100%;
+    padding: 24px;
+    border-radius: 30px;
+    background: rgba(255, 248, 219, 0.92);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+}
+
+.control-panel h1,
+.control-panel h2,
+.modal-card h2 {
+    margin-top: 0;
+}
+
+.panel-text {
+    margin-bottom: 18px;
+}
+
+.control-list ul,
+.modal-card ul {
     margin: 0;
-    background-color: #e0d96a;
+    padding-left: 20px;
+    line-height: 1.5;
+}
+
+.canvas-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.canvas-shell {
+    position: relative;
+    width: min(720px, calc(100vw - 48px));
+    aspect-ratio: 3 / 2;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.28);
+    background: #000;
 }
 
 canvas {
-    background-color: black;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: #000;
 }
+
+.canvas-top-buttons {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 3;
+}
+
+.fullscreen-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 3;
+}
+
+.restart-btn {
+    position: absolute;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
+    z-index: 3;
+}
+
+.game-btn {
+    border: 2px solid #9e6a00;
+    border-radius: 30px;
+    background: #ffd84d;
+    color: #5a3000;
+    padding: 10px 18px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 0 rgba(120, 80, 0, 0.4);
+}
+
+.game-btn:hover {
+    transform: translateY(-1px);
+}
+
+.game-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 rgba(120, 80, 0, 0.35);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.modal-backdrop,
+.orientation-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 20;
+}
+
+.modal-card,
+.orientation-card {
+    position: relative;
+    width: min(480px, calc(100vw - 32px));
+    padding: 28px;
+    border-radius: 30px;
+    background: #fff8db;
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.25);
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: none;
+    background: transparent;
+    font-size: 34px;
+    cursor: pointer;
+    color: #5a3000;
+}
+
+
+:fullscreen .canvas-shell,
+.canvas-shell:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+}
+
+@media (max-width: 1024px) {
+    .page-shell {
+        padding: 12px;
+    }
+
+    .control-panel {
+        display: none;
+    }
+
+    .canvas-shell {
+        width: min(100vw - 24px, 960px);
+    }
+
+    .fullscreen-side-btn {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .canvas-top-buttons {
+        top: 12px;
+        gap: 8px;
+    }
+
+    .game-btn {
+        padding: 8px 14px;
+        font-size: 16px;
+    }
+
+    .fullscreen-btn {
+        top: 12px;
+        right: 12px;
+    }
+}
+
+@media (max-width: 1024px) and (orientation: portrait) {
+    .orientation-overlay {
+        display: flex;
+    }
+}
+
+/* Ansichtsspezifische Start- und Steuerungsbuttons */
+.canvas-top-buttons:not(.hidden) #controlsBtn { display: none; }
+.canvas-top-buttons:not(.hidden) { gap: 0; }
+.canvas-shell:fullscreen .canvas-top-buttons:not(.hidden) #controlsBtn {
+    display: inline-block;
+}
+.canvas-shell:fullscreen .canvas-top-buttons:not(.hidden) { gap: 12px; }
+.canvas-shell:fullscreen .fullscreen-btn { top: 16px; right: 16px; }
+/* In der laufenden Fullscreen-Partie bleibt die Anleitung erreichbar. */
+.canvas-shell:fullscreen .canvas-top-buttons.game-running { display: flex !important; }
+.canvas-shell:fullscreen .canvas-top-buttons.game-running #startBtn { display: none; }
+.canvas-shell:fullscreen .canvas-top-buttons.game-running #controlsBtn { display: inline-block; }
+/* Restart darf seinen horizontalen Mittelpunkt bei Hover/Active nicht verlieren. */
+.restart-btn:hover, .restart-btn:active { transform: translateX(-50%); }

@@ -19,7 +19,7 @@ class cloud extends MovableObject {
     }
 
     getRandomY() {
-        return 10 + Math.random() * 90;
+        return 5 + Math.random() * 110;
     }
 
     resetPosition(x) {

@@ -8,19 +8,11 @@ class Character extends MovableObject {
     jumpSpeed = 15;
     gravity = 0.8;
     lastHit = 0;
-    deathAnimationStarted = false;
-    deathFrame = 0;
+    lastActivity = Date.now();
+    idleStarted = false;
+    idleFrame = 0;
 
     HURT_IMAGE = "img/2_character_pepe/4_hurt/H-41.png";
-
-    IMAGES_DEAD = [
-        "img/2_character_pepe/5_dead/D-51.png",
-        "img/2_character_pepe/5_dead/D-52.png",
-        "img/2_character_pepe/5_dead/D-53.png",
-        "img/2_character_pepe/5_dead/D-54.png",
-        "img/2_character_pepe/5_dead/D-55.png",
-        "img/2_character_pepe/5_dead/D-56.png"
-    ];
 
     IMAGES_JUMPING = [
         "img/2_character_pepe/3_jump/J-31.png",
@@ -43,29 +35,64 @@ class Character extends MovableObject {
         "img/2_character_pepe/2_walk/W-26.png"
     ];
 
+    IMAGES_IDLE = [
+        "img/2_character_pepe/1_idle/idle/I-1.png",
+        "img/2_character_pepe/1_idle/idle/I-2.png",
+        "img/2_character_pepe/1_idle/idle/I-3.png",
+        "img/2_character_pepe/1_idle/idle/I-4.png",
+        "img/2_character_pepe/1_idle/idle/I-5.png",
+        "img/2_character_pepe/1_idle/idle/I-6.png",
+        "img/2_character_pepe/1_idle/idle/I-7.png",
+        "img/2_character_pepe/1_idle/idle/I-8.png",
+        "img/2_character_pepe/1_idle/idle/I-9.png",
+        "img/2_character_pepe/1_idle/idle/I-10.png",
+        "img/2_character_pepe/1_idle/long_idle/I-11.png",
+        "img/2_character_pepe/1_idle/long_idle/I-12.png",
+        "img/2_character_pepe/1_idle/long_idle/I-13.png",
+        "img/2_character_pepe/1_idle/long_idle/I-14.png",
+        "img/2_character_pepe/1_idle/long_idle/I-15.png",
+        "img/2_character_pepe/1_idle/long_idle/I-16.png",
+        "img/2_character_pepe/1_idle/long_idle/I-17.png",
+        "img/2_character_pepe/1_idle/long_idle/I-18.png",
+        "img/2_character_pepe/1_idle/long_idle/I-19.png",
+        "img/2_character_pepe/1_idle/long_idle/I-20.png"
+    ];
+
+    IDLE_LOOP_IMAGES = [
+        "img/2_character_pepe/1_idle/long_idle/I-11.png",
+        "img/2_character_pepe/1_idle/long_idle/I-12.png",
+        "img/2_character_pepe/1_idle/long_idle/I-13.png"
+    ];
+
     constructor(keyboard, level) {
         super();
         this.loadImage(this.IMAGES_WALKING[0]);
         this.keyboard = keyboard;
         this.level = level;
         this.loadCharacterImages();
-        this.animate();
+        this.startAnimationLoop();
     }
 
     loadCharacterImages() {
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages(this.IMAGES_JUMPING);
-        this.loadImages(this.IMAGES_DEAD);
+        this.loadImages(this.IMAGES_IDLE);
         this.loadImages([this.HURT_IMAGE]);
     }
 
-    animate() {
-        setInterval(() => {
-            if (this.energy <= 0) return;
-            if (this.isHurt()) return this.showHurtImage();
+    startAnimationLoop() {
+        this.animationInterval = setInterval(() => {
+            if (this.energy <= 0 || this.idleStarted) return;
+            if (this.isHurt()) return;
+            if (this.shouldStartIdle()) return this.startIdleAnimation();
             if (this.y !== this.groundY || this.keyboard.LEFT === this.keyboard.RIGHT) return;
             this.playWalkingAnimation();
         }, 100);
+    }
+
+    shouldStartIdle() {
+        const standingStill = !this.keyboard.LEFT && !this.keyboard.RIGHT;
+        return standingStill && this.y === this.groundY && Date.now() - this.lastActivity >= 7000;
     }
 
     playWalkingAnimation() {
@@ -90,16 +117,18 @@ class Character extends MovableObject {
         const maxX = this.level.level_end_x - this.width;
         this.x = Math.min(maxX, this.x + this.speed);
         this.otherDirection = false;
+        this.markActivity();
     }
 
     moveCharacterLeft() {
         const minX = this.level.level_start_x + 100;
         this.x = Math.max(minX, this.x - this.speed);
         this.otherDirection = true;
+        this.markActivity();
     }
 
     updateJumpInput() {
-        const jumpKeyPressed = this.keyboard.SPACE || this.keyboard.UP;
+        const jumpKeyPressed = this.keyboard.UP;
         if (jumpKeyPressed && !this.jumpPressed) this.jump();
         this.jumpPressed = jumpKeyPressed;
     }
@@ -112,7 +141,7 @@ class Character extends MovableObject {
 
     continueJump() {
         this.speedY -= this.gravity;
-        if (!this.isHurt()) this.animateJump();
+        this.animateJump();
     }
 
     landOnGround() {
@@ -128,8 +157,8 @@ class Character extends MovableObject {
     }
 
     animateJump() {
-        const jumpDuration = Math.ceil(2 * this.jumpSpeed / this.gravity + 1);
-        const frame = Math.floor(this.jumpFrame * this.IMAGES_JUMPING.length / jumpDuration);
+        const duration = Math.ceil(2 * this.jumpSpeed / this.gravity + 1);
+        const frame = Math.floor(this.jumpFrame * this.IMAGES_JUMPING.length / duration);
         const index = Math.min(frame, this.IMAGES_JUMPING.length - 1);
         this.img = this.imageCache[this.IMAGES_JUMPING[index]];
         this.jumpFrame++;
@@ -139,15 +168,13 @@ class Character extends MovableObject {
         if (this.y !== this.groundY) return;
         this.speedY = this.jumpSpeed;
         this.jumpFrame = 0;
-    }
-
-    isAboveGround() {
-        return this.y < this.groundY;
+        this.markActivity();
     }
 
     bounceFromEnemy() {
         this.speedY = this.jumpSpeed * 0.6;
         this.jumpFrame = 0;
+        this.markActivity();
     }
 
     takeDamage(damage) {
@@ -156,38 +183,63 @@ class Character extends MovableObject {
         if (nextEnergy === 0) return this.die();
         this.energy = nextEnergy;
         this.lastHit = Date.now();
+        this.markActivity();
         this.showHurtImage();
     }
 
     die() {
         this.energy = 0;
-        this.startDeathAnimation();
+        this.clearTimers();
     }
 
     isHurt() {
-        return Date.now() - this.lastHit < 200;
+        return Date.now() - this.lastHit < 50;
     }
 
     showHurtImage() {
+        clearTimeout(this.hurtTimeout);
         this.img = this.imageCache[this.HURT_IMAGE];
+        this.hurtTimeout = setTimeout(() => this.showStandingImage(), 1);
     }
 
-    startDeathAnimation() {
-        if (this.deathAnimationStarted) return;
-        this.deathAnimationStarted = true;
-        this.deathFrame = 0;
-        this.y = this.groundY;
-        this.showNextDeathFrame();
-        this.deathInterval = setInterval(() => this.showNextDeathFrame(), 150);
+    showStandingImage() {
+        if (this.energy <= 0 || this.idleStarted || this.y !== this.groundY) return;
+        this.img = this.imageCache[this.IMAGES_WALKING[0]];
     }
 
-    showNextDeathFrame() {
-        if (this.deathFrame >= this.IMAGES_DEAD.length) {
-            clearInterval(this.deathInterval);
-            return;
-        }
-        this.img = this.imageCache[this.IMAGES_DEAD[this.deathFrame]];
-        if (this.deathFrame >= 2) this.y += 100;
-        this.deathFrame++;
+    markActivity() {
+        this.lastActivity = Date.now();
+        if (this.idleStarted) this.stopIdleAnimation();
+    }
+
+    startIdleAnimation() {
+        if (this.idleStarted) return;
+        this.idleStarted = true;
+        this.idleFrame = 0;
+        this.idleInterval = setInterval(() => this.showNextIdleFrame(), 500);
+    }
+
+    showNextIdleFrame() {
+        const path = this.resolveIdleImage();
+        this.img = this.imageCache[path];
+        this.idleFrame++;
+    }
+
+    resolveIdleImage() {
+        if (this.idleFrame < this.IMAGES_IDLE.length) return this.IMAGES_IDLE[this.idleFrame];
+        const loopIndex = (this.idleFrame - this.IMAGES_IDLE.length) % this.IDLE_LOOP_IMAGES.length;
+        return this.IDLE_LOOP_IMAGES[loopIndex];
+    }
+
+    stopIdleAnimation() {
+        this.idleStarted = false;
+        this.idleFrame = 0;
+        clearInterval(this.idleInterval);
+        this.showStandingImage();
+    }
+
+    clearTimers() {
+        super.clearTimers();
+        this.stopIdleAnimation();
     }
 }

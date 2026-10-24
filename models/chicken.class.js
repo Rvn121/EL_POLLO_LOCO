@@ -17,14 +17,14 @@ class chicken extends MovableObject {
         this.loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages([this.DEAD_IMAGE]);
-        this.x = startX ?? 1000 + Math.random() * 1500;
-        this.speed = 0.35 + Math.random() * 0.9;
+        this.x = startX ?? 2400 + Math.random() * 2600;
+        this.speed = 0.45 + Math.random() * 0.85;
         this.animate();
     }
 
     animate() {
         this.moveLeft();
-        this.walkInterval = setInterval(() => {
+        this.animationInterval = setInterval(() => {
             if (this.isDead) return;
             const path = this.IMAGES_WALKING[this.currentImage];
             this.img = this.imageCache[path];
@@ -36,8 +36,7 @@ class chicken extends MovableObject {
         if (this.isDead) return;
         this.isDead = true;
         this.isCollidable = false;
-        this.stopMoving();
-        clearInterval(this.walkInterval);
+        this.clearTimers();
         this.img = this.imageCache[this.DEAD_IMAGE];
     }
 }

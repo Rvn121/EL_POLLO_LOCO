@@ -1,52 +1,56 @@
-const level1 = new Level(
-    createLevelEnemies(),
-    createLevelClouds(),
-    createLevelBackgrounds()
-);
+function createLevel1() {
+    return new Level(
+        createLevelEnemies(),
+        createLevelClouds(),
+        createLevelBackgrounds()
+    );
+}
 
 function createLevelEnemies() {
     return [
-        new chicken(1100),
-        new chicken(1500),
-        new chicken(1900),
-        new chicken(2300),
+        ...createSmallChickens(),
+        ...createNormalChickens(),
         new Endboss()
     ];
 }
 
+function createSmallChickens() {
+    return Array.from({ length: 10 }, (_, index) => {
+        const x = 900 + index * 150 + Math.random() * 120;
+        return new chickenSmall(x);
+    });
+}
+
+function createNormalChickens() {
+    return Array.from({ length: 10 }, (_, index) => {
+        const x = 2700 + index * 220 + Math.random() * 180;
+        return new chicken(x);
+    });
+}
+
 function createLevelClouds() {
-    return Array.from({ length: 8 }, () => {
-        const x = -200 + Math.random() * 3200;
-        const y = 10 + Math.random() * 90;
+    return Array.from({ length: 14 }, (_, index) => {
+        const x = -300 + index * 520 + Math.random() * 220;
+        const y = 5 + Math.random() * 115;
         return new cloud(x, y);
     });
 }
 
 function createLevelBackgrounds() {
-    return [
-        new BackgroundObject("img/5_background/layers/air.png", -720),
-        new BackgroundObject("img/5_background/layers/3_third_layer/2.png", -720),
-        new BackgroundObject("img/5_background/layers/2_second_layer/2.png", -720),
-        new BackgroundObject("img/5_background/layers/1_first_layer/2.png", -720),
-
-        new BackgroundObject("img/5_background/layers/air.png", 0),
-        new BackgroundObject("img/5_background/layers/3_third_layer/1.png", 0),
-        new BackgroundObject("img/5_background/layers/2_second_layer/1.png", 0),
-        new BackgroundObject("img/5_background/layers/1_first_layer/1.png", 0),
-
-        new BackgroundObject("img/5_background/layers/air.png", 720),
-        new BackgroundObject("img/5_background/layers/3_third_layer/2.png", 720),
-        new BackgroundObject("img/5_background/layers/2_second_layer/2.png", 720),
-        new BackgroundObject("img/5_background/layers/1_first_layer/2.png", 720),
-
-        new BackgroundObject("img/5_background/layers/air.png", 720 * 2),
-        new BackgroundObject("img/5_background/layers/3_third_layer/1.png", 720 * 2),
-        new BackgroundObject("img/5_background/layers/2_second_layer/1.png", 720 * 2),
-        new BackgroundObject("img/5_background/layers/1_first_layer/1.png", 720 * 2),
-
-        new BackgroundObject("img/5_background/layers/air.png", 720 * 3),
-        new BackgroundObject("img/5_background/layers/3_third_layer/2.png", 720 * 3),
-        new BackgroundObject("img/5_background/layers/2_second_layer/2.png", 720 * 3),
-        new BackgroundObject("img/5_background/layers/1_first_layer/2.png", 720 * 3)
+    const backgrounds = [];
+    const pattern = [
+        ["img/5_background/layers/air.png", "img/5_background/layers/3_third_layer/1.png",
+            "img/5_background/layers/2_second_layer/1.png", "img/5_background/layers/1_first_layer/1.png"],
+        ["img/5_background/layers/air.png", "img/5_background/layers/3_third_layer/2.png",
+            "img/5_background/layers/2_second_layer/2.png", "img/5_background/layers/1_first_layer/2.png"]
     ];
+
+    for (let i = -1; i < 10; i++) {
+        const images = pattern[Math.abs(i) % 2];
+        backgrounds.push(new BackgroundObject(images[0], 720 * i));
+        backgrounds.push(new BackgroundObject(images[1], 720 * i));
+        backgrounds.push(new BackgroundObject(images[2], 720 * i));
+        backgrounds.push(new BackgroundObject(images[3], 720 * i));
+    }
+    return backgrounds;
 }
