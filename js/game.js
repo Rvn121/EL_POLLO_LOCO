@@ -36,12 +36,13 @@ function loadTitleAssets() {
 function bindUiEvents() {
     document.getElementById("startBtn").addEventListener("click", startGame);
     document.getElementById("restartBtn").addEventListener("click", restartGame);
+    document.getElementById("pauseBtn").addEventListener("click", togglePause);
     document.getElementById("controlsBtn").addEventListener("click", openControlsModal);
     document.getElementById("closeModalBtn").addEventListener("click", closeControlsModal);
     document.getElementById("fullscreenBtn").addEventListener("click", toggleFullscreen);
     controlsModal.addEventListener("click", handleBackdropClick);
     window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", event => setKey(event, false));
+    window.addEventListener("keyup", handleKeyUp);
     window.addEventListener("blur", resetKeys);
     document.addEventListener("fullscreenchange", updateFullscreenUi);
     window.addEventListener("resize", updateOrientationState);
@@ -116,7 +117,9 @@ function startGame() {
     hideStartMenu();
     hideRestartButton();
     if (isTabletOrMobile()) requestFullscreenMode();
+    window.gamePaused = false;
     world = new World(canvas, keyboard, handleGameOver);
+    document.getElementById("pauseBtn").classList.remove("hidden");
     updateFullscreenUi();
 }
 
@@ -128,9 +131,11 @@ function restartGame() {
 function disposeWorld() {
     if (world) world.dispose();
     world = null;
+    window.gamePaused = false;
 }
 
 function handleGameOver() {
+    window.gamePaused = false;
     window.setTimeout(showRestartButton, 2000);
 }
 
@@ -181,10 +186,28 @@ function handleKeyDown(event) {
     }
     if (event.code === "Space" && world) {
         event.preventDefault();
-        if (!event.repeat) world.throwBottle();
+        if (!event.repeat && !world.isPaused) world.throwChargeStart = performance.now();
         return;
     }
+    if (event.code === "KeyP" && !event.repeat) return togglePause();
     setKey(event, true);
+}
+
+function handleKeyUp(event) {
+    if (event.code === "Space" && world?.throwChargeStart !== null && world) {
+        const duration = performance.now() - world.throwChargeStart;
+        const power = Math.min(1, Math.max(0, duration / 900));
+        world.throwChargeStart = null;
+        world.throwBottle(power);
+    }
+    setKey(event, false);
+}
+
+function togglePause() {
+    if (!world || world.isGameOver || world.isWin) return;
+    const paused = world.togglePause();
+    window.gamePaused = paused;
+    document.getElementById("pauseBtn").textContent = paused ? "Weiter" : "Pause";
 }
 
 function setKey(event, pressed) {

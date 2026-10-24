@@ -19,11 +19,13 @@ class CollectibleBottle extends DrawableObject {
 
     collect() {
         this.collected = true;
-        this.respawnAt = Date.now() + 30000;
+        this.respawnAt = 30000;
     }
 
-    update() {
-        if (this.collected && Date.now() >= this.respawnAt) this.respawn();
+    update(delta = 0) {
+        if (!this.collected) return;
+        this.respawnAt -= delta;
+        if (this.respawnAt <= 0) this.respawn();
     }
 
     respawn() {

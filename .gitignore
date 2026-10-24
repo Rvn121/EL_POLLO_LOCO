@@ -1,0 +1,36 @@
+# Editor / IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Betriebssystem
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Abhängigkeiten
+node_modules/
+
+# Logs und temporäre Dateien
+*.log
+logs/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Lokale Umgebungsvariablen / Zugangsdaten
+.env
+.env.*
+!.env.example
+
+# Build- und Testausgaben
+dist/
+build/
+coverage/
+.cache/
+
+# Lokale Sicherungen
+*.bak
+*.backup

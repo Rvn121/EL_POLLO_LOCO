@@ -14,11 +14,12 @@ class ThrowableBottle extends DrawableObject {
     SPLASH = [1, 2, 3, 4, 5, 6].map(i =>
         `img/6_salsa_bottle/bottle_rotation/bottle_splash/${i}_bottle_splash.png`);
 
-    constructor(x, y, direction) {
+    constructor(x, y, direction, power = 1) {
         super();
         this.x = x;
         this.y = y;
-        this.speedX *= direction;
+        this.speedX *= direction * (0.30 + 0.70 * power);
+        this.speedY *= 0.5 + 0.5 * power;
         this.loadImages([...this.ROTATION, ...this.SPLASH]);
         this.img = this.imageCache[this.ROTATION[0]];
     }

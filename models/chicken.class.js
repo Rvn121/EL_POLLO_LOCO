@@ -25,6 +25,7 @@ class chicken extends MovableObject {
     animate() {
         this.moveLeft();
         this.animationInterval = setInterval(() => {
+            if (window.gamePaused) return;
             if (this.isDead) return;
             const path = this.IMAGES_WALKING[this.currentImage];
             this.img = this.imageCache[path];

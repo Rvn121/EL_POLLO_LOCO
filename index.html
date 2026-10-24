@@ -41,6 +41,8 @@
                     <li><strong>Pfeil links</strong> – nach links laufen</li>
                     <li><strong>Pfeil rechts</strong> – nach rechts laufen</li>
                     <li><strong>Pfeil hoch</strong> – springen</li>
+                    <li><strong>Leertaste halten / loslassen</strong> – Flaschenwurf aufladen / werfen</li>
+                    <li><strong>P</strong> – Spiel pausieren</li>
                 </ul>
             </div>
         </aside>
@@ -54,6 +56,8 @@
                     <button class="game-btn" id="controlsBtn" type="button">Steuerung</button>
                 </div>
 
+                <button class="game-btn pause-btn hidden" id="pauseBtn" type="button">Pause</button>
+
                 <button class="game-btn fullscreen-btn" id="fullscreenBtn" type="button">
                     Fullscreen
                 </button>
@@ -61,23 +65,25 @@
                 <button class="game-btn restart-btn hidden" id="restartBtn" type="button">
                     Restart
                 </button>
+                <div class="modal-backdrop hidden" id="controlsModal">
+                        <div class="modal-card">
+                            <button class="modal-close" id="closeModalBtn" type="button">×</button>
+                            <h2>Spielsteuerung</h2>
+                            <ul>
+                                <li><strong>Pfeil links</strong> – Pepe läuft nach links</li>
+                                <li><strong>Pfeil rechts</strong> – Pepe läuft nach rechts</li>
+                                <li><strong>Pfeil hoch</strong> – Pepe springt</li>
+                                <li><strong>Leertaste</strong> – Starten; im Spiel halten für Wurfweite, loslassen zum Werfen</li>
+                                <li><strong>P / Pause</strong> – Spielzeit anhalten und fortsetzen</li>
+                                <li><strong>Von oben auf Hühner springen</strong> – Gegner besiegen</li>
+                                <li><strong>Fullscreen</strong> – Spielbereich vergrößern</li>
+                            </ul>
+                        </div>
+                    </div>
             </div>
         </section>
     </main>
 
-    <div class="modal-backdrop hidden" id="controlsModal">
-        <div class="modal-card">
-            <button class="modal-close" id="closeModalBtn" type="button">×</button>
-            <h2>Spielsteuerung</h2>
-            <ul>
-                <li><strong>Pfeil links</strong> – Pepe läuft nach links</li>
-                <li><strong>Pfeil rechts</strong> – Pepe läuft nach rechts</li>
-                <li><strong>Pfeil hoch</strong> – Pepe springt</li>
-                <li><strong>Leertaste</strong> – Spiel starten / Flasche werfen</li>
-                <li><strong>Von oben auf Hühner springen</strong> – Gegner besiegen</li>
-                <li><strong>Fullscreen</strong> – Spielbereich vergrößern</li>
-            </ul>
-        </div>
-    </div>
+
 </body>
 </html>

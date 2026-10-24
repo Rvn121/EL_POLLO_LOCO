@@ -10,6 +10,9 @@ class World {
     debugMode = false;
     isDisposed = false;
     isGameOver = false;
+    isWin = false;
+    isPaused = false;
+    throwChargeStart = null;
     bottleCount = 0;
     coinValue = 0;
     bottles = [];
@@ -24,6 +27,8 @@ class World {
         this.onGameOver = onGameOver;
         this.gameOverImage = new Image();
         this.gameOverImage.src = "img/9_intro_outro_screens/game_over/game over.png";
+        this.winImage = new Image();
+        this.winImage.src = "img/You won, you lost/You won A.png";
         this.level = createLevel1();
         this.character = new Character(this.keyboard, this.level);
         this.statusBar = new StatusBar();
@@ -38,9 +43,9 @@ class World {
 
     startGameLoop() {
         this.gameLoopInterval = setInterval(() => {
-            if (this.isDisposed) return;
+            if (this.isDisposed || this.isPaused) return;
             this.updateClouds();
-            if (this.isGameOver) return;
+            if (this.isGameOver || this.isWin) return;
             this.character.updateMovement();
             this.updateCamera();
             this.updateCollectibles();
@@ -49,7 +54,7 @@ class World {
 
     startCollisionLoop() {
         this.collisionInterval = setInterval(() => {
-            if (this.isDisposed || this.isGameOver) return;
+            if (this.isDisposed || this.isGameOver || this.isWin || this.isPaused) return;
             this.level.enemies.forEach(enemy => this.checkEnemyCollision(enemy));
             this.checkCollectibleCollisions();
         }, 1000 / 60);
@@ -66,6 +71,13 @@ class World {
         this.coinBar.y = 84;
         this.bottleBar.setPercentage(0);
         this.coinBar.setPercentage(0);
+        this.bossBar = new StatusBar();
+        this.bossBar.IMAGES_HEALTH = [0,20,40,60,80,100].map(n =>
+            `img/7_statusbars/2_statusbar_endboss/blue/blue${n}.png`);
+        this.bossBar.loadImages(this.bossBar.IMAGES_HEALTH);
+        this.bossBar.setPercentage(100);
+        this.bossBar.x = this.canvas.width - this.bossBar.width - 20;
+        this.bossBar.y = 0;
         this.bottles = this.createBottles();
         this.coins = this.createCoins();
     }
@@ -80,7 +92,7 @@ class World {
     createCoins() {
         return Array.from({ length: 20 }, (_, index) => {
             const x = 370 + index * 240 + Math.random() * 120;
-            const y = 275 + Math.random() * 90;
+            const y = index % 3 === 0 ? 190 + Math.random() * 35 : 265 + Math.random() * 70;
             return new Coin(x, y);
         });
     }
@@ -89,7 +101,10 @@ class World {
         const now = performance.now();
         const delta = Math.min(45, now - this.lastUpdate);
         this.lastUpdate = now;
-        this.bottles.forEach(b => b.update());
+        this.bottles.forEach(b => b.update(delta));
+        const boss = this.getBoss();
+        if (boss) boss.update(delta);
+        if (boss?.state === "finished") this.triggerWin();
         this.coins.forEach(c => c.update(delta));
         this.thrownBottles.forEach(b => this.updateThrownBottle(b, delta));
         this.thrownBottles = this.thrownBottles.filter(b => b.state !== "done");
@@ -105,7 +120,11 @@ class World {
         if (bottle.state !== "flying" || enemy.isDead) return;
         if (!bottle.isColliding?.(enemy) && !this.boxesOverlap(bottle, enemy)) return;
         if (enemy instanceof chicken || enemy instanceof chickenSmall) enemy.die();
-        else enemy.energy = Math.max(0, enemy.energy - 20);
+        else if (enemy instanceof Endboss) {
+            if (enemy.state !== "walking") return;
+            enemy.takeBottleHit();
+            this.bossBar.setPercentage(enemy.energy);
+        }
         bottle.splash();
     }
 
@@ -125,8 +144,8 @@ class World {
         if (bottle.collected || this.bottleCount >= 20) return;
         if (!this.boxesOverlap(this.character, bottle)) return;
         bottle.collect();
-        this.bottleCount++;
-        this.bottleBar.setPercentage(Math.floor(this.bottleCount / 4) * 20);
+        this.bottleCount = Math.min(20, this.bottleCount + 4);
+        this.bottleBar.setPercentage(this.getBottlePercentage());
     }
 
     pickupCoin(coin) {
@@ -136,13 +155,28 @@ class World {
         this.coinBar.setPercentage(this.coinValue);
     }
 
-    throwBottle() {
-        if (this.isGameOver || this.bottleCount <= 0) return;
+    throwBottle(power = 1) {
+        if (this.isGameOver || this.isWin || this.isPaused || this.bottleCount <= 0) return;
         const dir = this.character.otherDirection ? -1 : 1;
-        const x = this.character.x + (dir === 1 ? this.character.width - 30 : 0);
-        this.thrownBottles.push(new ThrowableBottle(x, this.character.y + 105, dir));
+        const x = this.character.x + (dir === 1 ? this.character.width - 75 : 20);
+        this.thrownBottles.push(new ThrowableBottle(x, this.character.y + 65, dir, power));
         this.bottleCount--;
-        this.bottleBar.setPercentage(Math.floor(this.bottleCount / 4) * 20);
+        this.bottleBar.setPercentage(this.getBottlePercentage());
+    }
+
+    getBottlePercentage() {
+        return Math.ceil(this.bottleCount / 4) * 20;
+    }
+
+    getBoss() {
+        return this.level.enemies.find(enemy => enemy instanceof Endboss);
+    }
+
+    togglePause() {
+        this.isPaused = !this.isPaused;
+        this.lastUpdate = performance.now();
+        if (!this.isPaused) this.character.lastActivity = Date.now();
+        return this.isPaused;
     }
 
     checkEnemyCollision(enemy) {
@@ -221,14 +255,17 @@ class World {
         if (this.isGameOver) return;
         this.isGameOver = true;
         this.character.clearTimers();
+        document.getElementById("pauseBtn").classList.add("hidden");
         if (typeof this.onGameOver === "function") this.onGameOver();
     }
 
     draw() {
         if (this.isDisposed) return;
+        if (this.isPaused) return requestAnimationFrame(() => this.draw());
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawBackgroundAndClouds();
         if (this.isGameOver) this.drawGameOverScreen();
+        else if (this.isWin) this.drawWinScreen();
         else this.drawGameScene();
         requestAnimationFrame(() => this.draw());
     }
@@ -253,12 +290,26 @@ class World {
         this.addToMap(this.statusBar);
         this.addToMap(this.bottleBar);
         this.addToMap(this.coinBar);
+        if (this.character.x >= this.getBoss().x - 600) this.addToMap(this.bossBar);
     }
 
     drawGameOverScreen() {
         if (this.gameOverImage.complete && this.gameOverImage.naturalWidth) {
             this.ctx.drawImage(this.gameOverImage, 0, 0, this.canvas.width, this.canvas.height);
         }
+    }
+
+    triggerWin() {
+        if (this.isWin) return;
+        this.isWin = true;
+        document.getElementById("pauseBtn").classList.add("hidden");
+        this.character.clearTimers();
+        this.onGameOver?.();
+    }
+
+    drawWinScreen() {
+        if (this.winImage.complete && this.winImage.naturalWidth)
+            this.ctx.drawImage(this.winImage, 0, 0, this.canvas.width, this.canvas.height);
     }
 
     addObjectsToMap(objects) {

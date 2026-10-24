@@ -82,6 +82,7 @@ class Character extends MovableObject {
 
     startAnimationLoop() {
         this.animationInterval = setInterval(() => {
+            if (window.gamePaused) return;
             if (this.energy <= 0 || this.idleStarted) return;
             if (this.isHurt()) return;
             if (this.shouldStartIdle()) return this.startIdleAnimation();
@@ -193,13 +194,16 @@ class Character extends MovableObject {
     }
 
     isHurt() {
-        return Date.now() - this.lastHit < 50;
+        return Date.now() - this.lastHit < 270;
     }
 
     showHurtImage() {
         clearTimeout(this.hurtTimeout);
         this.img = this.imageCache[this.HURT_IMAGE];
-        this.hurtTimeout = setTimeout(() => this.showStandingImage(), 1);
+        this.hurtTimeout = setTimeout(() => {
+            this.lastHit = 0;
+            this.img = this.imageCache[this.IMAGES_WALKING[0]];
+        }, 270);
     }
 
     showStandingImage() {
@@ -216,7 +220,9 @@ class Character extends MovableObject {
         if (this.idleStarted) return;
         this.idleStarted = true;
         this.idleFrame = 0;
-        this.idleInterval = setInterval(() => this.showNextIdleFrame(), 500);
+        this.idleInterval = setInterval(() => {
+            if (!window.gamePaused) this.showNextIdleFrame();
+        }, 500);
     }
 
     showNextIdleFrame() {
@@ -228,7 +234,7 @@ class Character extends MovableObject {
     resolveIdleImage() {
         if (this.idleFrame < this.IMAGES_IDLE.length) return this.IMAGES_IDLE[this.idleFrame];
         const loopIndex = (this.idleFrame - this.IMAGES_IDLE.length) % this.IDLE_LOOP_IMAGES.length;
-        return this.IDLE_LOOP_IMAGES[loopIndex];
+        return this.IMAGES_IDLE[10 + (this.idleFrame - this.IMAGES_IDLE.length) % 10];
     }
 
     stopIdleAnimation() {

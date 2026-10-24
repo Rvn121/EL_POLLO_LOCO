@@ -15,6 +15,7 @@ class MovableObject extends DrawableObject {
     moveLeft() {
         clearInterval(this.moveInterval);
         this.moveInterval = setInterval(() => {
+            if (window.gamePaused) return;
             this.x -= this.speed;
         }, 1000 / 60);
     }

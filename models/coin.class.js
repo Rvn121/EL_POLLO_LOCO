@@ -1,6 +1,6 @@
 class Coin extends DrawableObject {
-    width = 42;
-    height = 42;
+    width = 62;
+    height = 62;
     collected = false;
     vanishY = -60;
     baseY;
