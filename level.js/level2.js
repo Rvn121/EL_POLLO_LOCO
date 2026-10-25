@@ -14,7 +14,9 @@ function createLevel2Enemies() {
     const enemies = [];
     for (let i = 0; i < 60; i++) enemies.push(createLevel2Chicken(i));
     enemies.push(new MiniBoss(3800), new MiniBoss(6900));
-    enemies.push(new Endboss(10300, true));
+    const boss = new Endboss(10300, true);
+    boss.healthPhases = true;
+    enemies.push(boss);
     return enemies;
 }
 
