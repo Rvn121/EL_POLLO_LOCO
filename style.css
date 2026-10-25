@@ -226,10 +226,6 @@ canvas {
 }
 .canvas-shell:fullscreen .canvas-top-buttons:not(.hidden) { gap: 12px; }
 .canvas-shell:fullscreen .fullscreen-btn { top: 16px; right: 16px; }
-/* In der laufenden Fullscreen-Partie bleibt die Anleitung erreichbar. */
-.canvas-shell:fullscreen .canvas-top-buttons.game-running { display: flex !important; }
-.canvas-shell:fullscreen .canvas-top-buttons.game-running #startBtn { display: none; }
-.canvas-shell:fullscreen .canvas-top-buttons.game-running #controlsBtn { display: inline-block; }
 /* Restart darf seinen horizontalen Mittelpunkt bei Hover/Active nicht verlieren. */
 .restart-btn:hover, .restart-btn:active { transform: translateX(-50%); }
 
@@ -255,12 +251,9 @@ canvas {
 .game-toolbar { display: flex; justify-content: flex-end; width: 720px; max-width: 100%; gap: 10px; }
 .game-toolbar .pause-btn, .game-toolbar .fullscreen-btn { position: static; }
 .canvas-section:fullscreen { background: #21170b; padding: 8px; display: flex; flex-direction: column; }
-.canvas-section:fullscreen .canvas-shell { height: calc(100vh - 68px); width: min(100vw, (100vh - 68px) * 1.5); }
-.canvas-section:fullscreen .game-toolbar { width: min(100vw, (100vh - 68px) * 1.5); }
+.canvas-section:fullscreen .canvas-shell { height: calc(100vh - 108px); width: min(100vw, (100vh - 108px) * 1.5); }
+.canvas-section:fullscreen .game-toolbar { width: min(100vw, (100vh - 108px) * 1.5); }
 .canvas-section:fullscreen .modal-backdrop { position: fixed; z-index: 40; }
-.canvas-section:fullscreen .canvas-top-buttons.game-running { display: flex !important; }
-.canvas-section:fullscreen .canvas-top-buttons.game-running #startBtn { display: none; }
-.canvas-section:fullscreen .canvas-top-buttons.game-running #controlsBtn { display: inline-block; }
 .game-btn:hover { background: #ffe879; filter: brightness(1.06); }
 .end-buttons .restart-btn:hover { background: #ffe879; filter: brightness(1.12); }
 .level-announcement { position: absolute; z-index: 6; top: 38%; left: 50%; transform: translateX(-50%); background: #ffd84d; border: 2px solid #9e6a00; border-radius: 30px; padding: 10px 26px; color: #5a3000; font-size: 30px; font-weight: bold; }
@@ -270,7 +263,7 @@ canvas {
 .end-buttons .game-btn { transition: transform .14s ease, box-shadow .14s ease, background .14s ease; }
 .end-buttons .restart-btn:hover { transform: translateY(-3px); box-shadow: 0 7px 0 rgba(120,80,0,.4); }
 .end-buttons .restart-btn:active { transform: translateY(1px); box-shadow: 0 2px 0 rgba(120,80,0,.35); }
-.legal-link { position: fixed; bottom: 9px; right: 15px; z-index: 10; color: #412100; background: #fff4cb; padding: 6px 14px; border-radius: 20px; text-decoration: none; font-weight: bold; }
+.legal-link { align-self: center; flex-shrink: 0; color: #412100; background: #fff4cb; padding: 6px 14px; border-radius: 20px; text-decoration: none; font-weight: bold; }
 .legal-link:hover { background: #ffd84d; }
 .legal-page { max-width: 760px; margin: 6vh auto; padding: 30px; border-radius: 30px; background: #fff8db; box-shadow: 0 12px 30px #0003; }
 .legal-page a { color: #603400; }
@@ -285,3 +278,40 @@ canvas {
 .game-toolbar .toolbar-controls, .game-toolbar .toolbar-sound { position: static; }
 .canvas-section:fullscreen .game-toolbar { flex-shrink: 0; }
 .canvas-section:fullscreen .canvas-top-buttons { z-index: 3; }
+
+/* Image-based level selection */
+.canvas-top-buttons:not(.game-running) { position:absolute; inset: 0; display:flex; align-items:center; justify-content:center; gap: 12px; padding: 14px; transform:none; pointer-events:none; }
+.level-choice { cursor:pointer; border:3px solid #9e6a00; padding:0; overflow:hidden; border-radius:16px; background:transparent; width:45%; max-width:330px; aspect-ratio: 16/9; pointer-events:auto; transition:transform .15s ease; }
+.level-choice:hover { transform:translateY(-5px); }
+.level-choice img { display:block; width:100%; height:100%; object-fit:cover; }
+
+.level-transition-image { position:absolute; inset:0; z-index:5; display:block; width:100%; height:100%; object-fit:cover; pointer-events:none; }
+
+/* Main menu uses ordinary game buttons; transition artwork only appears between screens. */
+.canvas-top-buttons:not(.game-running) { gap: 12px; }
+
+
+/* Main-menu revision: a centered canvas without the old left-hand instructions. */
+.page-shell { display: flex; justify-content: center; }
+.control-panel { display: none !important; }
+.canvas-top-buttons:not(.game-running) { pointer-events: none; }
+.canvas-top-buttons .main-start-btn { pointer-events: auto; align-self: flex-start; margin-top: 50%; }
+.canvas-top-buttons .level-choices {
+    display: flex; width: 100%; justify-content: center; align-items: center;
+    gap: 14px; pointer-events: none;
+}
+.canvas-top-buttons .level-choice { width: 43%; pointer-events: auto; }
+.canvas-top-buttons .level-choice img { width: 100%; height: 100%; object-fit: cover; }
+.game-toolbar .toolbar-controls { display: inline-block; }
+@media (max-width: 720px) {
+    .canvas-top-buttons .level-choices { gap: 8px; }
+    .canvas-top-buttons .level-choice { width: 46%; }
+}
+
+/* Raise the main-menu Start button without changing the level selection. */
+.canvas-top-buttons .main-start-btn { margin-top: calc(13% - 50px); }
+
+:fullscreen .canvas-top-buttons .main-start-btn {
+    font-size: 28px;
+    padding: 16px 32px;
+}

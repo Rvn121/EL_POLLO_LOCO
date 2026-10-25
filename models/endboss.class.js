@@ -8,6 +8,7 @@ class Endboss extends MovableObject {
     isMainBoss = true;
     isDead = false;
     attackCooldown = 0;
+    healthPhases = false;
     originX = 6100;
     direction = -1;
     IMAGES_WALKING = [1, 2, 3, 4].map(i => `img/4_enemie_boss_chicken/1_walk/G${i}.png`);
@@ -26,7 +27,7 @@ class Endboss extends MovableObject {
         this.img = this.imageCache[this.IMAGES_ALERT[0]];
     }
 
-    /** Each bottle removes ten energy points. */
+    /** Each bottle removes twenty energy points from the main boss. */
     takeBottleHit() {
         if (this.energy <= 0) return;
         this.energy = Math.max(0, this.energy - (this.isMainBoss ? 20 : 100 / 3));
@@ -48,17 +49,33 @@ class Endboss extends MovableObject {
 
     moveAndAttack(delta, player) {
         const distance = Math.abs(player.x - this.x);
+        if (this.healthPhases && this.energy <= 20) {
+            this.direction = player.x > this.x ? 1 : -1;
+            this.otherDirection = this.direction > 0;
+        }
         if (distance < 220 && !this.attackCooldown) return this.beginAttack();
         if (distance < 240) return;
-        if (this.x < this.originX - 180) this.direction = 1;
-        if (this.x > this.originX + 180) this.direction = -1;
-        this.x += this.direction * delta * 0.09;
+        if (this.healthPhases && this.energy <= 20) {
+            this.direction = player.x > this.x ? 1 : -1;
+        } else {
+            if (this.x < this.originX - 180) this.direction = 1;
+            if (this.x > this.originX + 180) this.direction = -1;
+        }
+        this.x += this.direction * delta * this.getMovementSpeed();
         this.otherDirection = this.direction > 0;
+    }
+
+    getMovementSpeed() {
+        if (!this.healthPhases) return 0.09;
+        if (this.energy <= 20) return 0.18;
+        if (this.energy <= 40) return 0.14;
+        if (this.energy <= 60) return 0.10;
+        return 0.06;
     }
 
     beginAttack() {
         this.attackHitDone = false;
-        this.attackCooldown = 1500;
+        this.attackCooldown = this.healthPhases && this.energy <= 20 ? 900 : 1500;
         this.setState("attack");
     }
 

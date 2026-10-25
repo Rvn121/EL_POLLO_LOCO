@@ -8,18 +8,30 @@ function createLevel1() {
 
 function createLevelEnemies() {
     const enemies = [ ...createSmallChickens(), ...createNormalChickens() ];
-    for (let i = 0; i < 15; i++) {
-        const x = 800 + i * 320 + Math.random() * 100;
-        enemies.push(i % 2 ? new chicken(x) : new chickenSmall(x));
+    for (let i = 0; i < 7; i++) {
+        const x = 1120 + i * 640 + Math.random() * 100;
+        enemies.push(new chicken(x));
     }
-    enemies.push(new Endboss());
+    const boss = new Endboss(6100, true);
+    boss.healthPhases = true;
+    enemies.push(boss);
     return enemies;
 }
 
 function createSmallChickens() {
-    return Array.from({ length: 10 }, (_, index) => {
-        const x = 900 + index * 150 + Math.random() * 120;
-        return new chickenSmall(x);
+    return Array.from({ length: 28 }, (_, index) => {
+        const behindStart = index < 3;
+        const x = behindStart
+            ? -600 + index * 120 + Math.random() * 20
+            : 1050 + (index - 3) * 190 + Math.random() * 70;
+        const enemy = new chickenSmall(x);
+        if (index % 4 !== 3) {
+            const range = 110 + Math.random() * 100;
+            enemy.startPatrol(
+                Math.max(behindStart ? -620 : 850, x - range),
+                Math.min(behindStart ? -300 : 5900, x + range));
+        }
+        return enemy;
     });
 }
 

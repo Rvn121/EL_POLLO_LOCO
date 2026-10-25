@@ -16,6 +16,9 @@ class World {
     bottleCount = 0;
     coinValue = 0;
     coinsCollected = 0;
+    coinInventory = 0;
+    minibossSoundIds = new WeakSet();
+    minibossDeadIds = new WeakSet();
     bossUnlocked = false;
     bossSoundPlayed = false;
     levelIntroActive = true;
@@ -62,6 +65,7 @@ class World {
             this.checkBossApproach();
             this.updateCamera();
             this.updateCollectibles();
+            this.updateMiniBossSounds();
         }, 1000 / 60);
     }
 
@@ -69,9 +73,9 @@ class World {
     updateAmbientSounds() {
         if (this.isGameOver || this.isWin) return;
         gameSounds.play("wind");
-        const smallChickensAlive = this.level.enemies.some(enemy =>
-            enemy instanceof chickenSmall && !enemy.isDead);
-        if (smallChickensAlive) gameSounds.play("chicken_background");
+        const anyChickensAlive = this.level.enemies.some(enemy =>
+            (enemy instanceof chickenSmall || enemy instanceof chicken) && !enemy.isDead);
+        if (anyChickensAlive) gameSounds.play("chicken_background");
         else gameSounds.stop("chicken_background");
     }
 
@@ -80,6 +84,21 @@ class World {
         const onGround = this.character.y === this.character.groundY;
         if (moving && onGround) gameSounds.play("steps");
         else gameSounds.stop("steps");
+    }
+
+    updateMiniBossSounds() {
+        this.level.enemies.filter(enemy => enemy instanceof MiniBoss).forEach(boss => {
+            const visible = boss.x + boss.width > -this.camera_x &&
+                boss.x < -this.camera_x + this.canvas.width;
+            if (visible && !this.minibossSoundIds.has(boss) && !boss.isDead) {
+                this.minibossSoundIds.add(boss);
+                gameSounds.play("miniboss_llive");
+            }
+            if (boss.energy <= 0 && !this.minibossDeadIds.has(boss)) {
+                this.minibossDeadIds.add(boss);
+                gameSounds.play("miniboss_dead");
+            }
+        });
     }
 
     checkBossApproach() {
@@ -95,6 +114,7 @@ class World {
             if (this.isDisposed || this.isGameOver || this.isWin || this.isPaused) return;
             if (this.character.energy <= 0) return;
             this.level.enemies.forEach(enemy => this.checkEnemyCollision(enemy));
+            this.checkMainBossContact();
             this.checkCollectibleCollisions();
         }, 1000 / 60);
     }
@@ -122,7 +142,7 @@ class World {
     }
 
     createBottles() {
-        const count = this.levelNumber === 2 ? 9 : 5;
+        const count = this.levelNumber === 2 ? 9 : 8;
         const maxX = this.getBoss().x - 950;
         return Array.from({ length: count }, (_, index) => {
             const x = 550 + (maxX - 800) * (index + Math.random() * 0.4) / count;
@@ -131,13 +151,25 @@ class World {
     }
 
     createCoins() {
+        const count = 50;
+        const behindCount = 8;
+        const minX = this.level.level_start_x + 100;
         const maxX = this.getBoss().x - 1150;
-        return Array.from({ length: 5 }, (_, index) => {
-            const x = 400 + (maxX - 650) * (index + 0.4) / 5;
+        return Array.from({ length: count }, (_, index) => {
+            const x = index < behindCount
+                ? minX + (50 - minX) * (index + 0.4) / behindCount
+                : 450 + (maxX - 450) * (index - behindCount + 0.4) / (count - behindCount);
             const high = this.levelNumber === 2 ? index % 2 === 0 : index % 3 === 0;
             const y = high ? 140 + Math.random() * 35 : 245 + Math.random() * 30;
-            return new Coin(x, y);
+            const coin = new Coin(x, y);
+            coin.behindCharacter = index % 2 === 0;
+            return coin;
         });
+    }
+
+    updateCoinBar() {
+        const percentage = Math.min(100, Math.floor(this.coinInventory / 10) * 20);
+        this.coinBar.setPercentage(percentage);
     }
 
     startLevel() {
@@ -165,21 +197,47 @@ class World {
     }
 
     updateThrownBottle(bottle, delta) {
+        const wasFlying = bottle.state === "flying";
         bottle.update(delta);
+        if (wasFlying && bottle.state === "splash") this.applySplashDamage(bottle);
         if (bottle.state !== "flying") return;
         this.level.enemies.forEach(enemy => this.hitEnemyWithBottle(bottle, enemy));
+    }
+
+    applySplashDamage(bottle) {
+        this.level.enemies.forEach(enemy => {
+            if (enemy.isDead || enemy.state === "dead" || enemy.state === "finished") return;
+            if (enemy.isMainBoss && !this.bossUnlocked) return;
+            const centerX = enemy.x + enemy.width / 2;
+            const centerY = enemy.y + enemy.height / 2;
+            const splashX = bottle.x + bottle.width / 2;
+            const splashY = bottle.y + bottle.height / 2;
+            if (Math.hypot(centerX - splashX, centerY - splashY) > 60) return;
+            this.damageEnemyWithBottle(enemy, bottle);
+        });
+    }
+
+    damageEnemyWithBottle(enemy, bottle) {
+        if (bottle.damagedEnemies?.has(enemy)) return;
+        if (!bottle.damagedEnemies) bottle.damagedEnemies = new Set();
+        bottle.damagedEnemies.add(enemy);
+        if (enemy instanceof chicken || enemy instanceof chickenSmall) enemy.die();
+        else if (enemy instanceof Endboss) {
+            gameSounds.play("boss_hit");
+            enemy.takeBottleHit();
+            if (enemy.isMainBoss) {
+                this.bossBar.setPercentage(enemy.energy);
+                if (enemy.energy <= 0) gameSounds.stop("chicken_boss");
+            }
+        }
     }
 
     hitEnemyWithBottle(bottle, enemy) {
         if (bottle.state !== "flying" || enemy.isDead) return;
         if (!bottle.isColliding?.(enemy) && !this.boxesOverlap(bottle, enemy)) return;
-        if (enemy instanceof chicken || enemy instanceof chickenSmall) enemy.die();
-        else if (enemy instanceof Endboss) {
-            if (enemy.state === "dead" || enemy.state === "finished") return;
-            if (enemy.isMainBoss && !this.bossUnlocked) return;
-            enemy.takeBottleHit();
-            if (enemy.isMainBoss) this.bossBar.setPercentage(enemy.energy);
-        }
+        if (enemy instanceof Endboss && enemy.isMainBoss && !this.bossUnlocked) return;
+        this.applySplashDamage(bottle);
+        this.damageEnemyWithBottle(enemy, bottle);
         bottle.splash();
     }
 
@@ -199,6 +257,7 @@ class World {
         if (bottle.collected || this.bottleCount >= 20) return;
         if (!this.boxesOverlap(this.character, bottle)) return;
         bottle.collect();
+        gameSounds.play("bottlecollect");
         this.bottleCount = Math.min(20, this.bottleCount + 4);
         this.bottleBar.setPercentage(this.getBottlePercentage());
     }
@@ -207,11 +266,11 @@ class World {
         if (coin.collected || !this.boxesOverlap(this.character, coin)) return;
         coin.collect();
         this.coinsCollected++;
-        this.coinValue = Math.min(100, this.coinsCollected * 20);
+        this.coinInventory++;
+        this.coinValue = Math.min(100, Math.floor(this.coinsCollected / 10) * 20);
         this.bossUnlocked = this.coinsCollected === this.coins.length;
-        this.coinBar.setPercentage(this.coinValue);
-        this.character.energy = Math.min(100, this.character.energy + 10);
-        this.statusBar.setPercentage(this.character.energy);
+        this.updateCoinBar();
+        gameSounds.play("drop_coin");
     }
 
     throwBottle(power = 1) {
@@ -248,16 +307,25 @@ class World {
             if (boss.attackHitDone || this.character.energy <= 0) return;
             if (Math.abs(boss.x - this.character.x) > 180) return;
             boss.attackHitDone = true;
-            this.character.takeDamage(this.levelNumber === 2 ? 20 : 10);
-            this.statusBar.setPercentage(this.character.energy);
+            this.damageCharacter(this.levelNumber === 2 ? 20 : 10);
         });
+    }
+
+    /** Main boss inflicts contact damage while touching Pepe. */
+    checkMainBossContact() {
+        const boss = this.getBoss();
+        if (!boss || boss.isDead || !this.bossUnlocked) return;
+        if (this.character.energy <= 0 || !this.character.isColliding(boss)) return;
+        if (!this.canTakeHitFrom(boss)) return;
+        this.damageCharacter(this.levelNumber === 2 ? 20 : 10);
+        boss.lastHitPosition = { x: this.character.x, y: this.character.y };
     }
 
     checkEnemyCollision(enemy) {
         const isChicken = enemy instanceof chicken || enemy instanceof chickenSmall;
         if (enemy instanceof MiniBoss && !enemy.isDead) {
             if (this.character.isColliding(enemy) && this.canTakeHitFrom(enemy)) {
-                this.character.takeDamage(this.levelNumber === 2 ? 20 : 10);
+                this.damageCharacter(this.levelNumber === 2 ? 20 : 10);
                 enemy.lastHitPosition = { x: this.character.x, y: this.character.y };
                 this.statusBar.setPercentage(this.character.energy);
             }
@@ -267,7 +335,7 @@ class World {
         if (!this.character.isColliding(enemy)) return;
         if (this.isJumpAttack(enemy)) return this.killChicken(enemy);
         if (!this.canChickenDamageCharacter(enemy) || !this.canTakeHitFrom(enemy)) return;
-        this.character.takeDamage(this.levelNumber === 2 ? 10 : 5);
+        this.damageCharacter(this.levelNumber === 2 ? 10 : 5);
         enemy.lastHitPosition = { x: this.character.x, y: this.character.y };
         this.statusBar.setPercentage(this.character.energy);
     }
@@ -290,6 +358,14 @@ class World {
         if (this.character.isDescendingOnto(enemy)) return false;
         return player.y + player.height > target.y + target.height * 0.35 &&
             player.y < target.y + target.height;
+    }
+
+    damageCharacter(amount) {
+        if (this.character.energy <= 0) return;
+        this.character.takeDamage(amount);
+        if (this.coinInventory > 0) this.coinInventory--;
+        this.updateCoinBar();
+        this.statusBar.setPercentage(this.character.energy);
     }
 
     canTakeHitFrom(enemy) {
@@ -332,6 +408,7 @@ class World {
     triggerGameOver() {
         if (this.isGameOver) return;
         gameSounds.stopAll();
+        gameSounds.play("gameover");
         this.isGameOver = true;
         this.character.clearTimers();
         document.getElementById("pauseBtn").classList.add("hidden");
@@ -360,11 +437,12 @@ class World {
     drawGameScene() {
         this.ctx.save();
         this.ctx.translate(this.camera_x, 0);
+        this.coins.filter(c => c.isVisible() && c.behindCharacter).forEach(c => this.addToMap(c));
         this.addToMap(this.character);
         this.addObjectsToMap(this.level.enemies.filter(enemy =>
             !(enemy.isMainBoss && !this.bossUnlocked)));
         this.bottles.filter(b => !b.collected).forEach(b => this.addToMap(b));
-        this.coins.filter(c => c.isVisible()).forEach(c => this.addToMap(c));
+        this.coins.filter(c => c.isVisible() && !c.behindCharacter).forEach(c => this.addToMap(c));
         this.addObjectsToMap(this.thrownBottles);
         this.ctx.restore();
         this.addToMap(this.statusBar);
@@ -392,6 +470,18 @@ class World {
     drawWinScreen() {
         if (this.winImage.complete && this.winImage.naturalWidth)
             this.ctx.drawImage(this.winImage, 0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.save();
+        this.ctx.font = 'bold 32px "Averia Sans Libre", sans-serif';
+        this.ctx.textAlign = "center";
+        this.ctx.textBaseline = "middle";
+        this.ctx.lineWidth = 5;
+        this.ctx.lineJoin = "round";
+        this.ctx.strokeStyle = "#5a3000";
+        this.ctx.fillStyle = "#ffd84d";
+        const coinText = `Coins collected: ${this.coinsCollected} / ${this.coins.length}`;
+        this.ctx.strokeText(coinText, this.canvas.width / 2, this.canvas.height * 0.26);
+        this.ctx.fillText(coinText, this.canvas.width / 2, this.canvas.height * 0.26);
+        this.ctx.restore();
     }
 
     addObjectsToMap(objects) {

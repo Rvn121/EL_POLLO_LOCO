@@ -3,13 +3,25 @@ function createLevel2() {
     return new Level(createLevel2Enemies(), createLevelClouds(), createLevel2Backgrounds());
 }
 
-/** Creates 60 chickens, including 20 patrolling to the right. */
+/** Spreads 60 chickens through the level, with patrols throughout the map. */
 function createLevel2Enemies() {
     const enemies = [];
     for (let i = 0; i < 60; i++) {
-        const x = 1050 + i * 135 + Math.random() * 130;
+        const small = i % 2 === 0;
+        const smallIndex = i / 2;
+        const behindStart = small && smallIndex < 3;
+        const x = small
+            ? (behindStart
+                ? -600 + smallIndex * 120 + Math.random() * 20
+                : 1050 + (smallIndex - 3) * 335 + Math.random() * 80)
+            : 1050 + i * 135 + Math.random() * 130;
         const enemy = i % 2 ? new chicken(x) : new chickenSmall(x);
-        if (i < 20) enemy.startPatrol(x - 140, x + 140);
+        if ((small && (i / 2) % 5 !== 4) || (!small && i % 6 === 1)) {
+            const range = 140 + Math.random() * 160;
+            enemy.startPatrol(
+                Math.max(behindStart ? -620 : 850, x - range),
+                Math.min(behindStart ? -300 : 10100, x + range));
+        }
         enemies.push(enemy);
     }
     enemies.push(new MiniBoss(3800), new MiniBoss(6900));

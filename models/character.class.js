@@ -115,7 +115,9 @@ class Character extends MovableObject {
     }
 
     moveCharacterRight() {
-        const maxX = this.level.level_end_x - this.width;
+        const boss = this.level.enemies.find(enemy => enemy.isMainBoss);
+        const bossLimit = boss ? boss.x + boss.width + 120 : Infinity;
+        const maxX = Math.min(this.level.level_end_x - this.width, bossLimit);
         this.x = Math.min(maxX, this.x + this.speed);
         this.otherDirection = false;
         this.markActivity();
@@ -260,6 +262,7 @@ class Character extends MovableObject {
     startIdleAnimation() {
         if (this.idleStarted) return;
         this.idleStarted = true;
+        gameSounds.play("snoring");
         this.idleFrame = 0;
         this.idleInterval = setInterval(() => {
             if (!window.gamePaused) this.showNextIdleFrame();
@@ -280,6 +283,7 @@ class Character extends MovableObject {
 
     stopIdleAnimation() {
         this.idleStarted = false;
+        gameSounds.stop("snoring");
         this.idleFrame = 0;
         clearInterval(this.idleInterval);
         this.showStandingImage();

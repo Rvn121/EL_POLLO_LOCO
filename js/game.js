@@ -8,6 +8,8 @@ let titleClouds = [];
 let titleBackground = new Image();
 let startScreenImage = new Image();
 let menuButtons;
+let levelChoices;
+let menuSelectionOpen = false;
 let restartBtn;
 let controlsModal;
 let orientationOverlay;
@@ -15,6 +17,9 @@ let canvasShell;
 let menuMusic;
 let menuMuted = false;
 let menuMuteBtn;
+let menuEffectsBtn;
+
+document.addEventListener("DOMContentLoaded", init);
 
 function init() {
     cacheDomElements();
@@ -28,12 +33,14 @@ function init() {
 function cacheDomElements() {
     canvas = document.getElementById("canvas");
     menuButtons = document.getElementById("menuButtons");
+    levelChoices = document.getElementById("levelChoices");
     restartBtn = document.getElementById("restartBtn");
     controlsModal = document.getElementById("controlsModal");
     orientationOverlay = document.getElementById("orientationOverlay");
     canvasShell = document.getElementById("canvasShell");
     menuMusic = document.getElementById("menuMusic");
     menuMuteBtn = document.getElementById("menuMuteBtn");
+    menuEffectsBtn = document.getElementById("menuEffectsBtn");
 }
 
 function loadTitleAssets() {
@@ -43,9 +50,11 @@ function loadTitleAssets() {
 
 function bindUiEvents() {
     menuMuteBtn.addEventListener("click", toggleMenuMute);
+    menuEffectsBtn.addEventListener("click", toggleEffectsMute);
     document.getElementById("allSoundsBtn").addEventListener("click", toggleAllSounds);
-    document.getElementById("startBtn").addEventListener("click", () => startSelectedLevel(1));
-    document.getElementById("levelOneBtn").addEventListener("click", () => startSelectedLevel(2));
+    document.getElementById("startBtn").addEventListener("click", openLevelSelection);
+    document.getElementById("tutorialChoice").addEventListener("click", () => startSelectedLevel(1));
+    document.getElementById("levelOneChoice").addEventListener("click", () => startSelectedLevel(2));
     document.getElementById("restartBtn").addEventListener("click", restartGame);
     document.getElementById("nextBtn").addEventListener("click", nextLevel);
     document.getElementById("backToStartBtn").addEventListener("click", backToStart);
@@ -125,7 +134,15 @@ function resetTitleCloud(cloudObject) {
     cloudObject.y = 10 + Math.random() * 95;
 }
 
-/** Starts the chosen level directly from the main menu. */
+/** Opens artwork-based level selection without changing the title background. */
+function openLevelSelection() {
+    if (world || menuSelectionOpen) return;
+    menuSelectionOpen = true;
+    document.getElementById("startBtn").classList.add("hidden");
+    levelChoices.classList.remove("hidden");
+}
+
+/** Starts the chosen level after the menu selection. */
 function startSelectedLevel(levelNumber) {
     if (world) return;
     currentLevel = levelNumber;
@@ -134,11 +151,11 @@ function startSelectedLevel(levelNumber) {
 
 /** Attempts menu playback; browsers may require an initial user gesture. */
 function setupMenuMusic() {
-    menuMuted = localStorage.getItem("elPolloLocoMenuMuted") === "true";
-    gameSounds.setMuted(menuMuted);
+    menuMuted = false;
     menuMusic.muted = menuMuted;
     updateMenuMuteButton();
     updateAllSoundsButton();
+    updateEffectsMuteButton();
     menuMusic.volume = 0.45;
     playMenuMusic();
     document.addEventListener("pointerdown", playMenuMusicOnInteraction);
@@ -155,41 +172,43 @@ function playMenuMusic() {
     menuMusic.play().catch(() => {});
 }
 
-/** Switches menu music on and off and remembers the preference. */
+/** Switches menu music on and off for the current page visit. */
 function toggleMenuMute() {
     menuMuted = !menuMuted;
     menuMusic.muted = menuMuted;
-    gameSounds.setMuted(menuMuted);
-    localStorage.setItem("elPolloLocoMenuMuted", String(menuMuted));
     if (menuMuted) menuMusic.pause();
     else playMenuMusic();
     updateMenuMuteButton();
-    updateAllSoundsButton();
 }
 
 /** Updates the button label and accessibility state. */
 function updateMenuMuteButton() {
-    menuMuteBtn.textContent = menuMuted ? "Sound On" : "Sound Off";
+    menuMuteBtn.textContent = menuMuted ? "Music On" : "Music Off";
     menuMuteBtn.setAttribute("aria-pressed", String(menuMuted));
 }
 
-/** Toggles all game sounds using the same saved mute preference as the menu. */
-function toggleAllSounds() {
-    menuMuted = !menuMuted;
-    gameSounds.setMuted(menuMuted);
-    menuMusic.muted = menuMuted;
-    localStorage.setItem("elPolloLocoMenuMuted", String(menuMuted));
-    if (menuMuted) menuMusic.pause();
-    else if (world && !world.isPaused && !world.levelIntroActive) world.updateAmbientSounds();
+/** Independent game sound-effects toggle. */
+function toggleEffectsMute() {
+    gameSounds.setMuted(!gameSounds.muted);
+    localStorage.setItem("elPolloLocoEffectsMuted", String(gameSounds.muted));
+    if (!gameSounds.muted && world && !world.isPaused) world.updateAmbientSounds();
+    updateEffectsMuteButton();
     updateAllSoundsButton();
-    updateMenuMuteButton();
 }
 
-/** Shows the action performed by clicking the game audio button. */
+function updateEffectsMuteButton() {
+    menuEffectsBtn.textContent = gameSounds.muted ? "Effects On" : "Effects Off";
+    menuEffectsBtn.setAttribute("aria-pressed", String(gameSounds.muted));
+}
+
+function toggleAllSounds() {
+    toggleEffectsMute();
+}
+
 function updateAllSoundsButton() {
     const button = document.getElementById("allSoundsBtn");
-    button.textContent = menuMuted ? "All Sounds On" : "All Sounds Off";
-    button.setAttribute("aria-pressed", String(menuMuted));
+    button.textContent = gameSounds.muted ? "All Sounds On" : "All Sounds Off";
+    button.setAttribute("aria-pressed", String(gameSounds.muted));
 }
 
 function stopMenuMusic() {
@@ -217,12 +236,14 @@ function startGame() {
 /** Starts the next level after winning the tutorial. */
 function showLevelAnnouncement() {
     const announcement = document.getElementById("levelAnnouncement");
+    const image = document.getElementById("levelTransitionImage");
     const currentWorld = world;
-    announcement.textContent = currentLevel === 1 ? "Tutorial" : "Level 1";
-    announcement.classList.remove("hidden");
+    announcement.classList.add("hidden");
+    image.src = currentLevel === 1 ? "img/tutorial_transition.png" : "img/level1_transition.png";
+    image.classList.remove("hidden");
     window.setTimeout(() => {
         if (world !== currentWorld) return;
-        announcement.classList.add("hidden");
+        image.classList.add("hidden");
         world.startLevel();
         window.gamePaused = false;
     }, 1000);
@@ -246,6 +267,7 @@ function backToStart() {
     resetKeys();
     hideRestartButton();
     document.getElementById("levelAnnouncement").classList.add("hidden");
+    document.getElementById("levelTransitionImage").classList.add("hidden");
     document.getElementById("pauseBtn").classList.add("hidden");
     document.getElementById("pauseBtn").textContent = "Pause";
     closeControlsModal();
@@ -286,11 +308,15 @@ function hideRestartButton() {
 }
 
 function hideStartMenu() {
+    levelChoices.classList.add("hidden");
     menuButtons.classList.add("hidden");
     menuButtons.classList.add("game-running");
 }
 
 function showStartMenu() {
+    menuSelectionOpen = false;
+    levelChoices.classList.add("hidden");
+    document.getElementById("startBtn").classList.remove("hidden");
     menuButtons.classList.remove("hidden");
     menuButtons.classList.remove("game-running");
 }
@@ -317,9 +343,14 @@ function requestFullscreenMode() {
 }
 
 function handleKeyDown(event) {
+    if (event.code === "Escape" && world) {
+        event.preventDefault();
+        backToStart();
+        return;
+    }
     if (event.code === "Space" && !world) {
         event.preventDefault();
-        startSelectedLevel(1);
+        openLevelSelection();
         return;
     }
     if (event.code === "Space" && world) {
@@ -382,8 +413,9 @@ function updateFullscreenUi() {
     const button = document.getElementById("fullscreenBtn");
     button.textContent = fullscreen ? "Minimize" : "Fullscreen";
     menuButtons.classList.toggle("hidden", !!world);
-    document.getElementById("controlsBtn").classList.toggle("hidden", !fullscreen);
+    document.getElementById("controlsBtn").classList.remove("hidden");
     menuMuteBtn.classList.toggle("hidden", !!world);
+    menuEffectsBtn.classList.toggle("hidden", !!world);
     document.getElementById("allSoundsBtn").classList.toggle("hidden", !world);
     updateAllSoundsButton();
 }
