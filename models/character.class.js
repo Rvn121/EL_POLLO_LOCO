@@ -134,7 +134,24 @@ class Character extends MovableObject {
         this.jumpPressed = jumpKeyPressed;
     }
 
+    /** Checks the previous landing trajectory so stomps cannot become side hits. */
+    jumpStartedAboveEnemy(enemy) {
+        const target = enemy.getHitbox();
+        if (!target) return false;
+        const previousFeet = this.previousFeet ?? this.getHitbox()?.y;
+        return previousFeet <= target.y + 12;
+    }
+
+    isDescendingOnto(enemy) {
+        const box = this.getHitbox();
+        const target = enemy.getHitbox();
+        if (!box || !target || this.speedY >= 0) return false;
+        return this.jumpStartedAboveEnemy(enemy) || box.y < target.y;
+    }
+
     applyGravity() {
+        const box = this.getHitbox();
+        this.previousFeet = box ? box.y + box.height : this.y + this.height;
         this.y -= this.speedY;
         if (this.y < this.groundY) return this.continueJump();
         this.landOnGround();
@@ -169,6 +186,8 @@ class Character extends MovableObject {
         if (this.y !== this.groundY) return;
         this.speedY = this.jumpSpeed;
         this.jumpFrame = 0;
+        gameSounds.stop("steps");
+        gameSounds.play("jump");
         this.markActivity();
     }
 
@@ -181,6 +200,7 @@ class Character extends MovableObject {
     takeDamage(damage) {
         const nextEnergy = Math.max(0, this.energy - damage);
         if (this.energy <= 0) return;
+        gameSounds.play("hit_pepe");
         if (nextEnergy === 0) return this.die();
         this.energy = nextEnergy;
         this.lastHit = Date.now();
@@ -191,6 +211,27 @@ class Character extends MovableObject {
     die() {
         this.energy = 0;
         this.clearTimers();
+        this.startDeathAnimation();
+    }
+
+    /** Plays all six death sprites before showing Game Over. */
+    startDeathAnimation() {
+        this.deathImages = [51,52,53,54,55,56].map(n =>
+            `img/2_character_pepe/5_dead/D-${n}.png`);
+        this.loadImages(this.deathImages);
+        this.deathIndex = 0;
+        this.img = this.imageCache[this.deathImages[0]];
+        this.deathInterval = setInterval(() => this.showNextDeathFrame(), 170);
+    }
+
+    showNextDeathFrame() {
+        if (++this.deathIndex >= this.deathImages.length) {
+            clearInterval(this.deathInterval);
+            this.deathFinished = true;
+            return;
+        }
+        this.img = this.imageCache[this.deathImages[this.deathIndex]];
+        if (this.deathIndex >= 2) this.y += 90;
     }
 
     isHurt() {

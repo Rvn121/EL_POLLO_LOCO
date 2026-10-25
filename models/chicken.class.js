@@ -38,6 +38,7 @@ class chicken extends MovableObject {
         this.isDead = true;
         this.isCollidable = false;
         this.clearTimers();
+        this.y += 12;
         this.img = this.imageCache[this.DEAD_IMAGE];
     }
 }

@@ -232,3 +232,56 @@ canvas {
 .canvas-shell:fullscreen .canvas-top-buttons.game-running #controlsBtn { display: inline-block; }
 /* Restart darf seinen horizontalen Mittelpunkt bei Hover/Active nicht verlieren. */
 .restart-btn:hover, .restart-btn:active { transform: translateX(-50%); }
+
+/* Fixed end-menu layout: the button group itself never moves on hover. */
+.end-buttons {
+    position: absolute;
+    z-index: 5;
+    left: 50%;
+    bottom: 16px;
+    display: flex;
+    gap: 12px;
+    transform: translateX(-50%);
+}
+.end-buttons .restart-btn {
+    position: static;
+    transform: none;
+}
+.end-buttons .restart-btn:hover,
+.end-buttons .restart-btn:active { transform: none; }
+
+/* Game toolbar is HTML above the canvas, never overlaying its picture. */
+.canvas-section { display: flex; flex-direction: column; gap: 10px; }
+.game-toolbar { display: flex; justify-content: flex-end; width: 720px; max-width: 100%; gap: 10px; }
+.game-toolbar .pause-btn, .game-toolbar .fullscreen-btn { position: static; }
+.canvas-section:fullscreen { background: #21170b; padding: 8px; display: flex; flex-direction: column; }
+.canvas-section:fullscreen .canvas-shell { height: calc(100vh - 68px); width: min(100vw, (100vh - 68px) * 1.5); }
+.canvas-section:fullscreen .game-toolbar { width: min(100vw, (100vh - 68px) * 1.5); }
+.canvas-section:fullscreen .modal-backdrop { position: fixed; z-index: 40; }
+.canvas-section:fullscreen .canvas-top-buttons.game-running { display: flex !important; }
+.canvas-section:fullscreen .canvas-top-buttons.game-running #startBtn { display: none; }
+.canvas-section:fullscreen .canvas-top-buttons.game-running #controlsBtn { display: inline-block; }
+.game-btn:hover { background: #ffe879; filter: brightness(1.06); }
+.end-buttons .restart-btn:hover { background: #ffe879; filter: brightness(1.12); }
+.level-announcement { position: absolute; z-index: 6; top: 38%; left: 50%; transform: translateX(-50%); background: #ffd84d; border: 2px solid #9e6a00; border-radius: 30px; padding: 10px 26px; color: #5a3000; font-size: 30px; font-weight: bold; }
+@media(max-width:1024px) { .game-toolbar { width: min(960px, calc(100vw - 24px)); } }
+
+/* Keep the whole action row stationary while each button lifts on hover. */
+.end-buttons .game-btn { transition: transform .14s ease, box-shadow .14s ease, background .14s ease; }
+.end-buttons .restart-btn:hover { transform: translateY(-3px); box-shadow: 0 7px 0 rgba(120,80,0,.4); }
+.end-buttons .restart-btn:active { transform: translateY(1px); box-shadow: 0 2px 0 rgba(120,80,0,.35); }
+.legal-link { position: fixed; bottom: 9px; right: 15px; z-index: 10; color: #412100; background: #fff4cb; padding: 6px 14px; border-radius: 20px; text-decoration: none; font-weight: bold; }
+.legal-link:hover { background: #ffd84d; }
+.legal-page { max-width: 760px; margin: 6vh auto; padding: 30px; border-radius: 30px; background: #fff8db; box-shadow: 0 12px 30px #0003; }
+.legal-page a { color: #603400; }
+
+/* Tutorial and Level 1 remain visible together on the main menu. */
+.canvas-top-buttons:not(.game-running) #controlsBtn { display: none; }
+.canvas-top-buttons:not(.game-running) { gap: 12px; }
+.canvas-top-buttons.game-running #levelOneBtn { display: none; }
+
+/* Controls and menu audio stay in the HTML toolbar, above the canvas. */
+.game-toolbar { align-items: center; flex-wrap: wrap; }
+.game-toolbar .toolbar-controls, .game-toolbar .toolbar-sound { position: static; }
+.canvas-section:fullscreen .game-toolbar { flex-shrink: 0; }
+.canvas-section:fullscreen .canvas-top-buttons { z-index: 3; }

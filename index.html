@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,69 +20,78 @@
     <script src="./models/endboss.class.js"></script>
     <script src="./models/level.class.js"></script>
     <script src="./level.js/level1.js"></script>
+    <script src="./level.js/level2.js"></script>
     <script src="./models/world.class.js"></script>
+    <script src="./js/sound-manager.js"></script>
     <script src="./js/game.js"></script>
 </head>
 <body onload="init()">
     <div class="orientation-overlay hidden" id="orientationOverlay">
         <div class="orientation-card">
-            <h2>Bitte drehen</h2>
-            <p>Spiele El Pollo Loco im Querformat.</p>
+            <h2>Rotate your device</h2>
+            <p>Play El Pollo Loco in landscape mode.</p>
         </div>
     </div>
 
     <main class="page-shell">
         <aside class="control-panel" id="controlPanel">
             <h1>El Pollo Loco</h1>
-            <p class="panel-text">Starte das Spiel mit der Leertaste oder über den Start-Button im Canvas.</p>
+            <p class="panel-text">Choose Tutorial or Level 1. Press Space to start the tutorial.</p>
             <div class="control-list">
-                <h2>Spielsteuerung</h2>
+                <h2>Controls</h2>
                 <ul>
-                    <li><strong>Pfeil links</strong> – nach links laufen</li>
-                    <li><strong>Pfeil rechts</strong> – nach rechts laufen</li>
-                    <li><strong>Pfeil hoch</strong> – springen</li>
-                    <li><strong>Leertaste halten / loslassen</strong> – Flaschenwurf aufladen / werfen</li>
-                    <li><strong>P</strong> – Spiel pausieren</li>
+                    <li><strong>Left Arrow</strong> – move left</li>
+                    <li><strong>Right Arrow</strong> – move right</li>
+                    <li><strong>Up Arrow</strong> – jump</li>
+                    <li><strong>Hold / release Space</strong> – charge / throw a bottle</li>
+                    <li><strong>P</strong> – pause the game</li>
                 </ul>
             </div>
         </aside>
 
-        <section class="canvas-section">
-            <div class="canvas-shell" id="canvasShell">
+        <section class="canvas-section" id="canvasShell">
+            <div class="game-toolbar" id="gameToolbar">
+                <button class="game-btn pause-btn hidden" id="pauseBtn" type="button">Pause</button>
+                <button class="game-btn toolbar-controls hidden" id="controlsBtn" type="button">Controls</button>
+                <button class="game-btn toolbar-sound hidden" id="allSoundsBtn" type="button" aria-pressed="false">All Sounds Off</button>
+                <button class="game-btn toolbar-sound" id="menuMuteBtn" type="button" aria-pressed="false">Sound On</button>
+                <button class="game-btn fullscreen-btn" id="fullscreenBtn" type="button">Fullscreen</button>
+            </div>
+            <div class="canvas-shell" id="canvasFrame">
                 <canvas id="canvas" width="720" height="480"></canvas>
 
                 <div class="canvas-top-buttons" id="menuButtons">
-                    <button class="game-btn" id="startBtn" type="button">Start</button>
-                    <button class="game-btn" id="controlsBtn" type="button">Steuerung</button>
+                    <button class="game-btn" id="startBtn" type="button">Tutorial</button>
+                    <button class="game-btn" id="levelOneBtn" type="button">Level 1</button>
                 </div>
 
-                <button class="game-btn pause-btn hidden" id="pauseBtn" type="button">Pause</button>
 
-                <button class="game-btn fullscreen-btn" id="fullscreenBtn" type="button">
-                    Fullscreen
-                </button>
-
-                <button class="game-btn restart-btn hidden" id="restartBtn" type="button">
-                    Restart
-                </button>
+                <div class="level-announcement hidden" id="levelAnnouncement"></div>
+                <div class="end-buttons" id="endButtons">
+                    <button class="game-btn restart-btn hidden" id="restartBtn" type="button">Restart</button>
+                    <button class="game-btn hidden" id="nextBtn" type="button">Next</button>
+                    <button class="game-btn hidden" id="backToStartBtn" type="button">Back to Start</button>
+                </div>
+            </div>
                 <div class="modal-backdrop hidden" id="controlsModal">
                         <div class="modal-card">
                             <button class="modal-close" id="closeModalBtn" type="button">×</button>
-                            <h2>Spielsteuerung</h2>
+                            <h2>Controls</h2>
                             <ul>
-                                <li><strong>Pfeil links</strong> – Pepe läuft nach links</li>
-                                <li><strong>Pfeil rechts</strong> – Pepe läuft nach rechts</li>
-                                <li><strong>Pfeil hoch</strong> – Pepe springt</li>
-                                <li><strong>Leertaste</strong> – Starten; im Spiel halten für Wurfweite, loslassen zum Werfen</li>
-                                <li><strong>P / Pause</strong> – Spielzeit anhalten und fortsetzen</li>
-                                <li><strong>Von oben auf Hühner springen</strong> – Gegner besiegen</li>
-                                <li><strong>Fullscreen</strong> – Spielbereich vergrößern</li>
+                                <li><strong>Left Arrow</strong> – Pepe moves left</li>
+                                <li><strong>Right Arrow</strong> – Pepe moves right</li>
+                                <li><strong>Up Arrow</strong> – Pepe jumps</li>
+                                <li><strong>Space</strong> – Start Tutorial in the menu; hold and release to throw in-game</li>
+                                <li><strong>P / Pause</strong> – pause / resume the game</li>
+                                <li><strong>Jump onto chickens from above</strong> – defeat enemies</li>
+                                <li><strong>Fullscreen</strong> – expand the game</li>
                             </ul>
                         </div>
                     </div>
-            </div>
         </section>
     </main>
+    <audio id="menuMusic" src="./audio/Sombrero_Stomp.mp3" preload="auto" loop></audio>
+    <a class="legal-link" href="impressum.html">Impressum</a>
 
 
 </body>

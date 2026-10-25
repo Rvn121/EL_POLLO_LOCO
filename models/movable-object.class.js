@@ -20,6 +20,19 @@ class MovableObject extends DrawableObject {
         }, 1000 / 60);
     }
 
+    /** Patrols between two world positions, starting to the right. */
+    startPatrol(left, right) {
+        this.stopMoving();
+        this.patrolDirection = 1;
+        this.moveInterval = setInterval(() => {
+            if (window.gamePaused || this.isDead) return;
+            if (this.x >= right) this.patrolDirection = -1;
+            if (this.x <= left) this.patrolDirection = 1;
+            this.x += this.speed * this.patrolDirection;
+            this.otherDirection = this.patrolDirection > 0;
+        }, 1000 / 60);
+    }
+
     stopMoving() {
         clearInterval(this.moveInterval);
     }

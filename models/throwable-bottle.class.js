@@ -39,6 +39,7 @@ class ThrowableBottle extends DrawableObject {
     splash() {
         if (this.state !== "flying") return;
         this.state = "splash";
+        gameSounds.play("splash");
         this.elapsed = 0;
         this.frame = 0;
         this.y = Math.min(this.y, 425 - this.height);

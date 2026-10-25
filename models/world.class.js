@@ -15,12 +15,16 @@ class World {
     throwChargeStart = null;
     bottleCount = 0;
     coinValue = 0;
+    coinsCollected = 0;
+    bossUnlocked = false;
+    bossSoundPlayed = false;
+    levelIntroActive = true;
     bottles = [];
     coins = [];
     thrownBottles = [];
     lastUpdate = performance.now();
 
-    constructor(canvas, keyboard, onGameOver) {
+    constructor(canvas, keyboard, onGameOver, levelNumber = 1) {
         this.ctx = canvas.getContext("2d");
         this.canvas = canvas;
         this.keyboard = keyboard;
@@ -29,13 +33,15 @@ class World {
         this.gameOverImage.src = "img/9_intro_outro_screens/game_over/game over.png";
         this.winImage = new Image();
         this.winImage.src = "img/You won, you lost/You won A.png";
-        this.level = createLevel1();
+        this.levelNumber = levelNumber;
+        this.level = levelNumber === 2 ? createLevel2() : createLevel1();
         this.character = new Character(this.keyboard, this.level);
         this.statusBar = new StatusBar();
         this.bottleBar = new StatusBar();
         this.coinBar = new StatusBar();
         this.configureCollectibles();
         this.character.x = this.characterScreenX - this.camera_x;
+        this.isPaused = true;
         this.startGameLoop();
         this.startCollisionLoop();
         this.draw();
@@ -44,17 +50,50 @@ class World {
     startGameLoop() {
         this.gameLoopInterval = setInterval(() => {
             if (this.isDisposed || this.isPaused) return;
+            this.updateAmbientSounds();
             this.updateClouds();
             if (this.isGameOver || this.isWin) return;
+            if (this.character.energy <= 0) {
+                if (this.character.deathFinished) this.triggerGameOver();
+                return;
+            }
             this.character.updateMovement();
+            this.updateFootsteps();
+            this.checkBossApproach();
             this.updateCamera();
             this.updateCollectibles();
         }, 1000 / 60);
     }
 
+    /** Plays wind throughout active play and chickens only while small ones remain alive. */
+    updateAmbientSounds() {
+        if (this.isGameOver || this.isWin) return;
+        gameSounds.play("wind");
+        const smallChickensAlive = this.level.enemies.some(enemy =>
+            enemy instanceof chickenSmall && !enemy.isDead);
+        if (smallChickensAlive) gameSounds.play("chicken_background");
+        else gameSounds.stop("chicken_background");
+    }
+
+    updateFootsteps() {
+        const moving = this.keyboard.LEFT !== this.keyboard.RIGHT;
+        const onGround = this.character.y === this.character.groundY;
+        if (moving && onGround) gameSounds.play("steps");
+        else gameSounds.stop("steps");
+    }
+
+    checkBossApproach() {
+        const boss = this.getBoss();
+        if (!boss || !this.bossUnlocked || this.bossSoundPlayed) return;
+        if (Math.abs(this.character.x - boss.x) > 600) return;
+        this.bossSoundPlayed = true;
+        gameSounds.play("chicken_boss");
+    }
+
     startCollisionLoop() {
         this.collisionInterval = setInterval(() => {
             if (this.isDisposed || this.isGameOver || this.isWin || this.isPaused) return;
+            if (this.character.energy <= 0) return;
             this.level.enemies.forEach(enemy => this.checkEnemyCollision(enemy));
             this.checkCollectibleCollisions();
         }, 1000 / 60);
@@ -83,18 +122,29 @@ class World {
     }
 
     createBottles() {
-        return Array.from({ length: 6 }, (_, index) => {
-            const x = 520 + index * 760 + Math.random() * 360;
+        const count = this.levelNumber === 2 ? 9 : 5;
+        const maxX = this.getBoss().x - 950;
+        return Array.from({ length: count }, (_, index) => {
+            const x = 550 + (maxX - 800) * (index + Math.random() * 0.4) / count;
             return new CollectibleBottle(x);
         });
     }
 
     createCoins() {
-        return Array.from({ length: 20 }, (_, index) => {
-            const x = 370 + index * 240 + Math.random() * 120;
-            const y = index % 3 === 0 ? 190 + Math.random() * 35 : 265 + Math.random() * 70;
+        const maxX = this.getBoss().x - 1150;
+        return Array.from({ length: 5 }, (_, index) => {
+            const x = 400 + (maxX - 650) * (index + 0.4) / 5;
+            const high = this.levelNumber === 2 ? index % 2 === 0 : index % 3 === 0;
+            const y = high ? 140 + Math.random() * 35 : 245 + Math.random() * 30;
             return new Coin(x, y);
         });
+    }
+
+    startLevel() {
+        this.levelIntroActive = false;
+        this.isPaused = false;
+        this.lastUpdate = performance.now();
+        this.character.lastActivity = Date.now();
     }
 
     updateCollectibles() {
@@ -102,9 +152,13 @@ class World {
         const delta = Math.min(45, now - this.lastUpdate);
         this.lastUpdate = now;
         this.bottles.forEach(b => b.update(delta));
-        const boss = this.getBoss();
-        if (boss) boss.update(delta);
-        if (boss?.state === "finished") this.triggerWin();
+        const bosses = this.level.enemies.filter(enemy => enemy instanceof Endboss);
+        bosses.forEach(boss => {
+            if (!boss.isMainBoss || this.bossUnlocked) boss.update(delta, this.character);
+        });
+        this.checkBossAttacks(bosses);
+        if (this.getBoss()?.state === "finished") this.triggerWin();
+        if (this.character.energy <= 0 && this.character.deathFinished) this.triggerGameOver();
         this.coins.forEach(c => c.update(delta));
         this.thrownBottles.forEach(b => this.updateThrownBottle(b, delta));
         this.thrownBottles = this.thrownBottles.filter(b => b.state !== "done");
@@ -121,9 +175,10 @@ class World {
         if (!bottle.isColliding?.(enemy) && !this.boxesOverlap(bottle, enemy)) return;
         if (enemy instanceof chicken || enemy instanceof chickenSmall) enemy.die();
         else if (enemy instanceof Endboss) {
-            if (enemy.state !== "walking") return;
+            if (enemy.state === "dead" || enemy.state === "finished") return;
+            if (enemy.isMainBoss && !this.bossUnlocked) return;
             enemy.takeBottleHit();
-            this.bossBar.setPercentage(enemy.energy);
+            if (enemy.isMainBoss) this.bossBar.setPercentage(enemy.energy);
         }
         bottle.splash();
     }
@@ -151,8 +206,12 @@ class World {
     pickupCoin(coin) {
         if (coin.collected || !this.boxesOverlap(this.character, coin)) return;
         coin.collect();
-        this.coinValue = Math.min(100, this.coinValue + 5);
+        this.coinsCollected++;
+        this.coinValue = Math.min(100, this.coinsCollected * 20);
+        this.bossUnlocked = this.coinsCollected === this.coins.length;
         this.coinBar.setPercentage(this.coinValue);
+        this.character.energy = Math.min(100, this.character.energy + 10);
+        this.statusBar.setPercentage(this.character.energy);
     }
 
     throwBottle(power = 1) {
@@ -169,50 +228,68 @@ class World {
     }
 
     getBoss() {
-        return this.level.enemies.find(enemy => enemy instanceof Endboss);
+        return this.level.enemies.find(enemy => enemy instanceof Endboss && enemy.isMainBoss);
     }
 
     togglePause() {
+        if (this.levelIntroActive) return true;
         this.isPaused = !this.isPaused;
+        if (this.isPaused) gameSounds.stopAll();
         this.lastUpdate = performance.now();
         if (!this.isPaused) this.character.lastActivity = Date.now();
         return this.isPaused;
     }
 
+    /** Deals damage when the moving boss attacks at close range. */
+    checkBossAttacks(bosses) {
+        bosses.forEach(boss => {
+            if (boss.isMainBoss && !this.bossUnlocked) return;
+            if (!boss.moving || boss.state !== "attack" || boss.frame !== 4) return;
+            if (boss.attackHitDone || this.character.energy <= 0) return;
+            if (Math.abs(boss.x - this.character.x) > 180) return;
+            boss.attackHitDone = true;
+            this.character.takeDamage(this.levelNumber === 2 ? 20 : 10);
+            this.statusBar.setPercentage(this.character.energy);
+        });
+    }
+
     checkEnemyCollision(enemy) {
         const isChicken = enemy instanceof chicken || enemy instanceof chickenSmall;
+        if (enemy instanceof MiniBoss && !enemy.isDead) {
+            if (this.character.isColliding(enemy) && this.canTakeHitFrom(enemy)) {
+                this.character.takeDamage(this.levelNumber === 2 ? 20 : 10);
+                enemy.lastHitPosition = { x: this.character.x, y: this.character.y };
+                this.statusBar.setPercentage(this.character.energy);
+            }
+            return;
+        }
         if (!isChicken || enemy.isDead || this.character.energy <= 0) return;
         if (!this.character.isColliding(enemy)) return;
         if (this.isJumpAttack(enemy)) return this.killChicken(enemy);
-        if (!this.canChickenDamageCharacter(enemy)) return;
-        if (!this.canTakeHitFrom(enemy)) return;
-        this.character.takeDamage(5);
+        if (!this.canChickenDamageCharacter(enemy) || !this.canTakeHitFrom(enemy)) return;
+        this.character.takeDamage(this.levelNumber === 2 ? 10 : 5);
         enemy.lastHitPosition = { x: this.character.x, y: this.character.y };
         this.statusBar.setPercentage(this.character.energy);
-        if (this.character.energy <= 0) this.triggerGameOver();
     }
 
+    /** Descending onto any horizontal part of a chicken counts as a stomp. */
     isJumpAttack(enemy) {
         const player = this.character.getHitbox();
         const target = enemy.getHitbox();
         if (!player || !target || this.character.speedY >= 0) return false;
-        const bottom = player.y + player.height;
-        const previousBottom = bottom + this.character.speedY;
-        const reachesTop = previousBottom <= target.y + 18 && bottom >= target.y;
-        const overTop = bottom <= target.y + Math.min(32, target.height * 0.6);
-        const overlapsWidth = player.x < target.x + target.width &&
-            player.x + player.width > target.x;
-        return overlapsWidth && (reachesTop || overTop);
+        const feet = player.y + player.height;
+        const startedAbove = this.character.jumpStartedAboveEnemy(enemy);
+        return startedAbove && feet >= target.y && player.y < target.y;
     }
 
+    /** A chicken only hurts Pepe when their bodies touch from the side. */
     canChickenDamageCharacter(enemy) {
         const player = this.character.getHitbox();
         const target = enemy.getHitbox();
         if (!player || !target) return false;
-        const horizontal = player.x < target.x + target.width &&
-            player.x + player.width > target.x;
-        const feet = player.y + player.height;
-        return horizontal && feet > target.y && player.y < target.y + target.height;
+        if (this.character.isDescendingOnto(enemy)) return false;
+        return player.y + player.height > target.y + target.height * 0.35 &&
+            player.y < target.y + target.height;
     }
 
     canTakeHitFrom(enemy) {
@@ -223,6 +300,7 @@ class World {
     }
 
     killChicken(enemy) {
+        gameSounds.play("hit_chickens");
         enemy.die();
         this.character.bounceFromEnemy();
     }
@@ -253,6 +331,7 @@ class World {
 
     triggerGameOver() {
         if (this.isGameOver) return;
+        gameSounds.stopAll();
         this.isGameOver = true;
         this.character.clearTimers();
         document.getElementById("pauseBtn").classList.add("hidden");
@@ -282,7 +361,8 @@ class World {
         this.ctx.save();
         this.ctx.translate(this.camera_x, 0);
         this.addToMap(this.character);
-        this.addObjectsToMap(this.level.enemies);
+        this.addObjectsToMap(this.level.enemies.filter(enemy =>
+            !(enemy.isMainBoss && !this.bossUnlocked)));
         this.bottles.filter(b => !b.collected).forEach(b => this.addToMap(b));
         this.coins.filter(c => c.isVisible()).forEach(c => this.addToMap(c));
         this.addObjectsToMap(this.thrownBottles);
@@ -290,7 +370,7 @@ class World {
         this.addToMap(this.statusBar);
         this.addToMap(this.bottleBar);
         this.addToMap(this.coinBar);
-        if (this.character.x >= this.getBoss().x - 600) this.addToMap(this.bossBar);
+        if (this.bossUnlocked && this.character.x >= this.getBoss().x - 600) this.addToMap(this.bossBar);
     }
 
     drawGameOverScreen() {
@@ -301,10 +381,12 @@ class World {
 
     triggerWin() {
         if (this.isWin) return;
+        gameSounds.stopAll();
+        gameSounds.play("win");
         this.isWin = true;
         document.getElementById("pauseBtn").classList.add("hidden");
         this.character.clearTimers();
-        this.onGameOver?.();
+        this.onGameOver?.(true);
     }
 
     drawWinScreen() {
@@ -354,6 +436,7 @@ class World {
     }
 
     dispose() {
+        gameSounds.stopAll();
         this.isDisposed = true;
         clearInterval(this.gameLoopInterval);
         clearInterval(this.collisionInterval);

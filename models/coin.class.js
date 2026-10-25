@@ -1,6 +1,6 @@
 class Coin extends DrawableObject {
-    width = 62;
-    height = 62;
+    width = 186;
+    height = 186;
     collected = false;
     vanishY = -60;
     baseY;
@@ -11,7 +11,8 @@ class Coin extends DrawableObject {
         super();
         this.x = x;
         this.y = y;
-        this.baseY = y;
+        this.baseY = y - 20;
+        this.y = this.baseY;
         this.loadImages(this.IMAGES);
         this.img = this.imageCache[this.IMAGES[0]];
     }

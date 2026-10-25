@@ -7,11 +7,13 @@ function createLevel1() {
 }
 
 function createLevelEnemies() {
-    return [
-        ...createSmallChickens(),
-        ...createNormalChickens(),
-        new Endboss()
-    ];
+    const enemies = [ ...createSmallChickens(), ...createNormalChickens() ];
+    for (let i = 0; i < 15; i++) {
+        const x = 800 + i * 320 + Math.random() * 100;
+        enemies.push(i % 2 ? new chicken(x) : new chickenSmall(x));
+    }
+    enemies.push(new Endboss());
+    return enemies;
 }
 
 function createSmallChickens() {
@@ -45,7 +47,7 @@ function createLevelBackgrounds() {
             "img/5_background/layers/2_second_layer/2.png", "img/5_background/layers/1_first_layer/2.png"]
     ];
 
-    for (let i = -1; i < 10; i++) {
+    for (let i = -1; i < 16; i++) {
         const images = pattern[Math.abs(i) % 2];
         backgrounds.push(new BackgroundObject(images[0], 720 * i));
         backgrounds.push(new BackgroundObject(images[1], 720 * i));
