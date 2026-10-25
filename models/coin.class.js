@@ -7,6 +7,12 @@ class Coin extends DrawableObject {
     phase = Math.random() * Math.PI * 2;
     IMAGES = ["img/8_coin/coin_1.png", "img/8_coin/coin_2.png"];
 
+    /**
+     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
+     * EN: Creates a new object and sets its initial values.
+     * @param {number} x - DE: x. EN: x.
+     * @param {number} y - DE: y. EN: y.
+     */
     constructor(x, y) {
         super();
         this.x = x;
@@ -17,10 +23,19 @@ class Coin extends DrawableObject {
         this.img = this.imageCache[this.IMAGES[0]];
     }
 
+    /**
+     * DE: Sammelt.
+     * EN: Collects.
+     */
     collect() {
         this.collected = true;
     }
 
+    /**
+     * DE: Aktualisiert.
+     * EN: Updates.
+     * @param {number} delta - DE: Übergabewert delta. EN: Argument delta.
+     */
     update(delta) {
         if (this.collected) return this.flyAway(delta);
         this.phase += delta * 0.004;
@@ -29,10 +44,19 @@ class Coin extends DrawableObject {
         this.img = this.imageCache[this.IMAGES[Math.abs(frame)]];
     }
 
+    /**
+     * DE: Lässt die eingesammelte Münze nach oben fliegen.
+     * EN: Makes the collected coin fly upward.
+     * @param {number} delta - DE: delta. EN: delta.
+     */
     flyAway(delta) {
         this.y -= delta * 0.7;
     }
 
+    /**
+     * DE: Prüft, ob visible zutrifft.
+     * EN: Checks whether visible is true.
+     */
     isVisible() {
         return !this.collected || this.y + this.height > this.vanishY;
     }

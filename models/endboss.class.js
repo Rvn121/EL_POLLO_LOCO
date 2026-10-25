@@ -17,6 +17,12 @@ class Endboss extends MovableObject {
     IMAGES_HURT = [21, 22, 23].map(i => `img/4_enemie_boss_chicken/4_hurt/G${i}.png`);
     IMAGES_DEAD = [24, 25, 26].map(i => `img/4_enemie_boss_chicken/5_dead/G${i}.png`);
 
+    /**
+     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
+     * EN: Creates a new object and sets its initial values.
+     * @param {number} x - DE: x. EN: x.
+     * @param {Object} moving - DE: Übergabewert moving. EN: Argument moving.
+     */
     constructor(x = 6100, moving = false) {
         super();
         this.x = x;
@@ -27,14 +33,22 @@ class Endboss extends MovableObject {
         this.img = this.imageCache[this.IMAGES_ALERT[0]];
     }
 
-    /** Each bottle removes twenty energy points from the main boss. */
+    /**
+     * DE: Nimmt bottle hit.
+     * EN: Takes bottle hit.
+     */
     takeBottleHit() {
         if (this.energy <= 0) return;
         this.energy = Math.max(0, this.energy - (this.isMainBoss ? 20 : 100 / 3));
         this.setState(this.energy ? "hurt" : "dead");
     }
 
-    /** Advances animations and optional patrol/attack behavior. */
+    /**
+     * DE: Aktualisiert.
+     * EN: Updates.
+     * @param {number} delta - DE: Übergabewert delta. EN: Argument delta.
+     * @param {Object} player - DE: Übergabewert player. EN: Argument player.
+     */
     update(delta, player) {
         if (this.state === "finished") return;
         if (this.state === "falling") return this.updateFalling(delta);
@@ -47,24 +61,39 @@ class Endboss extends MovableObject {
         this.updateImage();
     }
 
+    /**
+     * DE: Bewegt and attack.
+     * EN: Moves and attack.
+     * @param {number} delta - DE: Übergabewert delta. EN: Argument delta.
+     * @param {Object} player - DE: Übergabewert player. EN: Argument player.
+     */
     moveAndAttack(delta, player) {
         const distance = Math.abs(player.x - this.x);
-        if (this.healthPhases && this.energy <= 20) {
-            this.direction = player.x > this.x ? 1 : -1;
-            this.otherDirection = this.direction > 0;
-        }
+        if (this.healthPhases && this.energy <= 20) this.facePlayer(player);
         if (distance < 220 && !this.attackCooldown) return this.beginAttack();
         if (distance < 240) return;
-        if (this.healthPhases && this.energy <= 20) {
-            this.direction = player.x > this.x ? 1 : -1;
-        } else {
-            if (this.x < this.originX - 180) this.direction = 1;
-            if (this.x > this.originX + 180) this.direction = -1;
-        }
+        this.chooseWalkingDirection(player);
         this.x += this.direction * delta * this.getMovementSpeed();
         this.otherDirection = this.direction > 0;
     }
 
+    /** DE: Dreht den Boss zur Spielfigur. EN: Turns the boss toward the player. */
+    facePlayer(player) {
+        this.direction = player.x > this.x ? 1 : -1;
+        this.otherDirection = this.direction > 0;
+    }
+
+    /** DE: Bestimmt die Laufrichtung des Bosses. EN: Chooses the boss movement direction. */
+    chooseWalkingDirection(player) {
+        if (this.healthPhases && this.energy <= 20) return this.facePlayer(player);
+        if (this.x < this.originX - 180) this.direction = 1;
+        if (this.x > this.originX + 180) this.direction = -1;
+    }
+
+    /**
+     * DE: Liefert movement speed.
+     * EN: Returns movement speed.
+     */
     getMovementSpeed() {
         if (!this.healthPhases) return 0.09;
         if (this.energy <= 20) return 0.18;
@@ -73,12 +102,21 @@ class Endboss extends MovableObject {
         return 0.06;
     }
 
+    /**
+     * DE: Führt begin attack aus.
+     * EN: Begin attack.
+     */
     beginAttack() {
         this.attackHitDone = false;
         this.attackCooldown = this.healthPhases && this.energy <= 20 ? 900 : 1500;
         this.setState("attack");
     }
 
+    /**
+     * DE: Setzt state.
+     * EN: Sets state.
+     * @param {Object} state - DE: Übergabewert state. EN: Argument state.
+     */
     setState(state) {
         this.state = state;
         this.frame = 0;
@@ -86,12 +124,20 @@ class Endboss extends MovableObject {
         this.updateImage();
     }
 
+    /**
+     * DE: Aktualisiert image.
+     * EN: Updates image.
+     */
     updateImage() {
         const images = this.getStateImages();
         if (this.frame >= images.length) return this.finishAnimation();
         this.img = this.imageCache[images[this.frame]];
     }
 
+    /**
+     * DE: Liefert state images.
+     * EN: Returns state images.
+     */
     getStateImages() {
         if (this.state === "hurt") return this.IMAGES_HURT;
         if (this.state === "dead") return this.IMAGES_DEAD;
@@ -100,13 +146,21 @@ class Endboss extends MovableObject {
     }
 
 
-    /** Drops a defeated miniboss below the canvas after its final sprite. */
+    /**
+     * DE: Aktualisiert falling.
+     * EN: Updates falling.
+     * @param {number} delta - DE: Übergabewert delta. EN: Argument delta.
+     */
     updateFalling(delta) {
         this.fallSpeed += 0.0012 * delta;
         this.y += this.fallSpeed * delta;
         if (this.y > 480) this.state = "finished";
     }
 
+    /**
+     * DE: Beendet animation.
+     * EN: Finishes animation.
+     */
     finishAnimation() {
         if (this.state === "dead") {
             this.isDead = true;
@@ -126,6 +180,11 @@ class MiniBoss extends Endboss {
     y = 180;
     isMainBoss = false;
 
+    /**
+     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
+     * EN: Creates a new object and sets its initial values.
+     * @param {number} x - DE: x. EN: x.
+     */
     constructor(x) {
         super(x, false);
     }

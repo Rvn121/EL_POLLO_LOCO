@@ -1,35 +1,54 @@
-/** Creates the longer and more difficult second level. */
+/**
+ * DE: Erstellt level 2.
+ * EN: Creates level 2.
+ */
 function createLevel2() {
     return new Level(createLevel2Enemies(), createLevelClouds(), createLevel2Backgrounds());
 }
 
-/** Spreads 60 chickens through the level, with patrols throughout the map. */
+/**
+ * DE: Erstellt level 2 enemies.
+ * EN: Creates level 2 enemies.
+ */
 function createLevel2Enemies() {
     const enemies = [];
-    for (let i = 0; i < 60; i++) {
-        const small = i % 2 === 0;
-        const smallIndex = i / 2;
-        const behindStart = small && smallIndex < 3;
-        const x = small
-            ? (behindStart
-                ? -600 + smallIndex * 120 + Math.random() * 20
-                : 1050 + (smallIndex - 3) * 335 + Math.random() * 80)
-            : 1050 + i * 135 + Math.random() * 130;
-        const enemy = i % 2 ? new chicken(x) : new chickenSmall(x);
-        if ((small && (i / 2) % 5 !== 4) || (!small && i % 6 === 1)) {
-            const range = 140 + Math.random() * 160;
-            enemy.startPatrol(
-                Math.max(behindStart ? -620 : 850, x - range),
-                Math.min(behindStart ? -300 : 10100, x + range));
-        }
-        enemies.push(enemy);
-    }
+    for (let i = 0; i < 60; i++) enemies.push(createLevel2Chicken(i));
     enemies.push(new MiniBoss(3800), new MiniBoss(6900));
     enemies.push(new Endboss(10300, true));
     return enemies;
 }
 
-/** Reuses the existing background assets for the new level. */
+/** DE: Erstellt einen Gegner in Level 1. EN: Creates an enemy for Level 1. */
+function createLevel2Chicken(index) {
+    const small = index % 2 === 0;
+    const smallIndex = index / 2;
+    const behindStart = small && smallIndex < 3;
+    const x = small ? getSmallChickenX(smallIndex, behindStart)
+        : 1050 + index * 135 + Math.random() * 130;
+    const enemy = index % 2 ? new chicken(x) : new chickenSmall(x);
+    if ((small && smallIndex % 5 !== 4) || (!small && index % 6 === 1)) {
+        setLevel2Patrol(enemy, x, behindStart);
+    }
+    return enemy;
+}
+
+/** DE: Berechnet die Startposition. EN: Calculates the starting position. */
+function getSmallChickenX(index, behindStart) {
+    if (behindStart) return -600 + index * 120 + Math.random() * 20;
+    return 1050 + (index - 3) * 335 + Math.random() * 80;
+}
+
+/** DE: Legt die Patrouillengrenzen fest. EN: Sets patrol boundaries. */
+function setLevel2Patrol(enemy, x, behindStart) {
+    const range = 140 + Math.random() * 160;
+    enemy.startPatrol(Math.max(behindStart ? -620 : 850, x - range),
+        Math.min(behindStart ? -300 : 10100, x + range));
+}
+
+/**
+ * DE: Erstellt level 2 backgrounds.
+ * EN: Creates level 2 backgrounds.
+ */
 function createLevel2Backgrounds() {
     const backgrounds = createLevelBackgrounds();
     const extra = [];

@@ -8,10 +8,18 @@ class MovableObject extends DrawableObject {
     deathInterval;
     hurtTimeout;
 
+    /**
+     * DE: Bewegt right.
+     * EN: Moves right.
+     */
     moveRight() {
         this.x += this.speed;
     }
 
+    /**
+     * DE: Bewegt left.
+     * EN: Moves left.
+     */
     moveLeft() {
         clearInterval(this.moveInterval);
         this.moveInterval = setInterval(() => {
@@ -20,7 +28,12 @@ class MovableObject extends DrawableObject {
         }, 1000 / 60);
     }
 
-    /** Patrols between two world positions, starting to the right. */
+    /**
+     * DE: Startet patrol.
+     * EN: Starts patrol.
+     * @param {number} left - DE: Übergabewert left. EN: Argument left.
+     * @param {number} right - DE: Übergabewert right. EN: Argument right.
+     */
     startPatrol(left, right) {
         this.stopMoving();
         this.patrolDirection = 1;
@@ -33,10 +46,18 @@ class MovableObject extends DrawableObject {
         }, 1000 / 60);
     }
 
+    /**
+     * DE: Stoppt moving.
+     * EN: Stops moving.
+     */
     stopMoving() {
         clearInterval(this.moveInterval);
     }
 
+    /**
+     * DE: Löscht timers.
+     * EN: Clears timers.
+     */
     clearTimers() {
         clearInterval(this.moveInterval);
         clearInterval(this.animationInterval);
@@ -45,6 +66,11 @@ class MovableObject extends DrawableObject {
         clearTimeout(this.hurtTimeout);
     }
 
+    /**
+     * DE: Prüft die Überschneidung der Hitboxen.
+     * EN: Is colliding.
+     * @param {MovableObject} movableObject - DE: Übergabewert movableObject. EN: Argument movableObject.
+     */
     isColliding(movableObject) {
         const ownHitbox = this.getHitbox();
         const otherHitbox = movableObject.getHitbox();

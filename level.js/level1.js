@@ -1,3 +1,7 @@
+/**
+ * DE: Erstellt level 1.
+ * EN: Creates level 1.
+ */
 function createLevel1() {
     return new Level(
         createLevelEnemies(),
@@ -6,6 +10,10 @@ function createLevel1() {
     );
 }
 
+/**
+ * DE: Erstellt level enemies.
+ * EN: Creates level enemies.
+ */
 function createLevelEnemies() {
     const enemies = [ ...createSmallChickens(), ...createNormalChickens() ];
     for (let i = 0; i < 7; i++) {
@@ -18,23 +26,32 @@ function createLevelEnemies() {
     return enemies;
 }
 
+/**
+ * DE: Erstellt small chickens.
+ * EN: Creates small chickens.
+ */
 function createSmallChickens() {
-    return Array.from({ length: 28 }, (_, index) => {
-        const behindStart = index < 3;
-        const x = behindStart
-            ? -600 + index * 120 + Math.random() * 20
-            : 1050 + (index - 3) * 190 + Math.random() * 70;
-        const enemy = new chickenSmall(x);
-        if (index % 4 !== 3) {
-            const range = 110 + Math.random() * 100;
-            enemy.startPatrol(
-                Math.max(behindStart ? -620 : 850, x - range),
-                Math.min(behindStart ? -300 : 5900, x + range));
-        }
-        return enemy;
-    });
+    return Array.from({ length: 28 }, (_, index) => createSmallChicken(index));
 }
 
+/** DE: Erstellt ein kleines Huhn. EN: Creates one small chicken. */
+function createSmallChicken(index) {
+    const behindStart = index < 3;
+    const x = behindStart ? -600 + index * 120 + Math.random() * 20
+        : 1050 + (index - 3) * 190 + Math.random() * 70;
+    const enemy = new chickenSmall(x);
+    if (index % 4 !== 3) {
+        const range = 110 + Math.random() * 100;
+        enemy.startPatrol(Math.max(behindStart ? -620 : 850, x - range),
+            Math.min(behindStart ? -300 : 5900, x + range));
+    }
+    return enemy;
+}
+
+/**
+ * DE: Erstellt normal chickens.
+ * EN: Creates normal chickens.
+ */
 function createNormalChickens() {
     return Array.from({ length: 10 }, (_, index) => {
         const x = 2700 + index * 220 + Math.random() * 180;
@@ -42,6 +59,10 @@ function createNormalChickens() {
     });
 }
 
+/**
+ * DE: Erstellt level clouds.
+ * EN: Creates level clouds.
+ */
 function createLevelClouds() {
     return Array.from({ length: 14 }, (_, index) => {
         const x = -300 + index * 520 + Math.random() * 220;
@@ -50,21 +71,20 @@ function createLevelClouds() {
     });
 }
 
+/**
+ * DE: Erstellt level backgrounds.
+ * EN: Creates level backgrounds.
+ */
 function createLevelBackgrounds() {
     const backgrounds = [];
     const pattern = [
-        ["img/5_background/layers/air.png", "img/5_background/layers/3_third_layer/1.png",
-            "img/5_background/layers/2_second_layer/1.png", "img/5_background/layers/1_first_layer/1.png"],
-        ["img/5_background/layers/air.png", "img/5_background/layers/3_third_layer/2.png",
-            "img/5_background/layers/2_second_layer/2.png", "img/5_background/layers/1_first_layer/2.png"]
+        ["air.png", "3_third_layer/1.png", "2_second_layer/1.png", "1_first_layer/1.png"],
+        ["air.png", "3_third_layer/2.png", "2_second_layer/2.png", "1_first_layer/2.png"]
     ];
-
     for (let i = -1; i < 16; i++) {
         const images = pattern[Math.abs(i) % 2];
-        backgrounds.push(new BackgroundObject(images[0], 720 * i));
-        backgrounds.push(new BackgroundObject(images[1], 720 * i));
-        backgrounds.push(new BackgroundObject(images[2], 720 * i));
-        backgrounds.push(new BackgroundObject(images[3], 720 * i));
+        images.forEach(image => backgrounds.push(new BackgroundObject(
+            "img/5_background/layers/" + image, 720 * i)));
     }
     return backgrounds;
 }

@@ -11,6 +11,7 @@
     <script src="./models/movable-object.class.js"></script>
     <script src="./models/status-bar.class.js"></script>
     <script src="./models/keyboard.class.js"></script>
+    <script src="./models/character-base.class.js"></script>
     <script src="./models/character.class.js"></script>
     <script src="./models/chicken.class.js"></script>
     <script src="./models/chicken-small.class.js"></script>
@@ -23,8 +24,12 @@
     <script src="./models/level.class.js"></script>
     <script src="./level.js/level1.js"></script>
     <script src="./level.js/level2.js"></script>
+    <script src="./models/world-draw-base.class.js"></script>
+    <script src="./models/world-base.class.js"></script>
     <script src="./models/world.class.js"></script>
     <script src="./js/sound-manager.js"></script>
+    <script src="./js/game-flow.js"></script>
+    <script src="./js/touch-controls.js"></script>
     <script src="./js/game.js"></script>
 </head>
 <body>
@@ -61,6 +66,17 @@
                 </div>
 
 
+                <div class="touch-controls" id="touchControls" aria-label="Mobile controls">
+                    <div class="touch-direction">
+                        <button class="touch-btn" type="button" data-touch-key="LEFT" aria-label="Move left">&#8592;</button>
+                        <button class="touch-btn" type="button" data-touch-key="RIGHT" aria-label="Move right">&#8594;</button>
+                    </div>
+                    <div class="touch-actions">
+                        <button class="touch-btn" type="button" data-touch-key="UP" aria-label="Jump">Jump</button>
+                        <button class="touch-btn" type="button" data-touch-key="THROW" aria-label="Hold to throw">Throw</button>
+                    </div>
+                </div>
+
                 <div class="level-announcement hidden" id="levelAnnouncement"></div>
                 <img class="level-transition-image hidden" id="levelTransitionImage" alt="Level transition">
                 <div class="end-buttons" id="endButtons">
@@ -81,6 +97,7 @@
                                 <li><strong>P / Pause</strong> – pause / resume the game</li>
                                 <li><strong>Jump onto chickens from above</strong> – defeat enemies</li>
                                 <li><strong>Fullscreen</strong> – expand the game</li>
+                                <li><strong>Touch</strong> – hold arrows to move, tap Jump, hold Throw to charge</li>
                             </ul>
                         </div>
                     </div>

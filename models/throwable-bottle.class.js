@@ -14,6 +14,14 @@ class ThrowableBottle extends DrawableObject {
     SPLASH = [1, 2, 3, 4, 5, 6].map(i =>
         `img/6_salsa_bottle/bottle_rotation/bottle_splash/${i}_bottle_splash.png`);
 
+    /**
+     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
+     * EN: Creates a new object and sets its initial values.
+     * @param {number} x - DE: x. EN: x.
+     * @param {number} y - DE: y. EN: y.
+     * @param {number} direction - DE: direction. EN: direction.
+     * @param {number} power - DE: power. EN: power.
+     */
     constructor(x, y, direction, power = 1) {
         super();
         this.x = x;
@@ -24,6 +32,11 @@ class ThrowableBottle extends DrawableObject {
         this.img = this.imageCache[this.ROTATION[0]];
     }
 
+    /**
+     * DE: Aktualisiert.
+     * EN: Updates.
+     * @param {number} delta - DE: Übergabewert delta. EN: Argument delta.
+     */
     update(delta) {
         if (this.state === "done") return;
         this.elapsed += delta;
@@ -36,6 +49,10 @@ class ThrowableBottle extends DrawableObject {
         if (this.y + this.height >= 425) this.splash();
     }
 
+    /**
+     * DE: Führt splash aus.
+     * EN: Splash.
+     */
     splash() {
         if (this.state !== "flying") return;
         this.state = "splash";
@@ -46,6 +63,10 @@ class ThrowableBottle extends DrawableObject {
         this.img = this.imageCache[this.SPLASH[0]];
     }
 
+    /**
+     * DE: Aktualisiert splash.
+     * EN: Updates splash.
+     */
     updateSplash() {
         this.frame = Math.floor(this.elapsed / 65);
         if (this.frame >= 6) return this.state = "done";

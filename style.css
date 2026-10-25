@@ -315,3 +315,44 @@ canvas {
     font-size: 28px;
     padding: 16px 32px;
 }
+
+/* Mobile touch buttons: only visible while playing in landscape. */
+.touch-controls { display: none; }
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+    .canvas-shell:has(.game-running) .touch-controls,
+    .canvas-shell:has(#menuButtons.hidden) .touch-controls {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 10px;
+        z-index: 7;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 18px;
+        pointer-events: none;
+    }
+    .touch-direction, .touch-actions { display: flex; gap: 12px; }
+    .touch-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 60px;
+        min-height: 60px;
+        padding: 8px 12px;
+        border: 2px solid #9e6a00;
+        border-radius: 18px;
+        background: rgba(255, 216, 77, 0.82);
+        color: #5a3000;
+        font: 700 16px "Averia Sans Libre", sans-serif;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        pointer-events: auto;
+        cursor: pointer;
+    }
+    .touch-btn.touch-pressed { background: #fff2a4; }
+}
+@media (max-height: 440px) and (hover: none) and (pointer: coarse) {
+    .touch-btn { min-width: 48px; min-height: 48px; font-size: 13px; }
+}
