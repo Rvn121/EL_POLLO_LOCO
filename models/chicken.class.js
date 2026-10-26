@@ -13,8 +13,8 @@ class chicken extends MovableObject {
     DEAD_IMAGE = "img/3_enemies_chicken/chicken_normal/2_dead/dead.png";
 
     /**
-     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
-     * EN: Creates a new object and sets its initial values.
+     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
+     * EN: Creates the object and sets its initial values.
      * @param {number} startX - DE: startX. EN: startX.
      */
     constructor(startX = null) {
@@ -22,14 +22,14 @@ class chicken extends MovableObject {
         this.loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages([this.DEAD_IMAGE]);
-        this.x = startX ?? 2400 + Math.random() * 2600;
+        this.x = startX === null ? 2400 + Math.random() * 2600 : startX;
         this.speed = 0.8 + Math.random() * 1.1;
         this.animate();
     }
 
     /**
-     * DE: Startet eine Animation.
-     * EN: Animate.
+     * DE: Führt animate im Spiel aus.
+     * EN: Runs animate in the game.
      */
     animate() {
         this.moveLeft();
@@ -43,8 +43,8 @@ class chicken extends MovableObject {
     }
 
     /**
-     * DE: Lässt das Objekt sterben.
-     * EN: Kills the object.
+     * DE: Führt die im Spiel aus.
+     * EN: Runs die in the game.
      */
     die() {
         if (this.isDead) return;

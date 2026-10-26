@@ -15,8 +15,8 @@ class ThrowableBottle extends DrawableObject {
         `img/6_salsa_bottle/bottle_rotation/bottle_splash/${i}_bottle_splash.png`);
 
     /**
-     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
-     * EN: Creates a new object and sets its initial values.
+     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
+     * EN: Creates the object and sets its initial values.
      * @param {number} x - DE: x. EN: x.
      * @param {number} y - DE: y. EN: y.
      * @param {number} direction - DE: direction. EN: direction.
@@ -33,9 +33,9 @@ class ThrowableBottle extends DrawableObject {
     }
 
     /**
-     * DE: Aktualisiert.
-     * EN: Updates.
-     * @param {number} delta - DE: Übergabewert delta. EN: Argument delta.
+     * DE: Führt update im Spiel aus.
+     * EN: Runs update in the game.
+     * @param {number} delta - DE: Wert delta. EN: Value delta.
      */
     update(delta) {
         if (this.state === "done") return;
@@ -50,8 +50,8 @@ class ThrowableBottle extends DrawableObject {
     }
 
     /**
-     * DE: Führt splash aus.
-     * EN: Splash.
+     * DE: Startet die Spritzanimation nach einem Flaschentreffer.
+     * EN: Starts the splash animation after a bottle collision.
      */
     splash() {
         if (this.state !== "flying") return;
@@ -59,13 +59,13 @@ class ThrowableBottle extends DrawableObject {
         gameSounds.play("splash");
         this.elapsed = 0;
         this.frame = 0;
-        this.y = Math.min(this.y, 425 - this.height);
+        if (this.y + this.height >= 425) this.y = 425 - this.height;
         this.img = this.imageCache[this.SPLASH[0]];
     }
 
     /**
-     * DE: Aktualisiert splash.
-     * EN: Updates splash.
+     * DE: Spielt die Spritzanimation einer zerbrochenen Flasche ab.
+     * EN: Advances the splash animation of a broken bottle.
      */
     updateSplash() {
         this.frame = Math.floor(this.elapsed / 65);

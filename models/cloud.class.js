@@ -10,8 +10,8 @@ class cloud extends MovableObject {
     ];
 
     /**
-     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
-     * EN: Creates a new object and sets its initial values.
+     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
+     * EN: Creates the object and sets its initial values.
      * @param {number} x - DE: x. EN: x.
      * @param {number} y - DE: y. EN: y.
      */
@@ -19,23 +19,23 @@ class cloud extends MovableObject {
         super();
         const path = this.IMAGES[Math.floor(Math.random() * this.IMAGES.length)];
         this.loadImage(path);
-        this.x = x ?? Math.random() * 2500;
-        this.y = y ?? this.getRandomY();
+        this.x = x === null ? Math.random() * 2500 : x;
+        this.y = y === null ? this.getRandomY() : y;
         this.moveLeft();
     }
 
     /**
-     * DE: Liefert random y.
-     * EN: Returns random y.
+     * DE: Gibt random y für das Spiel.
+     * EN: Returns random y for the game.
      */
     getRandomY() {
         return 5 + Math.random() * 110;
     }
 
     /**
-     * DE: Setzt zurück position.
-     * EN: Resets position.
-     * @param {number} x - DE: Übergabewert x. EN: Argument x.
+     * DE: Setzt position für das Spiel.
+     * EN: Resets position for the game.
+     * @param {number} x - DE: Wert x. EN: Value x.
      */
     resetPosition(x) {
         this.x = x;

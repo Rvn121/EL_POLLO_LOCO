@@ -1,6 +1,6 @@
 /**
- * DE: Erstellt level 1.
- * EN: Creates level 1.
+ * DE: Erstellt das Tutorial mit Gegnern, Wolken und Hintergründen.
+ * EN: Creates the tutorial with enemies, clouds, and backgrounds.
  */
 function createLevel1() {
     return new Level(
@@ -11,8 +11,8 @@ function createLevel1() {
 }
 
 /**
- * DE: Erstellt level enemies.
- * EN: Creates level enemies.
+ * DE: Erstellt die Gegner für das Tutorial.
+ * EN: Creates enemies for the tutorial.
  */
 function createLevelEnemies() {
     const enemies = [ ...createSmallChickens(), ...createNormalChickens() ];
@@ -21,20 +21,23 @@ function createLevelEnemies() {
         enemies.push(new chicken(x));
     }
     const boss = new Endboss(6100, true);
-    boss.healthPhases = true;
+    boss.healthPhases = false;
     enemies.push(boss);
     return enemies;
 }
 
 /**
- * DE: Erstellt small chickens.
- * EN: Creates small chickens.
+ * DE: Erstellt small chickens für das Spiel.
+ * EN: Creates small chickens for the game.
  */
 function createSmallChickens() {
     return Array.from({ length: 28 }, (_, index) => createSmallChicken(index));
 }
 
-/** DE: Erstellt ein kleines Huhn. EN: Creates one small chicken. */
+/**
+ * DE: Erstellt small chicken für das Spiel.
+ * EN: Creates small chicken for the game.
+ */
 function createSmallChicken(index) {
     const behindStart = index < 3;
     const x = behindStart ? -600 + index * 120 + Math.random() * 20
@@ -49,8 +52,8 @@ function createSmallChicken(index) {
 }
 
 /**
- * DE: Erstellt normal chickens.
- * EN: Creates normal chickens.
+ * DE: Erstellt normal chickens für das Spiel.
+ * EN: Creates normal chickens for the game.
  */
 function createNormalChickens() {
     return Array.from({ length: 10 }, (_, index) => {
@@ -60,8 +63,8 @@ function createNormalChickens() {
 }
 
 /**
- * DE: Erstellt level clouds.
- * EN: Creates level clouds.
+ * DE: Erstellt level clouds für das Spiel.
+ * EN: Creates level clouds for the game.
  */
 function createLevelClouds() {
     return Array.from({ length: 14 }, (_, index) => {
@@ -72,8 +75,8 @@ function createLevelClouds() {
 }
 
 /**
- * DE: Erstellt level backgrounds.
- * EN: Creates level backgrounds.
+ * DE: Erstellt level backgrounds für das Spiel.
+ * EN: Creates level backgrounds for the game.
  */
 function createLevelBackgrounds() {
     const backgrounds = [];

@@ -1,7 +1,7 @@
 class WorldBase extends WorldDrawBase {
     /**
-     * DE: Prüft collectible collisions.
-     * EN: Checks collectible collisions.
+     * DE: Prüft collectible collisions für das Spiel.
+     * EN: Checks collectible collisions for the game.
      */
     checkCollectibleCollisions() {
         this.bottles.forEach(b => this.pickupBottle(b));
@@ -9,9 +9,9 @@ class WorldBase extends WorldDrawBase {
     }
 
     /**
-     * DE: Sammelt ein bottle.
-     * EN: Picks up bottle.
-     * @param {ThrowableBottle} bottle - DE: Übergabewert bottle. EN: Argument bottle.
+     * DE: Sammelt eine Flasche ein und erhöht den Flaschenvorrat.
+     * EN: Collects a bottle and increases the bottle supply.
+     * @param {ThrowableBottle} bottle - DE: Wert bottle. EN: Value bottle.
      */
     pickupBottle(bottle) {
         if (bottle.collected || this.bottleCount >= 20) return;
@@ -23,9 +23,9 @@ class WorldBase extends WorldDrawBase {
     }
 
     /**
-     * DE: Sammelt ein coin.
-     * EN: Picks up coin.
-     * @param {Object} coin - DE: Übergabewert coin. EN: Argument coin.
+     * DE: Sammelt eine Münze ein und aktualisiert Münzen und Leben.
+     * EN: Collects a coin and updates coins and health.
+     * @param {Object} coin - DE: Wert coin. EN: Value coin.
      */
     pickupCoin(coin) {
         if (coin.collected || !this.boxesOverlap(this.character, coin)) return;
@@ -39,8 +39,8 @@ class WorldBase extends WorldDrawBase {
     }
 
     /**
-     * DE: Wirft eine Flasche.
-     * EN: Throw bottle.
+     * DE: Erstellt eine geworfene Flasche und verringert den Vorrat.
+     * EN: Creates a thrown bottle and decreases the supply.
      * @param {number} power - DE: power. EN: power.
      */
     throwBottle(power = 1) {
@@ -53,38 +53,38 @@ class WorldBase extends WorldDrawBase {
     }
 
     /**
-     * DE: Liefert bottle percentage.
-     * EN: Returns bottle percentage.
+     * DE: Berechnet den Flaschenvorrat als Prozentwert.
+     * EN: Calculates bottle inventory as a percentage.
      */
     getBottlePercentage() {
         return Math.ceil(this.bottleCount / 4) * 20;
     }
 
     /**
-     * DE: Liefert den Endgegner.
-     * EN: Get boss.
+     * DE: Gibt boss für das Spiel.
+     * EN: Returns boss for the game.
      */
     getBoss() {
         return this.level.enemies.find(enemy => enemy instanceof Endboss && enemy.isMainBoss);
     }
 
     /**
-     * DE: Pausiert das Spiel oder setzt es fort.
-     * EN: Toggle pause.
+     * DE: Schaltet pause für das Spiel.
+     * EN: Toggles pause for the game.
      */
     togglePause() {
         if (this.levelIntroActive) return true;
         this.isPaused = !this.isPaused;
         if (this.isPaused) gameSounds.stopAll();
-        this.lastUpdate = performance.now();
+        this.lastUpdate = Date.now();
         if (!this.isPaused) this.character.lastActivity = Date.now();
         return this.isPaused;
     }
 
     /**
-     * DE: Prüft boss attacks.
-     * EN: Checks boss attacks.
-     * @param {Object} bosses - DE: Übergabewert bosses. EN: Argument bosses.
+     * DE: Prüft, ob der Endboss einen Angriff ausführt.
+     * EN: Checks boss attacks for the game.
+     * @param {Object} bosses - DE: Wert bosses. EN: Value bosses.
      */
     checkBossAttacks(bosses) {
         bosses.forEach(boss => {
@@ -98,8 +98,8 @@ class WorldBase extends WorldDrawBase {
     }
 
     /**
-     * DE: Prüft main boss contact.
-     * EN: Checks main boss contact.
+     * DE: Prüft, ob die Spielfigur den Endboss berührt.
+     * EN: Checks main boss contact for the game.
      */
     checkMainBossContact() {
         const boss = this.getBoss();
@@ -111,8 +111,8 @@ class WorldBase extends WorldDrawBase {
     }
 
     /**
-     * DE: Prüft die Kollision mit einem Gegner.
-     * EN: Check enemy collision.
+     * DE: Unterscheidet Sprungtreffer von schädlichen Gegnerkontakten.
+     * EN: Distinguishes stomp hits from harmful enemy contact.
      * @param {MovableObject} enemy - DE: enemy. EN: enemy.
      */
     checkEnemyCollision(enemy) {
@@ -127,7 +127,10 @@ class WorldBase extends WorldDrawBase {
         this.statusBar.setPercentage(this.character.energy);
     }
 
-    /** DE: Prüft den Kontakt mit einem Miniboss. EN: Checks mini-boss contact. */
+    /**
+     * DE: Prüft mini boss collision für das Spiel.
+     * EN: Checks mini boss collision for the game.
+     */
     checkMiniBossCollision(enemy) {
         if (!this.character.isColliding(enemy) || !this.canTakeHitFrom(enemy)) return;
         this.damageCharacter(this.levelNumber === 2 ? 20 : 10);
@@ -136,9 +139,9 @@ class WorldBase extends WorldDrawBase {
     }
 
     /**
-     * DE: Prüft, ob jump attack zutrifft.
-     * EN: Checks whether jump attack is true.
-     * @param {MovableObject} enemy - DE: Übergabewert enemy. EN: Argument enemy.
+     * DE: Prüft, ob die Figur von oben auf einen Gegner fällt.
+     * EN: Checks whether the player lands on an enemy from above.
+     * @param {MovableObject} enemy - DE: Wert enemy. EN: Value enemy.
      */
     isJumpAttack(enemy) {
         const player = this.character.getHitbox();
@@ -150,9 +153,9 @@ class WorldBase extends WorldDrawBase {
     }
 
     /**
-     * DE: Prüft, ob chicken damage character zutrifft.
-     * EN: Checks whether chicken damage character is true.
-     * @param {MovableObject} enemy - DE: Übergabewert enemy. EN: Argument enemy.
+     * DE: Prüft, ob ein Huhn die Figur seitlich verletzen darf.
+     * EN: Checks whether a chicken may damage the player from the side.
+     * @param {MovableObject} enemy - DE: Wert enemy. EN: Value enemy.
      */
     canChickenDamageCharacter(enemy) {
         const player = this.character.getHitbox();
@@ -164,8 +167,8 @@ class WorldBase extends WorldDrawBase {
     }
 
     /**
-     * DE: Verringert die Lebensenergie der Spielfigur.
-     * EN: Damage character.
+     * DE: Zieht Lebenspunkte ab und aktualisiert Trefferfolgen.
+     * EN: Removes health points and updates hit consequences.
      * @param {number} amount - DE: amount. EN: amount.
      */
     damageCharacter(amount) {
@@ -177,9 +180,9 @@ class WorldBase extends WorldDrawBase {
     }
 
     /**
-     * DE: Prüft, ob take hit from zutrifft.
-     * EN: Checks whether take hit from is true.
-     * @param {MovableObject} enemy - DE: Übergabewert enemy. EN: Argument enemy.
+     * DE: Prüft take hit from für das Spiel.
+     * EN: Checks take hit from for the game.
+     * @param {MovableObject} enemy - DE: Wert enemy. EN: Value enemy.
      */
     canTakeHitFrom(enemy) {
         if (!enemy.lastHitPosition) return true;
@@ -189,8 +192,8 @@ class WorldBase extends WorldDrawBase {
     }
 
     /**
-     * DE: Besiegt ein Huhn.
-     * EN: Kill chicken.
+     * DE: Besiegt chicken für das Spiel.
+     * EN: Defeats chicken for the game.
      * @param {MovableObject} enemy - DE: enemy. EN: enemy.
      */
     killChicken(enemy) {

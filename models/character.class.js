@@ -65,10 +65,10 @@ class Character extends CharacterBase {
     ];
 
     /**
-     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
-     * EN: Creates a new object and sets its initial values.
+     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
+     * EN: Creates the object and sets its initial values.
      * @param {Keyboard} keyboard - DE: keyboard. EN: keyboard.
-     * @param {Level} level - DE: Übergabewert level. EN: Argument level.
+     * @param {Level} level - DE: Wert level. EN: Value level.
      */
     constructor(keyboard, level) {
         super();
@@ -80,8 +80,8 @@ class Character extends CharacterBase {
     }
 
     /**
-     * DE: Lädt character images.
-     * EN: Loads character images.
+     * DE: Lädt character images für das Spiel.
+     * EN: Loads character images for the game.
      */
     loadCharacterImages() {
         this.loadImages(this.IMAGES_WALKING);
@@ -91,8 +91,8 @@ class Character extends CharacterBase {
     }
 
     /**
-     * DE: Startet animation loop.
-     * EN: Starts animation loop.
+     * DE: Startet animation loop für das Spiel.
+     * EN: Starts animation loop for the game.
      */
     startAnimationLoop() {
         this.animationInterval = setInterval(() => {
@@ -106,8 +106,8 @@ class Character extends CharacterBase {
     }
 
     /**
-     * DE: Prüft, ob die Ruheanimation beginnen soll.
-     * EN: Checks whether the idle animation should start.
+     * DE: Führt should start idle im Spiel aus.
+     * EN: Runs should start idle in the game.
      */
     shouldStartIdle() {
         const standingStill = !this.keyboard.LEFT && !this.keyboard.RIGHT;
@@ -115,8 +115,8 @@ class Character extends CharacterBase {
     }
 
     /**
-     * DE: Spielt ab walking animation.
-     * EN: Plays walking animation.
+     * DE: Spielt walking animation für das Spiel.
+     * EN: Plays walking animation for the game.
      */
     playWalkingAnimation() {
         const path = this.IMAGES_WALKING[this.currentImage];

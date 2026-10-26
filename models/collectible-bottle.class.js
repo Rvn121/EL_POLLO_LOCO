@@ -11,8 +11,8 @@ class CollectibleBottle extends DrawableObject {
     ];
 
     /**
-     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
-     * EN: Creates a new object and sets its initial values.
+     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
+     * EN: Creates the object and sets its initial values.
      * @param {number} x - DE: x. EN: x.
      */
     constructor(x) {
@@ -23,8 +23,8 @@ class CollectibleBottle extends DrawableObject {
     }
 
     /**
-     * DE: Sammelt.
-     * EN: Collects.
+     * DE: Führt collect im Spiel aus.
+     * EN: Runs collect in the game.
      */
     collect() {
         this.collected = true;
@@ -32,9 +32,9 @@ class CollectibleBottle extends DrawableObject {
     }
 
     /**
-     * DE: Aktualisiert.
-     * EN: Updates.
-     * @param {number} delta - DE: Übergabewert delta. EN: Argument delta.
+     * DE: Führt update im Spiel aus.
+     * EN: Runs update in the game.
+     * @param {number} delta - DE: Wert delta. EN: Value delta.
      */
     update(delta = 0) {
         if (!this.collected) return;
@@ -43,8 +43,8 @@ class CollectibleBottle extends DrawableObject {
     }
 
     /**
-     * DE: Legt die Flasche nach der Wartezeit wieder auf die Karte.
-     * EN: Returns the bottle to the map after its cooldown.
+     * DE: Führt respawn im Spiel aus.
+     * EN: Runs respawn in the game.
      */
     respawn() {
         this.collected = false;

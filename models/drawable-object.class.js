@@ -6,11 +6,11 @@ class DrawableObject {
     width = 200;
     imageCache = {};
     currentImage = 0;
-    imageBounds = new WeakMap();
+    imageBounds = {};
 
     /**
-     * DE: Lädt ein Bild.
-     * EN: Load image.
+     * DE: Lädt ein einzelnes Bild für das Spiel.
+     * EN: Loads image for the game.
      * @param {string} path - DE: path. EN: path.
      */
     loadImage(path) {
@@ -19,8 +19,8 @@ class DrawableObject {
     }
 
     /**
-     * DE: Lädt mehrere Bilder.
-     * EN: Load images.
+     * DE: Lädt mehrere Bilder in den Bildspeicher.
+     * EN: Loads images for the game.
      * @param {string[]} images - DE: images. EN: images.
      */
     loadImages(images) {
@@ -32,29 +32,30 @@ class DrawableObject {
     }
 
     /**
-     * DE: Liefert hitbox.
-     * EN: Returns hitbox.
+     * DE: Berechnet den sichtbaren Trefferbereich der aktuellen Grafik.
+     * EN: Calculates the visible hitbox of the current image.
      */
     getHitbox() {
         if (!this.img || !this.img.complete || !this.img.naturalWidth) return null;
-        if (!this.imageBounds.has(this.img)) this.cacheImageBounds();
-        const bounds = this.imageBounds.get(this.img);
+        if (!this.img.visibleBoundsCalculated) this.cacheImageBounds();
+        const bounds = this.img.visibleBounds;
         if (!bounds) return null;
         return this.scaleHitbox(bounds);
     }
 
     /**
-     * DE: Speichert zwischen image bounds.
-     * EN: Caches image bounds.
+     * DE: Speichert den sichtbaren Bildbereich für spätere Kollisionen.
+     * EN: Caches visible image bounds for later collisions.
      */
     cacheImageBounds() {
-        this.imageBounds.set(this.img, this.measureImageBounds());
+        this.img.visibleBounds = this.measureImageBounds();
+        this.img.visibleBoundsCalculated = true;
     }
 
     /**
-     * DE: Skaliert hitbox.
-     * EN: Scales hitbox.
-     * @param {Object} bounds - DE: Übergabewert bounds. EN: Argument bounds.
+     * DE: Überträgt Bildkoordinaten auf Größe und Position des Objekts.
+     * EN: Scales image coordinates to the object size and position.
+     * @param {Object} bounds - DE: Wert bounds. EN: Value bounds.
      */
     scaleHitbox(bounds) {
         const scaleX = this.width / this.img.naturalWidth;
@@ -69,8 +70,8 @@ class DrawableObject {
     }
 
     /**
-     * DE: Misst image bounds.
-     * EN: Measures image bounds.
+     * DE: Liest Bildpixel aus, um den sichtbaren Bereich zu ermitteln.
+     * EN: Reads image pixels to measure the visible area.
      */
     measureImageBounds() {
         const canvas = this.createMeasurementCanvas();
@@ -81,8 +82,8 @@ class DrawableObject {
     }
 
     /**
-     * DE: Erstellt measurement canvas.
-     * EN: Creates measurement canvas.
+     * DE: Erstellt measurement canvas für das Spiel.
+     * EN: Creates measurement canvas for the game.
      */
     createMeasurementCanvas() {
         const canvas = document.createElement("canvas");
@@ -92,11 +93,11 @@ class DrawableObject {
     }
 
     /**
-     * DE: Sucht opaque bounds.
-     * EN: Finds opaque bounds.
-     * @param {Uint8ClampedArray} pixels - DE: Übergabewert pixels. EN: Argument pixels.
-     * @param {number} width - DE: Übergabewert width. EN: Argument width.
-     * @param {number} height - DE: Übergabewert height. EN: Argument height.
+     * DE: Findet den Bereich der nicht transparenten Bildpixel.
+     * EN: Finds the area occupied by nontransparent pixels.
+     * @param {Uint8ClampedArray} pixels - DE: Wert pixels. EN: Value pixels.
+     * @param {number} width - DE: Wert width. EN: Value width.
+     * @param {number} height - DE: Wert height. EN: Value height.
      */
     findOpaqueBounds(pixels, width, height) {
         const bounds = { left: width, top: height, right: 0, bottom: 0 };
@@ -109,11 +110,11 @@ class DrawableObject {
     }
 
     /**
-     * DE: Erweitert bounds.
-     * EN: Expands bounds.
-     * @param {Object} bounds - DE: Übergabewert bounds. EN: Argument bounds.
-     * @param {number} x - DE: Übergabewert x. EN: Argument x.
-     * @param {number} y - DE: Übergabewert y. EN: Argument y.
+     * DE: Führt expand bounds im Spiel aus.
+     * EN: Runs expand bounds in the game.
+     * @param {Object} bounds - DE: Wert bounds. EN: Value bounds.
+     * @param {number} x - DE: Wert x. EN: Value x.
+     * @param {number} y - DE: Wert y. EN: Value y.
      */
     expandBounds(bounds, x, y) {
         bounds.left = Math.min(bounds.left, x);

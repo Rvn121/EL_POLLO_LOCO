@@ -8,8 +8,8 @@ class Coin extends DrawableObject {
     IMAGES = ["img/8_coin/coin_1.png", "img/8_coin/coin_2.png"];
 
     /**
-     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
-     * EN: Creates a new object and sets its initial values.
+     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
+     * EN: Creates the object and sets its initial values.
      * @param {number} x - DE: x. EN: x.
      * @param {number} y - DE: y. EN: y.
      */
@@ -24,17 +24,17 @@ class Coin extends DrawableObject {
     }
 
     /**
-     * DE: Sammelt.
-     * EN: Collects.
+     * DE: Führt collect im Spiel aus.
+     * EN: Runs collect in the game.
      */
     collect() {
         this.collected = true;
     }
 
     /**
-     * DE: Aktualisiert.
-     * EN: Updates.
-     * @param {number} delta - DE: Übergabewert delta. EN: Argument delta.
+     * DE: Führt update im Spiel aus.
+     * EN: Runs update in the game.
+     * @param {number} delta - DE: Wert delta. EN: Value delta.
      */
     update(delta) {
         if (this.collected) return this.flyAway(delta);
@@ -45,8 +45,8 @@ class Coin extends DrawableObject {
     }
 
     /**
-     * DE: Lässt die eingesammelte Münze nach oben fliegen.
-     * EN: Makes the collected coin fly upward.
+     * DE: Bewegt eine eingesammelte Münze nach oben aus dem Bild.
+     * EN: Moves a collected coin upward offscreen.
      * @param {number} delta - DE: delta. EN: delta.
      */
     flyAway(delta) {
@@ -54,8 +54,8 @@ class Coin extends DrawableObject {
     }
 
     /**
-     * DE: Prüft, ob visible zutrifft.
-     * EN: Checks whether visible is true.
+     * DE: Prüft visible für das Spiel.
+     * EN: Checks visible for the game.
      */
     isVisible() {
         return !this.collected || this.y + this.height > this.vanishY;

@@ -9,8 +9,8 @@ class StatusBar extends DrawableObject {
     ];
 
     /**
-     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
-     * EN: Creates a new object and sets its initial values.
+     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
+     * EN: Creates the object and sets its initial values.
      */
     constructor() {
         super();
@@ -23,8 +23,8 @@ class StatusBar extends DrawableObject {
     }
 
     /**
-     * DE: Setzt den Statusleistenwert.
-     * EN: Set percentage.
+     * DE: Setzt den Prozentwert der Statusanzeige.
+     * EN: Sets percentage for the game.
      * @param {number} percentage - DE: percentage. EN: percentage.
      */
     setPercentage(percentage) {
@@ -33,8 +33,8 @@ class StatusBar extends DrawableObject {
     }
 
     /**
-     * DE: Ermittelt image index.
-     * EN: Resolves image index.
+     * DE: Führt resolve image index im Spiel aus.
+     * EN: Runs resolve image index in the game.
      */
     resolveImageIndex() {
         if (this.percentage > 80) return 5;

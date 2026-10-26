@@ -1,6 +1,6 @@
 /**
- * DE: Richtet die Touchsteuerung für Smartphone und Tablet ein.
- * EN: Sets up touch controls for phones and tablets.
+ * DE: Verbindet die mobilen Steuertasten mit der Spielsteuerung.
+ * EN: Connects mobile control buttons to game input.
  */
 function setupTouchControls() {
     document.querySelectorAll("[data-touch-key]").forEach(bindTouchButton);
@@ -9,8 +9,8 @@ function setupTouchControls() {
 }
 
 /**
- * DE: Verbindet die Touch-Ereignisse mit einer Schaltfläche.
- * EN: Connects pointer events to a touch button.
+ * DE: Verknüpft einen Touchbutton mit Drücken und Loslassen.
+ * EN: Binds touch button press and release actions.
  * @param {HTMLButtonElement} button - DE: Schaltfläche. EN: Button.
  */
 function bindTouchButton(button) {
@@ -22,8 +22,8 @@ function bindTouchButton(button) {
 }
 
 /**
- * DE: Aktiviert eine Taste, solange sie berührt wird.
- * EN: Activates a control while it is pressed.
+ * DE: Markiert eine gedrückte Touch-Taste als aktiv.
+ * EN: Marks a pressed touch control as active.
  * @param {PointerEvent} event - DE: Berührung. EN: Pointer event.
  * @param {HTMLButtonElement} button - DE: Schaltfläche. EN: Button.
  */
@@ -38,8 +38,8 @@ function pressTouchButton(event, button) {
 }
 
 /**
- * DE: Beendet die Berührung und löst gegebenenfalls einen Wurf aus.
- * EN: Releases a control and throws a bottle when needed.
+ * DE: Setzt eine losgelassene Touch-Taste zurück.
+ * EN: Resets a released touch control.
  * @param {PointerEvent} event - DE: Berührung. EN: Pointer event.
  * @param {HTMLButtonElement} button - DE: Schaltfläche. EN: Button.
  */
@@ -53,28 +53,28 @@ function releaseTouchButton(event, button) {
 }
 
 /**
- * DE: Startet das Aufladen einer Flasche.
- * EN: Starts charging a bottle throw.
+ * DE: Beginnt das Aufladen eines Flaschenwurfs per Touch.
+ * EN: Starts charging a bottle throw by touch.
  */
 function beginTouchThrow() {
-    if (world && world.throwChargeStart === null) world.throwChargeStart = performance.now();
+    if (world && world.throwChargeStart === null) world.throwChargeStart = Date.now();
 }
 
 /**
- * DE: Wirft die Flasche entsprechend der Druckdauer.
- * EN: Throws a bottle based on press duration.
+ * DE: Beendet das Aufladen und wirft die Flasche.
+ * EN: Ends charging and throws the bottle.
  */
 function finishTouchThrow() {
     if (!world || world.throwChargeStart === null) return;
-    const duration = performance.now() - world.throwChargeStart;
+    const duration = Date.now() - world.throwChargeStart;
     world.throwChargeStart = null;
     if (world.isPaused || world.isGameOver || world.isWin) return;
     world.throwBottle(Math.min(1, Math.max(0, duration / 900)));
 }
 
 /**
- * DE: Entfernt gedrückte Touchzustände bei Fokusverlust.
- * EN: Clears held controls when focus is lost.
+ * DE: Setzt touch controls für das Spiel.
+ * EN: Resets touch controls for the game.
  */
 function resetTouchControls() {
     document.querySelectorAll("[data-touch-key]").forEach(button => {
@@ -85,8 +85,8 @@ function resetTouchControls() {
 }
 
 /**
- * DE: Stoppt die Steuerung, wenn die Seite nicht sichtbar ist.
- * EN: Releases controls when the page becomes hidden.
+ * DE: Zeigt die Touchsteuerung nur in geeigneten Spielansichten.
+ * EN: Shows touch controls only in suitable game views.
  */
 function handleTouchVisibility() {
     if (document.hidden) resetTouchControls();

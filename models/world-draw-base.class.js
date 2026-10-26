@@ -1,16 +1,16 @@
 class WorldDrawBase {
     /**
-     * DE: Aktualisiert clouds.
-     * EN: Updates clouds.
+     * DE: Aktualisiert clouds für das Spiel.
+     * EN: Updates clouds for the game.
      */
     updateClouds() {
         this.level.clouds.forEach(cloudObject => this.recycleCloud(cloudObject));
     }
 
     /**
-     * DE: Setzt zurück cloud.
-     * EN: Recycles cloud.
-     * @param {Object} cloudObject - DE: Übergabewert cloudObject. EN: Argument cloudObject.
+     * DE: Führt recycle cloud im Spiel aus.
+     * EN: Runs recycle cloud in the game.
+     * @param {Object} cloudObject - DE: Wert cloudObject. EN: Value cloudObject.
      */
     recycleCloud(cloudObject) {
         const leftEdge = -this.camera_x;
@@ -19,8 +19,8 @@ class WorldDrawBase {
     }
 
     /**
-     * DE: Liefert next cloud x.
-     * EN: Returns next cloud x.
+     * DE: Gibt next cloud x für das Spiel.
+     * EN: Returns next cloud x for the game.
      */
     getNextCloudX() {
         const rightEdge = -this.camera_x + this.canvas.width;
@@ -30,8 +30,8 @@ class WorldDrawBase {
     }
 
     /**
-     * DE: Aktualisiert die Kameraposition.
-     * EN: Update camera.
+     * DE: Aktualisiert camera für das Spiel.
+     * EN: Updates camera for the game.
      */
     updateCamera() {
         const minCameraX = this.canvas.width - this.level.level_end_x;
@@ -41,8 +41,8 @@ class WorldDrawBase {
     }
 
     /**
-     * DE: Zeigt den verlorenen Spielzustand.
-     * EN: Trigger game over.
+     * DE: Führt trigger game over im Spiel aus.
+     * EN: Runs trigger game over in the game.
      */
     triggerGameOver() {
         if (this.isGameOver) return;
@@ -55,8 +55,8 @@ class WorldDrawBase {
     }
 
     /**
-     * DE: Zeichnet den Spielzustand.
-     * EN: Draw.
+     * DE: Führt draw im Spiel aus.
+     * EN: Runs draw in the game.
      */
     draw() {
         if (this.isDisposed) return;
@@ -70,8 +70,8 @@ class WorldDrawBase {
     }
 
     /**
-     * DE: Zeichnet background and clouds.
-     * EN: Draws background and clouds.
+     * DE: Zeichnet background and clouds für das Spiel.
+     * EN: Draws background and clouds for the game.
      */
     drawBackgroundAndClouds() {
         this.ctx.save();
@@ -82,8 +82,8 @@ class WorldDrawBase {
     }
 
     /**
-     * DE: Zeichnet die Spielfiguren und Statusanzeigen.
-     * EN: Draw game scene.
+     * DE: Zeichnet game scene für das Spiel.
+     * EN: Draws game scene for the game.
      */
     drawGameScene() {
         this.ctx.save();
@@ -93,7 +93,10 @@ class WorldDrawBase {
         this.drawStatusBars();
     }
 
-    /** DE: Zeichnet Figuren und Gegenstände. EN: Draws actors and items. */
+    /**
+     * DE: Zeichnet level actors für das Spiel.
+     * EN: Draws level actors for the game.
+     */
     drawLevelActors() {
         this.coins.filter(c => c.isVisible() && c.behindCharacter).forEach(c => this.addToMap(c));
         this.addToMap(this.character);
@@ -104,7 +107,10 @@ class WorldDrawBase {
         this.addObjectsToMap(this.thrownBottles);
     }
 
-    /** DE: Zeichnet die Statusanzeigen. EN: Draws the status bars. */
+    /**
+     * DE: Zeichnet status bars für das Spiel.
+     * EN: Draws status bars for the game.
+     */
     drawStatusBars() {
         this.addToMap(this.statusBar);
         this.addToMap(this.bottleBar);
@@ -113,8 +119,8 @@ class WorldDrawBase {
     }
 
     /**
-     * DE: Zeichnet game over screen.
-     * EN: Draws game over screen.
+     * DE: Zeichnet game over screen für das Spiel.
+     * EN: Draws game over screen for the game.
      */
     drawGameOverScreen() {
         if (this.gameOverImage.complete && this.gameOverImage.naturalWidth) {
@@ -123,8 +129,8 @@ class WorldDrawBase {
     }
 
     /**
-     * DE: Beendet das Level bei einem Sieg.
-     * EN: Trigger win.
+     * DE: Führt trigger win im Spiel aus.
+     * EN: Runs trigger win in the game.
      */
     triggerWin() {
         if (this.isWin) return;
@@ -133,12 +139,12 @@ class WorldDrawBase {
         this.isWin = true;
         document.getElementById("pauseBtn").classList.add("hidden");
         this.character.clearTimers();
-        this.onGameOver?.(true);
+        if (this.onGameOver) this.onGameOver(true);
     }
 
     /**
-     * DE: Zeichnet win screen.
-     * EN: Draws win screen.
+     * DE: Zeichnet win screen für das Spiel.
+     * EN: Draws win screen for the game.
      */
     drawWinScreen() {
         if (this.winImage.complete && this.winImage.naturalWidth)
@@ -149,7 +155,10 @@ class WorldDrawBase {
         this.ctx.restore();
     }
 
-    /** DE: Legt das Aussehen des Siegtexts fest. EN: Styles the win text. */
+    /**
+     * DE: Setzt win text style für das Spiel.
+     * EN: Sets win text style for the game.
+     */
     setWinTextStyle() {
         this.ctx.font = 'bold 32px "Averia Sans Libre", sans-serif';
         this.ctx.textAlign = "center";
@@ -160,7 +169,10 @@ class WorldDrawBase {
         this.ctx.fillStyle = "#ffd84d";
     }
 
-    /** DE: Zeichnet die Anzahl gesammelter Münzen. EN: Draws collected coin total. */
+    /**
+     * DE: Zeichnet win coin text für das Spiel.
+     * EN: Draws win coin text for the game.
+     */
     drawWinCoinText() {
         const coinText = `Coins collected: ${this.coinsCollected} / ${this.coins.length}`;
         this.ctx.strokeText(coinText, this.canvas.width / 2, this.canvas.height * 0.26);
@@ -168,18 +180,18 @@ class WorldDrawBase {
     }
 
     /**
-     * DE: Fügt hinzu objects to map.
-     * EN: Adds objects to map.
-     * @param {Object} objects - DE: Übergabewert objects. EN: Argument objects.
+     * DE: Fügt objects to map für das Spiel.
+     * EN: Adds objects to map for the game.
+     * @param {Object} objects - DE: Wert objects. EN: Value objects.
      */
     addObjectsToMap(objects) {
         objects.forEach(object => this.addToMap(object));
     }
 
     /**
-     * DE: Fügt hinzu to map.
-     * EN: Adds to map.
-     * @param {MovableObject} movableObject - DE: Übergabewert movableObject. EN: Argument movableObject.
+     * DE: Fügt to map für das Spiel.
+     * EN: Adds to map for the game.
+     * @param {MovableObject} movableObject - DE: Wert movableObject. EN: Value movableObject.
      */
     addToMap(movableObject) {
         this.ctx.save();
@@ -190,32 +202,34 @@ class WorldDrawBase {
     }
 
     /**
-     * DE: Zeichnet ein Bild.
-     * EN: Draw image.
-     * @param {Object} drawableObject - DE: Übergabewert drawableObject. EN: Argument drawableObject.
+     * DE: Zeichnet image für das Spiel.
+     * EN: Draws image for the game.
+     * @param {Object} drawableObject - DE: Wert drawableObject. EN: Value drawableObject.
      */
     drawImage(drawableObject) {
-        if (!drawableObject?.img?.complete || !drawableObject.img.naturalWidth) return;
+        if (!drawableObject || !drawableObject.img) return;
+        if (!drawableObject.img.complete || !drawableObject.img.naturalWidth) return;
         this.ctx.drawImage(drawableObject.img, drawableObject.x, drawableObject.y,
             drawableObject.width, drawableObject.height);
     }
 
     /**
-     * DE: Spiegelt image.
-     * EN: Flips image.
-     * @param {MovableObject} movableObject - DE: Übergabewert movableObject. EN: Argument movableObject.
+     * DE: Führt flip image im Spiel aus.
+     * EN: Runs flip image in the game.
+     * @param {MovableObject} movableObject - DE: Wert movableObject. EN: Value movableObject.
      */
     flipImage(movableObject) {
-        if (!movableObject.img?.complete || !movableObject.img.naturalWidth) return;
+        if (!movableObject.img || !movableObject.img.complete) return;
+        if (!movableObject.img.naturalWidth) return;
         this.ctx.translate(movableObject.x + movableObject.width, movableObject.y);
         this.ctx.scale(-1, 1);
         this.ctx.drawImage(movableObject.img, 0, 0, movableObject.width, movableObject.height);
     }
 
     /**
-     * DE: Zeichnet frame.
-     * EN: Draws frame.
-     * @param {MovableObject} movableObject - DE: Übergabewert movableObject. EN: Argument movableObject.
+     * DE: Zeichnet frame für das Spiel.
+     * EN: Draws frame for the game.
+     * @param {MovableObject} movableObject - DE: Wert movableObject. EN: Value movableObject.
      */
     drawFrame(movableObject) {
         if (!this.debugMode || !this.shouldDrawFrame(movableObject)) return;
@@ -229,9 +243,9 @@ class WorldDrawBase {
     }
 
     /**
-     * DE: Führt should draw frame aus.
-     * EN: Should draw frame.
-     * @param {MovableObject} movableObject - DE: Übergabewert movableObject. EN: Argument movableObject.
+     * DE: Führt should draw frame im Spiel aus.
+     * EN: Runs should draw frame in the game.
+     * @param {MovableObject} movableObject - DE: Wert movableObject. EN: Value movableObject.
      */
     shouldDrawFrame(movableObject) {
         return movableObject instanceof Character || movableObject instanceof chicken ||
@@ -239,8 +253,8 @@ class WorldDrawBase {
     }
 
     /**
-     * DE: Beendet laufende Vorgänge und gibt Ressourcen frei.
-     * EN: Dispose.
+     * DE: Führt dispose im Spiel aus.
+     * EN: Runs dispose in the game.
      */
     dispose() {
         gameSounds.stopAll();
@@ -248,7 +262,11 @@ class WorldDrawBase {
         clearInterval(this.gameLoopInterval);
         clearInterval(this.collisionInterval);
         this.character.clearTimers();
-        this.level.enemies.forEach(enemy => enemy.clearTimers?.());
-        this.level.clouds.forEach(cloudObject => cloudObject.clearTimers?.());
+        this.level.enemies.forEach(enemy => {
+            if (enemy.clearTimers) enemy.clearTimers();
+        });
+        this.level.clouds.forEach(cloudObject => {
+            if (cloudObject.clearTimers) cloudObject.clearTimers();
+        });
     }
 }

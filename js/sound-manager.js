@@ -1,8 +1,8 @@
 /** Centralized sound effects, controlled by the existing Sound On/Off setting. */
 class SoundManager {
     /**
-     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
-     * EN: Creates a new object and sets its initial values.
+     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
+     * EN: Creates the object and sets its initial values.
      */
     constructor() {
         this.muted = localStorage.getItem("elPolloLocoEffectsMuted") === "true";
@@ -12,7 +12,10 @@ class SoundManager {
         this.addBossSounds();
     }
 
-    /** DE: Lädt Hintergrundgeräusche. EN: Loads ambient sounds. */
+    /**
+     * DE: Fügt background sounds für das Spiel.
+     * EN: Adds background sounds for the game.
+     */
     addBackgroundSounds() {
         this.addSound("steps", "audio/steps.mp3", 0.32, true);
         this.addSound("wind", "audio/wind.mp3", 0.26, true);
@@ -20,7 +23,10 @@ class SoundManager {
         this.addSound("snoring", "audio/snoring.mp3", 0.32, true);
     }
 
-    /** DE: Lädt Spielgeräusche. EN: Loads action sounds. */
+    /**
+     * DE: Fügt action sounds für das Spiel.
+     * EN: Adds action sounds for the game.
+     */
     addActionSounds() {
         this.addSound("jump", "audio/jump.mp3", 0.55);
         this.addSound("splash", "audio/slime_splash.mp3", 0.55);
@@ -30,7 +36,10 @@ class SoundManager {
         this.addSound("hit_chickens", "audio/hit_chickens.mp3", 0.65);
     }
 
-    /** DE: Lädt Boss- und Endgeräusche. EN: Loads boss and ending sounds. */
+    /**
+     * DE: Fügt boss sounds für das Spiel.
+     * EN: Adds boss sounds for the game.
+     */
     addBossSounds() {
         this.addSound("miniboss_llive", "audio/miniboss_llive.mp3", 0.50);
         this.addSound("miniboss_dead", "audio/miniboss_dead.mp3", 0.65);
@@ -41,12 +50,12 @@ class SoundManager {
     }
 
     /**
-     * DE: Fügt hinzu sound.
-     * EN: Adds sound.
-     * @param {string} name - DE: Übergabewert name. EN: Argument name.
-     * @param {string} path - DE: Übergabewert path. EN: Argument path.
-     * @param {Object} volume - DE: Übergabewert volume. EN: Argument volume.
-     * @param {Object} loop - DE: Übergabewert loop. EN: Argument loop.
+     * DE: Fügt sound für das Spiel.
+     * EN: Adds sound for the game.
+     * @param {string} name - DE: Wert name. EN: Value name.
+     * @param {string} path - DE: Wert path. EN: Value path.
+     * @param {Object} volume - DE: Wert volume. EN: Value volume.
+     * @param {Object} loop - DE: Wert loop. EN: Value loop.
      */
     addSound(name, path, volume, loop = false) {
         const sound = new Audio(path);
@@ -57,9 +66,9 @@ class SoundManager {
     }
 
     /**
-     * DE: Spielt ab.
-     * EN: Plays.
-     * @param {string} name - DE: Übergabewert name. EN: Argument name.
+     * DE: Führt play im Spiel aus.
+     * EN: Runs play in the game.
+     * @param {string} name - DE: Wert name. EN: Value name.
      */
     play(name) {
         if (this.muted || !this.sounds[name]) return;
@@ -70,9 +79,9 @@ class SoundManager {
     }
 
     /**
-     * DE: Stoppt.
-     * EN: Stops.
-     * @param {string} name - DE: Übergabewert name. EN: Argument name.
+     * DE: Führt stop im Spiel aus.
+     * EN: Runs stop in the game.
+     * @param {string} name - DE: Wert name. EN: Value name.
      */
     stop(name) {
         const sound = this.sounds[name];
@@ -82,17 +91,17 @@ class SoundManager {
     }
 
     /**
-     * DE: Stoppt all.
-     * EN: Stops all.
+     * DE: Stoppt all für das Spiel.
+     * EN: Stops all for the game.
      */
     stopAll() {
         Object.keys(this.sounds).forEach(name => this.stop(name));
     }
 
     /**
-     * DE: Setzt muted.
-     * EN: Sets muted.
-     * @param {Object} muted - DE: Übergabewert muted. EN: Argument muted.
+     * DE: Setzt muted für das Spiel.
+     * EN: Sets muted for the game.
+     * @param {Object} muted - DE: Wert muted. EN: Value muted.
      */
     setMuted(muted) {
         this.muted = muted;

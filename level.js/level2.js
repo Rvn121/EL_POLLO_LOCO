@@ -1,14 +1,14 @@
 /**
- * DE: Erstellt level 2.
- * EN: Creates level 2.
+ * DE: Erstellt das zweite Level mit Gegnern, Wolken und Hintergründen.
+ * EN: Creates the second level with enemies, clouds, and backgrounds.
  */
 function createLevel2() {
     return new Level(createLevel2Enemies(), createLevelClouds(), createLevel2Backgrounds());
 }
 
 /**
- * DE: Erstellt level 2 enemies.
- * EN: Creates level 2 enemies.
+ * DE: Erstellt die Gegner und Bosse für Level 2.
+ * EN: Creates enemies and bosses for level 2.
  */
 function createLevel2Enemies() {
     const enemies = [];
@@ -20,7 +20,10 @@ function createLevel2Enemies() {
     return enemies;
 }
 
-/** DE: Erstellt einen Gegner in Level 1. EN: Creates an enemy for Level 1. */
+/**
+ * DE: Erstellt level2chicken für das Spiel.
+ * EN: Creates level2chicken for the game.
+ */
 function createLevel2Chicken(index) {
     const small = index % 2 === 0;
     const smallIndex = index / 2;
@@ -34,13 +37,19 @@ function createLevel2Chicken(index) {
     return enemy;
 }
 
-/** DE: Berechnet die Startposition. EN: Calculates the starting position. */
+/**
+ * DE: Gibt small chicken x für das Spiel.
+ * EN: Returns small chicken x for the game.
+ */
 function getSmallChickenX(index, behindStart) {
     if (behindStart) return -600 + index * 120 + Math.random() * 20;
     return 1050 + (index - 3) * 335 + Math.random() * 80;
 }
 
-/** DE: Legt die Patrouillengrenzen fest. EN: Sets patrol boundaries. */
+/**
+ * DE: Setzt level2patrol für das Spiel.
+ * EN: Sets level2patrol for the game.
+ */
 function setLevel2Patrol(enemy, x, behindStart) {
     const range = 140 + Math.random() * 160;
     enemy.startPatrol(Math.max(behindStart ? -620 : 850, x - range),
@@ -48,8 +57,8 @@ function setLevel2Patrol(enemy, x, behindStart) {
 }
 
 /**
- * DE: Erstellt level 2 backgrounds.
- * EN: Creates level 2 backgrounds.
+ * DE: Erstellt level2backgrounds für das Spiel.
+ * EN: Creates level2backgrounds for the game.
  */
 function createLevel2Backgrounds() {
     const backgrounds = createLevelBackgrounds();

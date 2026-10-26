@@ -9,16 +9,16 @@ class MovableObject extends DrawableObject {
     hurtTimeout;
 
     /**
-     * DE: Bewegt right.
-     * EN: Moves right.
+     * DE: Bewegt right für das Spiel.
+     * EN: Moves right for the game.
      */
     moveRight() {
         this.x += this.speed;
     }
 
     /**
-     * DE: Bewegt left.
-     * EN: Moves left.
+     * DE: Bewegt left für das Spiel.
+     * EN: Moves left for the game.
      */
     moveLeft() {
         clearInterval(this.moveInterval);
@@ -29,10 +29,10 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * DE: Startet patrol.
-     * EN: Starts patrol.
-     * @param {number} left - DE: Übergabewert left. EN: Argument left.
-     * @param {number} right - DE: Übergabewert right. EN: Argument right.
+     * DE: Startet patrol für das Spiel.
+     * EN: Starts patrol for the game.
+     * @param {number} left - DE: Wert left. EN: Value left.
+     * @param {number} right - DE: Wert right. EN: Value right.
      */
     startPatrol(left, right) {
         this.stopMoving();
@@ -47,16 +47,16 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * DE: Stoppt moving.
-     * EN: Stops moving.
+     * DE: Stoppt moving für das Spiel.
+     * EN: Stops moving for the game.
      */
     stopMoving() {
         clearInterval(this.moveInterval);
     }
 
     /**
-     * DE: Löscht timers.
-     * EN: Clears timers.
+     * DE: Löscht timers für das Spiel.
+     * EN: Clears timers for the game.
      */
     clearTimers() {
         clearInterval(this.moveInterval);
@@ -67,9 +67,9 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * DE: Prüft die Überschneidung der Hitboxen.
-     * EN: Is colliding.
-     * @param {MovableObject} movableObject - DE: Übergabewert movableObject. EN: Argument movableObject.
+     * DE: Prüft colliding für das Spiel.
+     * EN: Checks colliding for the game.
+     * @param {MovableObject} movableObject - DE: Wert movableObject. EN: Value movableObject.
      */
     isColliding(movableObject) {
         const ownHitbox = this.getHitbox();

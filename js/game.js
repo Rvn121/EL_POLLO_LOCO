@@ -15,15 +15,15 @@ let controlsModal;
 let orientationOverlay;
 let canvasShell;
 let menuMusic;
-let menuMuted = true;
+let menuMuted = false;
 let menuMuteBtn;
 let menuEffectsBtn;
 
 document.addEventListener("DOMContentLoaded", init);
 
 /**
- * DE: Initialisiert die Startseite.
- * EN: Init.
+ * DE: Initialisiert Spieloberfläche, Musik und Startbildschirm.
+ * EN: Initializes the game interface, audio, and start screen.
  */
 function init() {
     cacheDomElements();
@@ -36,8 +36,8 @@ function init() {
 }
 
 /**
- * DE: Speichert zwischen dom elements.
- * EN: Caches dom elements.
+ * DE: Führt cache dom elements im Spiel aus.
+ * EN: Runs cache dom elements in the game.
  */
 function cacheDomElements() {
     canvas = document.getElementById("canvas");
@@ -53,8 +53,8 @@ function cacheDomElements() {
 }
 
 /**
- * DE: Lädt title assets.
- * EN: Loads title assets.
+ * DE: Lädt title assets für das Spiel.
+ * EN: Loads title assets for the game.
  */
 function loadTitleAssets() {
     titleBackground.src = "img/5_background/layers/air.png";
@@ -62,8 +62,8 @@ function loadTitleAssets() {
 }
 
 /**
- * DE: Verknüpft ui events.
- * EN: Binds ui events.
+ * DE: Verknüpft ui events für das Spiel.
+ * EN: Binds ui events for the game.
  */
 function bindUiEvents() {
     bindMenuButtons();
@@ -73,7 +73,10 @@ function bindUiEvents() {
     updateFullscreenUi();
 }
 
-/** DE: Verbindet Menütasten mit Aktionen. EN: Wires menu buttons. */
+/**
+ * DE: Verknüpft menu buttons für das Spiel.
+ * EN: Binds menu buttons for the game.
+ */
 function bindMenuButtons() {
     menuMuteBtn.addEventListener("click", toggleMenuMute);
     menuEffectsBtn.addEventListener("click", toggleEffectsMute);
@@ -85,17 +88,24 @@ function bindMenuButtons() {
     controlsModal.addEventListener("click", handleBackdropClick);
 }
 
-/** DE: Verbindet Spieltasten mit Aktionen. EN: Wires gameplay buttons. */
+/**
+ * DE: Verknüpft gameplay buttons für das Spiel.
+ * EN: Binds gameplay buttons for the game.
+ */
 function bindGameplayButtons() {
     document.getElementById("allSoundsBtn").addEventListener("click", toggleAllSounds);
     document.getElementById("restartBtn").addEventListener("click", restartGame);
     document.getElementById("nextBtn").addEventListener("click", nextLevel);
     document.getElementById("backToStartBtn").addEventListener("click", backToStart);
+    document.getElementById("toolbarBackToStartBtn").addEventListener("click", backToStart);
     document.getElementById("pauseBtn").addEventListener("click", togglePause);
     document.getElementById("fullscreenBtn").addEventListener("click", toggleFullscreen);
 }
 
-/** DE: Verbindet Tastatur- und Fensterereignisse. EN: Wires input events. */
+/**
+ * DE: Verknüpft keyboard events für das Spiel.
+ * EN: Binds keyboard events for the game.
+ */
 function bindKeyboardEvents() {
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
@@ -106,8 +116,8 @@ function bindKeyboardEvents() {
 }
 
 /**
- * DE: Initialisiert title clouds.
- * EN: Initializes title clouds.
+ * DE: Führt init title clouds im Spiel aus.
+ * EN: Runs init title clouds in the game.
  */
 function initTitleClouds() {
     titleClouds = Array.from({ length: 8 }, (_, index) => ({
@@ -120,8 +130,8 @@ function initTitleClouds() {
 }
 
 /**
- * DE: Startet title screen.
- * EN: Starts title screen.
+ * DE: Startet title screen für das Spiel.
+ * EN: Starts title screen for the game.
  */
 function startTitleScreen() {
     titleActive = true;
@@ -130,8 +140,8 @@ function startTitleScreen() {
 }
 
 /**
- * DE: Zeichnet title screen.
- * EN: Draws title screen.
+ * DE: Zeichnet title screen für das Spiel.
+ * EN: Draws title screen for the game.
  */
 function drawTitleScreen() {
     if (!titleActive || world) return;
@@ -146,9 +156,9 @@ function drawTitleScreen() {
 }
 
 /**
- * DE: Zeichnet title background.
- * EN: Draws title background.
- * @param {CanvasRenderingContext2D} ctx - DE: Übergabewert ctx. EN: Argument ctx.
+ * DE: Zeichnet title background für das Spiel.
+ * EN: Draws title background for the game.
+ * @param {CanvasRenderingContext2D} ctx - DE: Wert ctx. EN: Value ctx.
  */
 function drawTitleBackground(ctx) {
     if (titleBackground.complete && titleBackground.naturalWidth) ctx.drawImage(titleBackground, 0, 0, canvas.width, canvas.height);
@@ -159,9 +169,9 @@ function drawTitleBackground(ctx) {
 }
 
 /**
- * DE: Zeichnet title clouds.
- * EN: Draws title clouds.
- * @param {CanvasRenderingContext2D} ctx - DE: Übergabewert ctx. EN: Argument ctx.
+ * DE: Zeichnet title clouds für das Spiel.
+ * EN: Draws title clouds for the game.
+ * @param {CanvasRenderingContext2D} ctx - DE: Wert ctx. EN: Value ctx.
  */
 function drawTitleClouds(ctx) {
     ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
@@ -178,8 +188,8 @@ function drawTitleClouds(ctx) {
 }
 
 /**
- * DE: Aktualisiert title clouds.
- * EN: Updates title clouds.
+ * DE: Aktualisiert title clouds für das Spiel.
+ * EN: Updates title clouds for the game.
  */
 function updateTitleClouds() {
     titleClouds.forEach(cloudObject => {
@@ -189,9 +199,9 @@ function updateTitleClouds() {
 }
 
 /**
- * DE: Setzt zurück title cloud.
- * EN: Resets title cloud.
- * @param {Object} cloudObject - DE: Übergabewert cloudObject. EN: Argument cloudObject.
+ * DE: Setzt title cloud für das Spiel.
+ * EN: Resets title cloud for the game.
+ * @param {Object} cloudObject - DE: Wert cloudObject. EN: Value cloudObject.
  */
 function resetTitleCloud(cloudObject) {
     cloudObject.x = canvas.width + 120 + Math.random() * 120;
@@ -199,8 +209,8 @@ function resetTitleCloud(cloudObject) {
 }
 
 /**
- * DE: Öffnet level selection.
- * EN: Opens level selection.
+ * DE: Öffnet level selection für das Spiel.
+ * EN: Opens level selection for the game.
  */
 function openLevelSelection() {
     if (world || menuSelectionOpen) return;
@@ -210,9 +220,9 @@ function openLevelSelection() {
 }
 
 /**
- * DE: Startet selected level.
- * EN: Starts selected level.
- * @param {Object} levelNumber - DE: Übergabewert levelNumber. EN: Argument levelNumber.
+ * DE: Startet selected level für das Spiel.
+ * EN: Starts selected level for the game.
+ * @param {Object} levelNumber - DE: Wert levelNumber. EN: Value levelNumber.
  */
 function startSelectedLevel(levelNumber) {
     if (world) return;
@@ -221,11 +231,11 @@ function startSelectedLevel(levelNumber) {
 }
 
 /**
- * DE: Richtet ein menu music.
- * EN: Sets up menu music.
+ * DE: Setzt up menu music für das Spiel.
+ * EN: Sets up menu music for the game.
  */
 function setupMenuMusic() {
-    menuMuted = true;
+    menuMuted = false;
     menuMusic.muted = menuMuted;
     updateMenuMuteButton();
     updateAllSoundsButton();
@@ -239,8 +249,8 @@ function setupMenuMusic() {
 }
 
 /**
- * DE: Spielt ab menu music on interaction.
- * EN: Plays menu music on interaction.
+ * DE: Spielt menu music on interaction für das Spiel.
+ * EN: Plays menu music on interaction for the game.
  */
 function playMenuMusicOnInteraction() {
     if (!titleActive || world) return;
@@ -248,8 +258,8 @@ function playMenuMusicOnInteraction() {
 }
 
 /**
- * DE: Spielt die Menümusik ab.
- * EN: Play menu music.
+ * DE: Versucht die Titelmusik abzuspielen, sofern sie erlaubt ist.
+ * EN: Attempts to play title music when playback is allowed.
  */
 function playMenuMusic() {
     if (menuMuted || !titleActive || world || !menuMusic.paused) return;
@@ -257,8 +267,8 @@ function playMenuMusic() {
 }
 
 /**
- * DE: Schaltet um menu mute.
- * EN: Toggles menu mute.
+ * DE: Schaltet menu mute für das Spiel.
+ * EN: Toggles menu mute for the game.
  */
 function toggleMenuMute() {
     menuMuted = !menuMuted;
@@ -269,8 +279,8 @@ function toggleMenuMute() {
 }
 
 /**
- * DE: Aktualisiert menu mute button.
- * EN: Updates menu mute button.
+ * DE: Aktualisiert menu mute button für das Spiel.
+ * EN: Updates menu mute button for the game.
  */
 function updateMenuMuteButton() {
     menuMuteBtn.textContent = menuMuted ? "Music On" : "Music Off";
@@ -278,8 +288,8 @@ function updateMenuMuteButton() {
 }
 
 /**
- * DE: Schaltet um effects mute.
- * EN: Toggles effects mute.
+ * DE: Schaltet effects mute für das Spiel.
+ * EN: Toggles effects mute for the game.
  */
 function toggleEffectsMute() {
     gameSounds.setMuted(!gameSounds.muted);
@@ -290,8 +300,8 @@ function toggleEffectsMute() {
 }
 
 /**
- * DE: Aktualisiert effects mute button.
- * EN: Updates effects mute button.
+ * DE: Aktualisiert effects mute button für das Spiel.
+ * EN: Updates effects mute button for the game.
  */
 function updateEffectsMuteButton() {
     menuEffectsBtn.textContent = gameSounds.muted ? "Effects On" : "Effects Off";
@@ -299,16 +309,16 @@ function updateEffectsMuteButton() {
 }
 
 /**
- * DE: Schaltet die Spielgeräusche um.
- * EN: Toggle all sounds.
+ * DE: Schaltet all sounds für das Spiel.
+ * EN: Toggles all sounds for the game.
  */
 function toggleAllSounds() {
     toggleEffectsMute();
 }
 
 /**
- * DE: Aktualisiert all sounds button.
- * EN: Updates all sounds button.
+ * DE: Aktualisiert die Beschriftung des Schalters für alle Sounds.
+ * EN: Updates the label of the all-sounds toggle.
  */
 function updateAllSoundsButton() {
     const button = document.getElementById("allSoundsBtn");

@@ -11,6 +11,8 @@ class Endboss extends MovableObject {
     healthPhases = false;
     originX = 6100;
     direction = -1;
+    retreatUntil = 0;
+    approachUntil = 0;
     IMAGES_WALKING = [1, 2, 3, 4].map(i => `img/4_enemie_boss_chicken/1_walk/G${i}.png`);
     IMAGES_ALERT = Array.from({length: 8}, (_, i) => `img/4_enemie_boss_chicken/2_alert/G${i + 5}.png`);
     IMAGES_ATTACK = Array.from({length: 8}, (_, i) => `img/4_enemie_boss_chicken/3_attack/G${i + 13}.png`);
@@ -18,10 +20,10 @@ class Endboss extends MovableObject {
     IMAGES_DEAD = [24, 25, 26].map(i => `img/4_enemie_boss_chicken/5_dead/G${i}.png`);
 
     /**
-     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
-     * EN: Creates a new object and sets its initial values.
+     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
+     * EN: Creates the object and sets its initial values.
      * @param {number} x - DE: x. EN: x.
-     * @param {Object} moving - DE: Übergabewert moving. EN: Argument moving.
+     * @param {Object} moving - DE: Wert moving. EN: Value moving.
      */
     constructor(x = 6100, moving = false) {
         super();
@@ -34,20 +36,24 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * DE: Nimmt bottle hit.
-     * EN: Takes bottle hit.
+     * DE: Verarbeitet bottle hit für das Spiel.
+     * EN: Handles bottle hit for the game.
      */
     takeBottleHit() {
         if (this.energy <= 0) return;
         this.energy = Math.max(0, this.energy - (this.isMainBoss ? 20 : 100 / 3));
+        if (this.isMainBoss && this.healthPhases && this.energy > 0) {
+            this.approachUntil = Date.now() + 1400;
+            this.retreatUntil = Date.now() + 2800;
+        }
         this.setState(this.energy ? "hurt" : "dead");
     }
 
     /**
-     * DE: Aktualisiert.
-     * EN: Updates.
-     * @param {number} delta - DE: Übergabewert delta. EN: Argument delta.
-     * @param {Object} player - DE: Übergabewert player. EN: Argument player.
+     * DE: Führt update im Spiel aus.
+     * EN: Runs update in the game.
+     * @param {number} delta - DE: Wert delta. EN: Value delta.
+     * @param {Object} player - DE: Wert player. EN: Value player.
      */
     update(delta, player) {
         if (this.state === "finished") return;
@@ -65,45 +71,66 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * DE: Bewegt and attack.
-     * EN: Moves and attack.
-     * @param {number} delta - DE: Übergabewert delta. EN: Argument delta.
-     * @param {Object} player - DE: Übergabewert player. EN: Argument player.
+     * DE: Bewegt and attack für das Spiel.
+     * EN: Moves and attack for the game.
+     * @param {number} delta - DE: Wert delta. EN: Value delta.
+     * @param {Object} player - DE: Wert player. EN: Value player.
      */
     moveAndAttack(delta, player) {
         const distance = Math.abs(player.x - this.x);
-        if (this.healthPhases && this.energy <= 20) this.facePlayer(player);
+        if (this.healthPhases && this.energy <= 20) return this.chasePlayer(delta, player);
+        if (this.healthPhases && this.energy <= 40 && this.retreatUntil > Date.now()) {
+            return this.moveAfterHit(delta, player);
+        }
         if (distance < 220 && !this.attackCooldown) return this.beginAttack();
         if (distance < 240) return;
         this.chooseWalkingDirection(player);
+        this.walk(delta);
+    }
+
+    /** DE: Bewegt den Boss innerhalb seiner Strecke. EN: Moves the boss along its path. */
+    walk(delta) {
         this.x += this.direction * delta * this.getMovementSpeed();
         this.otherDirection = this.direction > 0;
     }
 
-    /** DE: Dreht den Boss zur Spielfigur. EN: Turns the boss toward the player. */
+    /** DE: Nach einem Treffer nähert sich der Boss und zieht sich zurück. EN: Approaches after a hit, then retreats. */
+    moveAfterHit(delta, player) {
+        const approaching = Date.now() < this.approachUntil;
+        this.direction = player.x > this.x ? 1 : -1;
+        if (!approaching) this.direction *= -1;
+        this.walk(delta);
+    }
+
+    /** DE: Unter 20 Prozent verfolgt und attackiert der Boss Pepe. EN: Below 20 percent the boss chases and attacks Pepe. */
+    chasePlayer(delta, player) {
+        this.facePlayer(player);
+        if (Math.abs(player.x - this.x) < 220 && !this.attackCooldown) return this.beginAttack();
+        if (Math.abs(player.x - this.x) > 110) this.walk(delta);
+    }
+
+    /**
+     * DE: Dreht den Boss in Richtung der Spielfigur.
+     * EN: Turns the boss towards the player.
+     */
     facePlayer(player) {
         this.direction = player.x > this.x ? 1 : -1;
         this.otherDirection = this.direction > 0;
     }
 
-    /** DE: Bestimmt die Laufrichtung des Bosses. EN: Chooses the boss movement direction. */
+    /**
+     * DE: Führt choose walking direction im Spiel aus.
+     * EN: Runs choose walking direction in the game.
+     */
     chooseWalkingDirection(player) {
-        if (this.healthPhases && this.energy <= 20) return this.facePlayer(player);
-        if (this.healthPhases) {
-            const chaseMin = this.originX - 1400;
-            const chaseMax = this.originX + 600;
-            if (this.x <= chaseMin && player.x < this.x) this.direction = 1;
-            else if (this.x >= chaseMax && player.x > this.x) this.direction = -1;
-            else this.facePlayer(player);
-            return;
-        }
-        if (this.x < this.originX - 180) this.direction = 1;
-        if (this.x > this.originX + 180) this.direction = -1;
+        const range = this.healthPhases ? 300 : 180;
+        if (this.x <= this.originX - range) this.direction = 1;
+        if (this.x >= this.originX + range) this.direction = -1;
     }
 
     /**
-     * DE: Liefert movement speed.
-     * EN: Returns movement speed.
+     * DE: Gibt movement speed für das Spiel.
+     * EN: Returns movement speed for the game.
      */
     getMovementSpeed() {
         if (!this.healthPhases) return 0.09;
@@ -113,7 +140,10 @@ class Endboss extends MovableObject {
         return 0.16;
     }
 
-    /** DE: Verfolgt die Spielfigur auch im Angriff. EN: Pursues the player during attacks. */
+    /**
+     * DE: Setzt die laufende Bossangriffsanimation fort.
+     * EN: Advances the current boss attack animation.
+     */
     advanceAttack(delta, player) {
         this.facePlayer(player);
         const distance = Math.abs(player.x - this.x);
@@ -122,8 +152,8 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * DE: Führt begin attack aus.
-     * EN: Begin attack.
+     * DE: Startet den Angriff des Bosses.
+     * EN: Starts a boss attack.
      */
     beginAttack() {
         this.attackHitDone = false;
@@ -132,9 +162,9 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * DE: Setzt state.
-     * EN: Sets state.
-     * @param {Object} state - DE: Übergabewert state. EN: Argument state.
+     * DE: Setzt state für das Spiel.
+     * EN: Sets state for the game.
+     * @param {Object} state - DE: Wert state. EN: Value state.
      */
     setState(state) {
         this.state = state;
@@ -144,8 +174,8 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * DE: Aktualisiert image.
-     * EN: Updates image.
+     * DE: Aktualisiert image für das Spiel.
+     * EN: Updates image for the game.
      */
     updateImage() {
         const images = this.getStateImages();
@@ -154,8 +184,8 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * DE: Liefert state images.
-     * EN: Returns state images.
+     * DE: Liefert die Bilder für den aktuellen Bosszustand.
+     * EN: Returns images for the current boss state.
      */
     getStateImages() {
         if (this.state === "hurt") return this.IMAGES_HURT;
@@ -166,9 +196,9 @@ class Endboss extends MovableObject {
 
 
     /**
-     * DE: Aktualisiert falling.
-     * EN: Updates falling.
-     * @param {number} delta - DE: Übergabewert delta. EN: Argument delta.
+     * DE: Bewegt den besiegten Boss nach unten aus dem Bild.
+     * EN: Moves the defeated boss downward offscreen.
+     * @param {number} delta - DE: Wert delta. EN: Value delta.
      */
     updateFalling(delta) {
         this.fallSpeed += 0.0012 * delta;
@@ -177,8 +207,8 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * DE: Beendet animation.
-     * EN: Finishes animation.
+     * DE: Beendet animation für das Spiel.
+     * EN: Finishes animation for the game.
      */
     finishAnimation() {
         if (this.state === "dead") {
@@ -200,8 +230,8 @@ class MiniBoss extends Endboss {
     isMainBoss = false;
 
     /**
-     * DE: Erstellt ein neues Objekt und legt seine Startwerte fest.
-     * EN: Creates a new object and sets its initial values.
+     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
+     * EN: Creates the object and sets its initial values.
      * @param {number} x - DE: x. EN: x.
      */
     constructor(x) {
