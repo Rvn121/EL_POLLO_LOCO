@@ -54,6 +54,9 @@ class Endboss extends MovableObject {
         if (this.state === "falling") return this.updateFalling(delta);
         this.attackCooldown = Math.max(0, this.attackCooldown - delta);
         if (this.state === "walking" && this.moving) this.moveAndAttack(delta, player);
+        if (this.state === "attack" && this.healthPhases && this.energy <= 20) {
+            this.advanceAttack(delta, player);
+        }
         this.frameElapsed += delta;
         if (this.frameElapsed < 160) return;
         this.frameElapsed = 0;
@@ -86,6 +89,14 @@ class Endboss extends MovableObject {
     /** DE: Bestimmt die Laufrichtung des Bosses. EN: Chooses the boss movement direction. */
     chooseWalkingDirection(player) {
         if (this.healthPhases && this.energy <= 20) return this.facePlayer(player);
+        if (this.healthPhases) {
+            const chaseMin = this.originX - 1400;
+            const chaseMax = this.originX + 600;
+            if (this.x <= chaseMin && player.x < this.x) this.direction = 1;
+            else if (this.x >= chaseMax && player.x > this.x) this.direction = -1;
+            else this.facePlayer(player);
+            return;
+        }
         if (this.x < this.originX - 180) this.direction = 1;
         if (this.x > this.originX + 180) this.direction = -1;
     }
@@ -96,10 +107,18 @@ class Endboss extends MovableObject {
      */
     getMovementSpeed() {
         if (!this.healthPhases) return 0.09;
-        if (this.energy <= 20) return 0.18;
-        if (this.energy <= 40) return 0.14;
-        if (this.energy <= 60) return 0.10;
-        return 0.06;
+        if (this.energy <= 20) return 0.23;
+        if (this.energy <= 40) return 0.20;
+        if (this.energy <= 60) return 0.18;
+        return 0.16;
+    }
+
+    /** DE: Verfolgt die Spielfigur auch im Angriff. EN: Pursues the player during attacks. */
+    advanceAttack(delta, player) {
+        this.facePlayer(player);
+        const distance = Math.abs(player.x - this.x);
+        const step = Math.min(Math.max(0, distance - 100), delta * 0.28);
+        this.x += this.direction * step;
     }
 
     /**

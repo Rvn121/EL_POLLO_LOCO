@@ -15,7 +15,7 @@ let controlsModal;
 let orientationOverlay;
 let canvasShell;
 let menuMusic;
-let menuMuted = false;
+let menuMuted = true;
 let menuMuteBtn;
 let menuEffectsBtn;
 
@@ -225,7 +225,7 @@ function startSelectedLevel(levelNumber) {
  * EN: Sets up menu music.
  */
 function setupMenuMusic() {
-    menuMuted = false;
+    menuMuted = true;
     menuMusic.muted = menuMuted;
     updateMenuMuteButton();
     updateAllSoundsButton();

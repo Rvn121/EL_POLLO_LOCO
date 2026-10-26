@@ -2,11 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>El Pollo Loco</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/png" href="./img/6_salsa_bottle/bottle_rotation/1_bottle_rotation.png">
-    <link rel="preload" as="audio" href="./audio/Sombrero_Stomp.mp3">
     <script src="./models/drawable-object.class.js"></script>
     <script src="./models/movable-object.class.js"></script>
     <script src="./models/status-bar.class.js"></script>
@@ -46,7 +45,7 @@
                 <button class="game-btn pause-btn hidden" id="pauseBtn" type="button">Pause</button>
                 <button class="game-btn toolbar-controls" id="controlsBtn" type="button">Controls</button>
                 <button class="game-btn toolbar-sound hidden" id="allSoundsBtn" type="button" aria-pressed="false">All Sounds Off</button>
-                <button class="game-btn toolbar-sound" id="menuMuteBtn" type="button" aria-pressed="false">Music Off</button>
+                <button class="game-btn toolbar-sound" id="menuMuteBtn" type="button" aria-pressed="true">Music On</button>
                 <button class="game-btn" id="menuEffectsBtn" type="button">Effects Off</button>
                 <button class="game-btn fullscreen-btn" id="fullscreenBtn" type="button">Fullscreen</button>
             </div>
@@ -56,11 +55,11 @@
                 <div class="canvas-top-buttons" id="menuButtons">
                     <button class="game-btn main-start-btn" id="startBtn" type="button">Start</button>
                     <div class="level-choices hidden" id="levelChoices">
-                        <button class="level-choice" id="tutorialChoice" type="button" aria-label="Play Tutorial">
-                            <img src="img/tutorial_transition.png" alt="Tutorial">
+                        <button class="level-choice" id="tutorialChoice" type="button" aria-label="Play Level 1">
+                            <img src="img/El_Pollo_Loco_Level_1_2D.png" alt="Level 1">
                         </button>
-                        <button class="level-choice" id="levelOneChoice" type="button" aria-label="Play Level 1">
-                            <img src="img/level1_transition.png" alt="Level 1">
+                        <button class="level-choice" id="levelOneChoice" type="button" aria-label="Play Level 2">
+                            <img src="img/El_Pollo_Loco_Level_2_2D.png" alt="Level 2">
                         </button>
                     </div>
                 </div>
@@ -104,7 +103,7 @@
             <a class="legal-link" href="impressum.html">Impressum</a>
         </section>
     </main>
-    <audio id="menuMusic" src="./audio/Sombrero_Stomp.mp3" preload="auto" autoplay loop></audio>
+    <audio id="menuMusic" src="./audio/Sombrero_Stomp.mp3" preload="auto" muted loop></audio>
 
 
 </body>

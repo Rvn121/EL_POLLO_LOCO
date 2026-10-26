@@ -42,7 +42,7 @@ function showLevelAnnouncement() {
     const image = document.getElementById("levelTransitionImage");
     const currentWorld = world;
     announcement.classList.add("hidden");
-    image.src = currentLevel === 1 ? "img/tutorial_transition.png" : "img/level1_transition.png";
+    image.src = currentLevel === 1 ? "img/El_Pollo_Loco_Level_1_2D.png" : "img/El_Pollo_Loco_Level_2_2D.png";
     image.classList.remove("hidden");
     window.setTimeout(() => {
         if (world !== currentWorld) return;
