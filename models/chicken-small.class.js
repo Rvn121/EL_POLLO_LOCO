@@ -22,15 +22,16 @@ class chickenSmall extends MovableObject {
         this.loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages([this.DEAD_IMAGE]);
-        this.x = startX === null ? 900 + Math.random() * 2000 : startX;
+        this.x = startX;
+        if (startX === null) this.x = 900 + Math.random() * 2000;
         this.speed = 1.15 + Math.random() * 1.5;
         this.animate();
     }
 
     /**
-     * DE: Führt animate im Spiel aus.
-     * EN: Runs animate in the game.
-     */
+ * DE: Animiert.
+ * EN: Animates.
+ */
     animate() {
         this.moveLeft();
         this.animationInterval = setInterval(() => {
@@ -43,9 +44,9 @@ class chickenSmall extends MovableObject {
     }
 
     /**
-     * DE: Führt die im Spiel aus.
-     * EN: Runs die in the game.
-     */
+ * DE: Beendet das Leben der Figur.
+ * EN: Ends the character life.
+ */
     die() {
         if (this.isDead) return;
         this.isDead = true;

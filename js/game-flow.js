@@ -43,7 +43,8 @@ function prepareGameView() {
 function showLevelAnnouncement() {
     const image = document.getElementById("levelTransitionImage");
     const currentWorld = world;
-    image.src = currentLevel === 1 ? "img/El_Pollo_Loco_Level_1_2D.png" : "img/El_Pollo_Loco_Level_2_2D.png";
+    image.src = "img/El_Pollo_Loco_Level_2_2D.png";
+    if (currentLevel === 1) image.src = "img/El_Pollo_Loco_Level_1_2D.png";
     image.classList.remove("hidden");
     showLevelGoal(currentWorld);
 }
@@ -281,7 +282,8 @@ function togglePause() {
     const paused = world.togglePause();
     if (paused) resetTouchControls();
     window.gamePaused = paused;
-    document.getElementById("pauseBtn").textContent = paused ? "Resume" : "Pause";
+    document.getElementById("pauseBtn").textContent = "Pause";
+    if (paused) document.getElementById("pauseBtn").textContent = "Resume";
 }
 
 /**
@@ -338,7 +340,8 @@ function isTabletOrMobile() {
 function updateFullscreenUi() {
     const fullscreen = document.fullscreenElement === canvasShell;
     const button = document.getElementById("fullscreenBtn");
-    button.textContent = fullscreen ? "Minimize" : "Fullscreen";
+    button.textContent = "Fullscreen";
+    if (fullscreen) button.textContent = "Minimize";
     menuButtons.classList.toggle("hidden", !!world);
     document.getElementById("controlsBtn").classList.remove("hidden");
     document.getElementById("toolbarBackToStartBtn").classList.toggle("hidden", !world);

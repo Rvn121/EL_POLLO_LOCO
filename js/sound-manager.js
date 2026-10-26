@@ -13,9 +13,9 @@ class SoundManager {
     }
 
     /**
-     * DE: Fügt background sounds für das Spiel.
-     * EN: Adds background sounds for the game.
-     */
+ * DE: Fügt hinzu: Hintergrund Töne.
+ * EN: Adds: background sounds.
+ */
     addBackgroundSounds() {
         this.addSound("steps", "audio/steps.mp3", 0.32, true);
         this.addSound("wind", "audio/wind.mp3", 0.26, true);
@@ -24,9 +24,9 @@ class SoundManager {
     }
 
     /**
-     * DE: Fügt action sounds für das Spiel.
-     * EN: Adds action sounds for the game.
-     */
+ * DE: Fügt hinzu: action Töne.
+ * EN: Adds: action sounds.
+ */
     addActionSounds() {
         this.addSound("jump", "audio/jump.mp3", 0.55);
         this.addSound("splash", "audio/slime_splash.mp3", 0.55);
@@ -37,9 +37,9 @@ class SoundManager {
     }
 
     /**
-     * DE: Fügt boss sounds für das Spiel.
-     * EN: Adds boss sounds for the game.
-     */
+ * DE: Fügt hinzu: Boss Töne.
+ * EN: Adds: boss sounds.
+ */
     addBossSounds() {
         this.addSound("miniboss_llive", "audio/miniboss_llive.mp3", 0.50);
         this.addSound("miniboss_dead", "audio/miniboss_dead.mp3", 0.65);
@@ -50,13 +50,13 @@ class SoundManager {
     }
 
     /**
-     * DE: Fügt sound für das Spiel.
-     * EN: Adds sound for the game.
-     * @param {string} name - DE: Wert name. EN: Value name.
-     * @param {string} path - DE: Wert path. EN: Value path.
-     * @param {Object} volume - DE: Wert volume. EN: Value volume.
-     * @param {Object} loop - DE: Wert loop. EN: Value loop.
-     */
+ * DE: Fügt hinzu: Ton.
+ * EN: Adds: sound.
+ * @param {string} name - DE: Eingabewert. EN: Input value.
+ * @param {string} path - DE: Eingabewert. EN: Input value.
+ * @param {Object} volume - DE: Eingabewert. EN: Input value.
+ * @param {Object} loop - DE: Eingabewert. EN: Input value.
+ */
     addSound(name, path, volume, loop = false) {
         const sound = new Audio(path);
         sound.preload = "auto";
@@ -66,10 +66,10 @@ class SoundManager {
     }
 
     /**
-     * DE: Führt play im Spiel aus.
-     * EN: Runs play in the game.
-     * @param {string} name - DE: Wert name. EN: Value name.
-     */
+ * DE: Spielt.
+ * EN: Plays.
+ * @param {string} name - DE: Eingabewert. EN: Input value.
+ */
     play(name) {
         if (this.muted || !this.sounds[name]) return;
         const sound = this.sounds[name];
@@ -79,10 +79,10 @@ class SoundManager {
     }
 
     /**
-     * DE: Führt stop im Spiel aus.
-     * EN: Runs stop in the game.
-     * @param {string} name - DE: Wert name. EN: Value name.
-     */
+ * DE: Stoppt.
+ * EN: Stops.
+ * @param {string} name - DE: Eingabewert. EN: Input value.
+ */
     stop(name) {
         const sound = this.sounds[name];
         if (!sound) return;
@@ -91,18 +91,20 @@ class SoundManager {
     }
 
     /**
-     * DE: Stoppt all für das Spiel.
-     * EN: Stops all for the game.
-     */
+ * DE: Stoppt all.
+ * EN: Stops all.
+ */
     stopAll() {
-        Object.keys(this.sounds).forEach(name => this.stop(name));
+        for (const name in this.sounds) {
+            this.stop(name);
+        }
     }
 
     /**
-     * DE: Setzt muted für das Spiel.
-     * EN: Sets muted for the game.
-     * @param {Object} muted - DE: Wert muted. EN: Value muted.
-     */
+ * DE: Setzt muted.
+ * EN: Sets muted.
+ * @param {Object} muted - DE: Eingabewert. EN: Input value.
+ */
     setMuted(muted) {
         this.muted = muted;
         if (muted) this.stopAll();

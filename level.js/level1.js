@@ -31,7 +31,9 @@ function createLevelEnemies() {
  * EN: Creates small chickens for the game.
  */
 function createSmallChickens() {
-    return Array.from({ length: 28 }, (_, index) => createSmallChicken(index));
+    const enemies = [];
+    for (let index = 0; index < 28; index++) enemies.push(createSmallChicken(index));
+    return enemies;
 }
 
 /**
@@ -40,13 +42,15 @@ function createSmallChickens() {
  */
 function createSmallChicken(index) {
     const behindStart = index < 3;
-    const x = behindStart ? -600 + index * 120 + Math.random() * 20
-        : 1050 + (index - 3) * 190 + Math.random() * 70;
+    let x = 1050 + (index - 3) * 190 + Math.random() * 70;
+    if (behindStart) x = -600 + index * 120 + Math.random() * 20;
     const enemy = new chickenSmall(x);
     if (index % 4 !== 3) {
         const range = 110 + Math.random() * 100;
-        enemy.startPatrol(Math.max(behindStart ? -620 : 850, x - range),
-            Math.min(behindStart ? -300 : 5900, x + range));
+        let minLimit = 850;
+        let maxLimit = 5900;
+        if (behindStart) { minLimit = -620; maxLimit = -300; }
+        enemy.startPatrol(Math.max(minLimit, x - range), Math.min(maxLimit, x + range));
     }
     return enemy;
 }
@@ -56,10 +60,12 @@ function createSmallChicken(index) {
  * EN: Creates normal chickens for the game.
  */
 function createNormalChickens() {
-    return Array.from({ length: 10 }, (_, index) => {
+    const enemies = [];
+    for (let index = 0; index < 10; index++) {
         const x = 2700 + index * 220 + Math.random() * 180;
-        return new chicken(x);
-    });
+        enemies.push(new chicken(x));
+    }
+    return enemies;
 }
 
 /**
@@ -67,11 +73,13 @@ function createNormalChickens() {
  * EN: Creates level clouds for the game.
  */
 function createLevelClouds() {
-    return Array.from({ length: 14 }, (_, index) => {
+    const clouds = [];
+    for (let index = 0; index < 14; index++) {
         const x = -300 + index * 520 + Math.random() * 220;
         const y = 5 + Math.random() * 115;
-        return new cloud(x, y);
-    });
+        clouds.push(new cloud(x, y));
+    }
+    return clouds;
 }
 
 /**

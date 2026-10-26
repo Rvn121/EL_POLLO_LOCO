@@ -120,13 +120,16 @@ function bindKeyboardEvents() {
  * EN: Runs init title clouds in the game.
  */
 function initTitleClouds() {
-    titleClouds = Array.from({ length: 8 }, (_, index) => ({
-        x: index * 160 + Math.random() * 140,
-        y: 10 + Math.random() * 95,
-        width: 250 + Math.random() * 70,
-        height: 90 + Math.random() * 40,
-        speed: 0.25 + Math.random() * 0.25
-    }));
+    titleClouds = [];
+    for (let index = 0; index < 8; index++) {
+        titleClouds.push({
+            x: index * 160 + Math.random() * 140,
+            y: 10 + Math.random() * 95,
+            width: 250 + Math.random() * 70,
+            height: 90 + Math.random() * 40,
+            speed: 0.25 + Math.random() * 0.25
+        });
+    }
 }
 
 /**
@@ -283,7 +286,8 @@ function toggleMenuMute() {
  * EN: Updates menu mute button for the game.
  */
 function updateMenuMuteButton() {
-    menuMuteBtn.textContent = menuMuted ? "Music On" : "Music Off";
+    menuMuteBtn.textContent = "Music Off";
+    if (menuMuted) menuMuteBtn.textContent = "Music On";
     menuMuteBtn.setAttribute("aria-pressed", String(menuMuted));
 }
 
@@ -304,7 +308,8 @@ function toggleEffectsMute() {
  * EN: Updates effects mute button for the game.
  */
 function updateEffectsMuteButton() {
-    menuEffectsBtn.textContent = gameSounds.muted ? "Effects On" : "Effects Off";
+    menuEffectsBtn.textContent = "Effects Off";
+    if (gameSounds.muted) menuEffectsBtn.textContent = "Effects On";
     menuEffectsBtn.setAttribute("aria-pressed", String(gameSounds.muted));
 }
 
@@ -322,7 +327,8 @@ function toggleAllSounds() {
  */
 function updateAllSoundsButton() {
     const button = document.getElementById("allSoundsBtn");
-    button.textContent = gameSounds.muted ? "All Sounds On" : "All Sounds Off";
+    button.textContent = "All Sounds Off";
+    if (gameSounds.muted) button.textContent = "All Sounds On";
     button.setAttribute("aria-pressed", String(gameSounds.muted));
 }
 

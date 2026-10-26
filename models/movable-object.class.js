@@ -9,17 +9,17 @@ class MovableObject extends DrawableObject {
     hurtTimeout;
 
     /**
-     * DE: Bewegt right für das Spiel.
-     * EN: Moves right for the game.
-     */
+ * DE: Bewegt rechts.
+ * EN: Moves right.
+ */
     moveRight() {
         this.x += this.speed;
     }
 
     /**
-     * DE: Bewegt left für das Spiel.
-     * EN: Moves left for the game.
-     */
+ * DE: Bewegt links.
+ * EN: Moves left.
+ */
     moveLeft() {
         clearInterval(this.moveInterval);
         this.moveInterval = setInterval(() => {
@@ -29,11 +29,11 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * DE: Startet patrol für das Spiel.
-     * EN: Starts patrol for the game.
-     * @param {number} left - DE: Wert left. EN: Value left.
-     * @param {number} right - DE: Wert right. EN: Value right.
-     */
+ * DE: Startet patrol.
+ * EN: Starts patrol.
+ * @param {number} left - DE: Eingabewert. EN: Input value.
+ * @param {number} right - DE: Eingabewert. EN: Input value.
+ */
     startPatrol(left, right) {
         this.stopMoving();
         this.patrolDirection = 1;
@@ -47,17 +47,17 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * DE: Stoppt moving für das Spiel.
-     * EN: Stops moving for the game.
-     */
+ * DE: Stoppt moving.
+ * EN: Stops moving.
+ */
     stopMoving() {
         clearInterval(this.moveInterval);
     }
 
     /**
-     * DE: Löscht timers für das Spiel.
-     * EN: Clears timers for the game.
-     */
+ * DE: Leert Zeitgeber.
+ * EN: Clears timers.
+ */
     clearTimers() {
         clearInterval(this.moveInterval);
         clearInterval(this.animationInterval);
@@ -67,10 +67,10 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * DE: Prüft colliding für das Spiel.
-     * EN: Checks colliding for the game.
-     * @param {MovableObject} movableObject - DE: Wert movableObject. EN: Value movableObject.
-     */
+ * DE: Prüft, ob colliding.
+ * EN: Checks whether colliding.
+ * @param {MovableObject} movableObject - DE: Eingabewert. EN: Input value.
+ */
     isColliding(movableObject) {
         const ownHitbox = this.getHitbox();
         const otherHitbox = movableObject.getHitbox();

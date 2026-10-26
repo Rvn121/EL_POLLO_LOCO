@@ -14,17 +14,29 @@ class Endboss extends MovableObject {
     retreatUntil = 0;
     approachUntil = 0;
     IMAGES_WALKING = [1, 2, 3, 4].map(i => `img/4_enemie_boss_chicken/1_walk/G${i}.png`);
-    IMAGES_ALERT = Array.from({length: 8}, (_, i) => `img/4_enemie_boss_chicken/2_alert/G${i + 5}.png`);
-    IMAGES_ATTACK = Array.from({length: 8}, (_, i) => `img/4_enemie_boss_chicken/3_attack/G${i + 13}.png`);
+    IMAGES_ALERT = this.createBossImages("2_alert", 5, 12);
+    IMAGES_ATTACK = this.createBossImages("3_attack", 13, 20);
     IMAGES_HURT = [21, 22, 23].map(i => `img/4_enemie_boss_chicken/4_hurt/G${i}.png`);
     IMAGES_DEAD = [24, 25, 26].map(i => `img/4_enemie_boss_chicken/5_dead/G${i}.png`);
 
     /**
-     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
-     * EN: Creates the object and sets its initial values.
-     * @param {number} x - DE: x. EN: x.
-     * @param {Object} moving - DE: Wert moving. EN: Value moving.
-     */
+ * DE: Erstellt Boss Bilder.
+ * EN: Creates boss images.
+ * @param {number} x - DE: x. EN: x.
+ * @param {Object} moving - DE: Eingabewert. EN: Input value.
+ * @param {string} folder - Ordner / Folder.
+ * @param {number} first - Erstes Bild / First image.
+ * @param {number} last - Letztes Bild / Last image.
+ * @returns {string[]} Die Bildpfade / The image paths.
+ */
+    createBossImages(folder, first, last) {
+        const images = [];
+        for (let i = first; i <= last; i++) {
+            images.push(`img/4_enemie_boss_chicken/${folder}/G${i}.png`);
+        }
+        return images;
+    }
+
     constructor(x = 6100, moving = false) {
         super();
         this.x = x;
@@ -36,25 +48,28 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * DE: Verarbeitet bottle hit für das Spiel.
-     * EN: Handles bottle hit for the game.
-     */
+ * DE: Verarbeitet Flasche hit.
+ * EN: Processes bottle hit.
+ */
     takeBottleHit() {
         if (this.energy <= 0) return;
-        this.energy = Math.max(0, this.energy - (this.isMainBoss ? 20 : 100 / 3));
+        let damage = 100 / 3;
+        if (this.isMainBoss) damage = 20;
+        this.energy = Math.max(0, this.energy - damage);
         if (this.isMainBoss && this.healthPhases && this.energy > 0) {
             this.approachUntil = Date.now() + 1400;
             this.retreatUntil = Date.now() + 2800;
         }
-        this.setState(this.energy ? "hurt" : "dead");
+        if (this.energy) this.setState("hurt");
+        else this.setState("dead");
     }
 
     /**
-     * DE: Führt update im Spiel aus.
-     * EN: Runs update in the game.
-     * @param {number} delta - DE: Wert delta. EN: Value delta.
-     * @param {Object} player - DE: Wert player. EN: Value player.
-     */
+ * DE: Aktualisiert.
+ * EN: Updates.
+ * @param {number} delta - DE: Eingabewert. EN: Input value.
+ * @param {Object} player - DE: Eingabewert. EN: Input value.
+ */
     update(delta, player) {
         if (this.state === "finished") return;
         if (this.state === "falling") return this.updateFalling(delta);
@@ -71,11 +86,11 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * DE: Bewegt and attack für das Spiel.
-     * EN: Moves and attack for the game.
-     * @param {number} delta - DE: Wert delta. EN: Value delta.
-     * @param {Object} player - DE: Wert player. EN: Value player.
-     */
+ * DE: Bewegt and attack.
+ * EN: Moves and attack.
+ * @param {number} delta - DE: Eingabewert. EN: Input value.
+ * @param {Object} player - DE: Eingabewert. EN: Input value.
+ */
     moveAndAttack(delta, player) {
         const distance = Math.abs(player.x - this.x);
         if (this.healthPhases && this.energy <= 20) return this.chasePlayer(delta, player);
@@ -97,7 +112,8 @@ class Endboss extends MovableObject {
     /** DE: Nach einem Treffer nähert sich der Boss und zieht sich zurück. EN: Approaches after a hit, then retreats. */
     moveAfterHit(delta, player) {
         const approaching = Date.now() < this.approachUntil;
-        this.direction = player.x > this.x ? 1 : -1;
+        if (player.x > this.x) this.direction = 1;
+        else this.direction = -1;
         if (!approaching) this.direction *= -1;
         this.walk(delta);
     }
@@ -114,24 +130,26 @@ class Endboss extends MovableObject {
      * EN: Turns the boss towards the player.
      */
     facePlayer(player) {
-        this.direction = player.x > this.x ? 1 : -1;
+        if (player.x > this.x) this.direction = 1;
+        else this.direction = -1;
         this.otherDirection = this.direction > 0;
     }
 
     /**
-     * DE: Führt choose walking direction im Spiel aus.
-     * EN: Runs choose walking direction in the game.
-     */
+ * DE: Verarbeitet Laufen direction.
+ * EN: Processes walking direction.
+ */
     chooseWalkingDirection(player) {
-        const range = this.healthPhases ? 300 : 180;
+        let range = 180;
+        if (this.healthPhases) range = 300;
         if (this.x <= this.originX - range) this.direction = 1;
         if (this.x >= this.originX + range) this.direction = -1;
     }
 
     /**
-     * DE: Gibt movement speed für das Spiel.
-     * EN: Returns movement speed for the game.
-     */
+ * DE: Ermittelt Bewegung speed.
+ * EN: Gets movement speed.
+ */
     getMovementSpeed() {
         if (!this.healthPhases) return 0.09;
         if (this.energy <= 20) return 0.23;
@@ -157,15 +175,16 @@ class Endboss extends MovableObject {
      */
     beginAttack() {
         this.attackHitDone = false;
-        this.attackCooldown = this.healthPhases && this.energy <= 20 ? 900 : 1500;
+        this.attackCooldown = 1500;
+        if (this.healthPhases && this.energy <= 20) this.attackCooldown = 900;
         this.setState("attack");
     }
 
     /**
-     * DE: Setzt state für das Spiel.
-     * EN: Sets state for the game.
-     * @param {Object} state - DE: Wert state. EN: Value state.
-     */
+ * DE: Setzt state.
+ * EN: Sets state.
+ * @param {Object} state - DE: Eingabewert. EN: Input value.
+ */
     setState(state) {
         this.state = state;
         this.frame = 0;
@@ -174,9 +193,9 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * DE: Aktualisiert image für das Spiel.
-     * EN: Updates image for the game.
-     */
+ * DE: Aktualisiert Bild.
+ * EN: Updates image.
+ */
     updateImage() {
         const images = this.getStateImages();
         if (this.frame >= images.length) return this.finishAnimation();
@@ -191,15 +210,16 @@ class Endboss extends MovableObject {
         if (this.state === "hurt") return this.IMAGES_HURT;
         if (this.state === "dead") return this.IMAGES_DEAD;
         if (this.state === "attack") return this.IMAGES_ATTACK;
-        return this.moving ? this.IMAGES_WALKING : this.IMAGES_ALERT;
+        if (this.moving) return this.IMAGES_WALKING;
+        return this.IMAGES_ALERT;
     }
 
 
     /**
-     * DE: Bewegt den besiegten Boss nach unten aus dem Bild.
-     * EN: Moves the defeated boss downward offscreen.
-     * @param {number} delta - DE: Wert delta. EN: Value delta.
-     */
+ * DE: Aktualisiert falling.
+ * EN: Updates falling.
+ * @param {number} delta - DE: Eingabewert. EN: Input value.
+ */
     updateFalling(delta) {
         this.fallSpeed += 0.0012 * delta;
         this.y += this.fallSpeed * delta;
@@ -207,14 +227,15 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * DE: Beendet animation für das Spiel.
-     * EN: Finishes animation for the game.
-     */
+ * DE: Beendet animation.
+ * EN: Finishes animation.
+ */
     finishAnimation() {
         if (this.state === "dead") {
             this.isDead = true;
             this.isCollidable = false;
-            this.state = this.isMainBoss ? "finished" : "falling";
+            if (this.isMainBoss) this.state = "finished";
+            else this.state = "falling";
             this.fallSpeed = 0;
             return;
         }

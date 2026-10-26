@@ -6,12 +6,12 @@ class Level {
     level_end_x;
 
     /**
-     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
-     * EN: Creates the object and sets its initial values.
-     * @param {MovableObject[]} enemies - DE: Wert enemies. EN: Value enemies.
-     * @param {cloud[]} clouds - DE: Wert clouds. EN: Value clouds.
-     * @param {BackgroundObject[]} backgroundObjects - DE: Wert backgroundObjects. EN: Value backgroundObjects.
-     */
+ * DE: Verarbeitet.
+ * EN: Processes.
+ * @param {MovableObject[]} enemies - DE: Eingabewert. EN: Input value.
+ * @param {cloud[]} clouds - DE: Eingabewert. EN: Input value.
+ * @param {BackgroundObject[]} backgroundObjects - DE: Eingabewert. EN: Input value.
+ */
     constructor(enemies, clouds, backgroundObjects){
         this.enemies = enemies;
         this.clouds = clouds;

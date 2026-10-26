@@ -33,9 +33,9 @@ class StatusBar extends DrawableObject {
     }
 
     /**
-     * DE: Führt resolve image index im Spiel aus.
-     * EN: Runs resolve image index in the game.
-     */
+ * DE: Ermittelt Bild index.
+ * EN: Resolves image index.
+ */
     resolveImageIndex() {
         if (this.percentage > 80) return 5;
         if (this.percentage > 60) return 4;

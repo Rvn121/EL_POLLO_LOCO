@@ -457,7 +457,7 @@ canvas {
  * DE: Passt das Spiellayout an die verfügbare Höhe des Bildschirms an.
  * EN: Fits the game layout into the available screen height.
  */
-body:has(.page-shell) {
+body {
     height: 100vh;
     height: 100dvh;
     overflow: hidden;
@@ -509,6 +509,19 @@ body:has(.page-shell) {
 .modal-card {
     max-height: calc(100dvh - 24px);
     overflow-y: auto;
+}
+
+/* Keep the normal view compact and preserve the canvas proportions. */
+.canvas-section:not(:fullscreen) {
+    width: min(720px, calc(100vw - 24px), calc((100dvh - 150px) * 1.5));
+    height: auto;
+    grid-template-rows: auto auto auto;
+}
+
+.canvas-section:not(:fullscreen) .canvas-shell:not(:fullscreen) {
+    height: auto;
+    aspect-ratio: 3 / 2;
+    border-radius: 20px;
 }
 
 @media (max-height: 500px) and (orientation: landscape) {

@@ -24,18 +24,18 @@ class Coin extends DrawableObject {
     }
 
     /**
-     * DE: Führt collect im Spiel aus.
-     * EN: Runs collect in the game.
-     */
+ * DE: Sammelt.
+ * EN: Collects.
+ */
     collect() {
         this.collected = true;
     }
 
     /**
-     * DE: Führt update im Spiel aus.
-     * EN: Runs update in the game.
-     * @param {number} delta - DE: Wert delta. EN: Value delta.
-     */
+ * DE: Aktualisiert.
+ * EN: Updates.
+ * @param {number} delta - DE: Eingabewert. EN: Input value.
+ */
     update(delta) {
         if (this.collected) return this.flyAway(delta);
         this.phase += delta * 0.004;
@@ -54,9 +54,9 @@ class Coin extends DrawableObject {
     }
 
     /**
-     * DE: Prüft visible für das Spiel.
-     * EN: Checks visible for the game.
-     */
+ * DE: Prüft, ob sichtbar.
+ * EN: Checks whether visible.
+ */
     isVisible() {
         return !this.collected || this.y + this.height > this.vanishY;
     }

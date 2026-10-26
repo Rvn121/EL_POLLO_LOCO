@@ -19,24 +19,26 @@ class cloud extends MovableObject {
         super();
         const path = this.IMAGES[Math.floor(Math.random() * this.IMAGES.length)];
         this.loadImage(path);
-        this.x = x === null ? Math.random() * 2500 : x;
-        this.y = y === null ? this.getRandomY() : y;
+        this.x = x;
+        if (x === null) this.x = Math.random() * 2500;
+        this.y = y;
+        if (y === null) this.y = this.getRandomY();
         this.moveLeft();
     }
 
     /**
-     * DE: Gibt random y für das Spiel.
-     * EN: Returns random y for the game.
-     */
+ * DE: Ermittelt random y.
+ * EN: Gets random y.
+ */
     getRandomY() {
         return 5 + Math.random() * 110;
     }
 
     /**
-     * DE: Setzt position für das Spiel.
-     * EN: Resets position for the game.
-     * @param {number} x - DE: Wert x. EN: Value x.
-     */
+ * DE: Setzt zurück: Position.
+ * EN: Resets: position.
+ * @param {number} x - DE: Eingabewert. EN: Input value.
+ */
     resetPosition(x) {
         this.x = x;
         this.y = this.getRandomY();

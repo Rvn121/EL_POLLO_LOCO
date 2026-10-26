@@ -65,11 +65,11 @@ class Character extends CharacterBase {
     ];
 
     /**
-     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
-     * EN: Creates the object and sets its initial values.
-     * @param {Keyboard} keyboard - DE: keyboard. EN: keyboard.
-     * @param {Level} level - DE: Wert level. EN: Value level.
-     */
+ * DE: Verarbeitet.
+ * EN: Processes.
+ * @param {Keyboard} keyboard - DE: keyboard. EN: keyboard.
+ * @param {Level} level - DE: Eingabewert. EN: Input value.
+ */
     constructor(keyboard, level) {
         super();
         this.loadImage(this.IMAGES_WALKING[0]);
@@ -80,9 +80,9 @@ class Character extends CharacterBase {
     }
 
     /**
-     * DE: Lädt character images für das Spiel.
-     * EN: Loads character images for the game.
-     */
+ * DE: Lädt Spielfigur Bilder.
+ * EN: Loads character images.
+ */
     loadCharacterImages() {
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages(this.IMAGES_JUMPING);
@@ -91,9 +91,9 @@ class Character extends CharacterBase {
     }
 
     /**
-     * DE: Startet animation loop für das Spiel.
-     * EN: Starts animation loop for the game.
-     */
+ * DE: Startet animation Schleife.
+ * EN: Starts animation loop.
+ */
     startAnimationLoop() {
         this.animationInterval = setInterval(() => {
             if (window.gamePaused) return;
@@ -106,18 +106,18 @@ class Character extends CharacterBase {
     }
 
     /**
-     * DE: Führt should start idle im Spiel aus.
-     * EN: Runs should start idle in the game.
-     */
+ * DE: Prüft, ob start Leerlauf.
+ * EN: Checks whether start idle.
+ */
     shouldStartIdle() {
         const standingStill = !this.keyboard.LEFT && !this.keyboard.RIGHT;
         return standingStill && this.y === this.groundY && Date.now() - this.lastActivity >= 7000;
     }
 
     /**
-     * DE: Spielt walking animation für das Spiel.
-     * EN: Plays walking animation for the game.
-     */
+ * DE: Spielt Laufen animation.
+ * EN: Plays walking animation.
+ */
     playWalkingAnimation() {
         const path = this.IMAGES_WALKING[this.currentImage];
         this.img = this.imageCache[path];

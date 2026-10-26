@@ -23,19 +23,19 @@ class CollectibleBottle extends DrawableObject {
     }
 
     /**
-     * DE: Führt collect im Spiel aus.
-     * EN: Runs collect in the game.
-     */
+ * DE: Sammelt.
+ * EN: Collects.
+ */
     collect() {
         this.collected = true;
         this.respawnAt = 30000;
     }
 
     /**
-     * DE: Führt update im Spiel aus.
-     * EN: Runs update in the game.
-     * @param {number} delta - DE: Wert delta. EN: Value delta.
-     */
+ * DE: Aktualisiert.
+ * EN: Updates.
+ * @param {number} delta - DE: Eingabewert. EN: Input value.
+ */
     update(delta = 0) {
         if (!this.collected) return;
         this.respawnAt -= delta;
@@ -43,9 +43,9 @@ class CollectibleBottle extends DrawableObject {
     }
 
     /**
-     * DE: Führt respawn im Spiel aus.
-     * EN: Runs respawn in the game.
-     */
+ * DE: Verarbeitet.
+ * EN: Processes.
+ */
     respawn() {
         this.collected = false;
         this.img = this.imageCache[this.IMAGES[Math.floor(Math.random() * 2)]];

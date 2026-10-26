@@ -28,9 +28,10 @@ function createLevel2Chicken(index) {
     const small = index % 2 === 0;
     const smallIndex = index / 2;
     const behindStart = small && smallIndex < 3;
-    const x = small ? getSmallChickenX(smallIndex, behindStart)
-        : 1050 + index * 135 + Math.random() * 130;
-    const enemy = index % 2 ? new chicken(x) : new chickenSmall(x);
+    let x = 1050 + index * 135 + Math.random() * 130;
+    if (small) x = getSmallChickenX(smallIndex, behindStart);
+    let enemy = new chickenSmall(x);
+    if (index % 2) enemy = new chicken(x);
     if ((small && smallIndex % 5 !== 4) || (!small && index % 6 === 1)) {
         setLevel2Patrol(enemy, x, behindStart);
     }
@@ -52,8 +53,10 @@ function getSmallChickenX(index, behindStart) {
  */
 function setLevel2Patrol(enemy, x, behindStart) {
     const range = 140 + Math.random() * 160;
-    enemy.startPatrol(Math.max(behindStart ? -620 : 850, x - range),
-        Math.min(behindStart ? -300 : 10100, x + range));
+    let minLimit = 850;
+    let maxLimit = 10100;
+    if (behindStart) { minLimit = -620; maxLimit = -300; }
+    enemy.startPatrol(Math.max(minLimit, x - range), Math.min(maxLimit, x + range));
 }
 
 /**

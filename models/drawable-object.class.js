@@ -9,10 +9,10 @@ class DrawableObject {
     imageBounds = {};
 
     /**
-     * DE: Lädt ein einzelnes Bild für das Spiel.
-     * EN: Loads image for the game.
-     * @param {string} path - DE: path. EN: path.
-     */
+ * DE: Lädt Bild.
+ * EN: Loads image.
+ * @param {string} path - DE: path. EN: path.
+ */
     loadImage(path) {
         this.img = new Image();
         this.img.src = path;
@@ -53,14 +53,15 @@ class DrawableObject {
     }
 
     /**
-     * DE: Überträgt Bildkoordinaten auf Größe und Position des Objekts.
-     * EN: Scales image coordinates to the object size and position.
-     * @param {Object} bounds - DE: Wert bounds. EN: Value bounds.
-     */
+ * DE: Verarbeitet Trefferbereich.
+ * EN: Processes hitbox.
+ * @param {Object} bounds - DE: Eingabewert. EN: Input value.
+ */
     scaleHitbox(bounds) {
         const scaleX = this.width / this.img.naturalWidth;
         const scaleY = this.height / this.img.naturalHeight;
-        const left = this.otherDirection ? this.img.naturalWidth - bounds.right : bounds.left;
+        let left = bounds.left;
+        if (this.otherDirection) left = this.img.naturalWidth - bounds.right;
         return {
             x: this.x + left * scaleX,
             y: this.y + bounds.top * scaleY,
@@ -82,9 +83,9 @@ class DrawableObject {
     }
 
     /**
-     * DE: Erstellt measurement canvas für das Spiel.
-     * EN: Creates measurement canvas for the game.
-     */
+ * DE: Erstellt measurement canvas.
+ * EN: Creates measurement canvas.
+ */
     createMeasurementCanvas() {
         const canvas = document.createElement("canvas");
         canvas.width = this.img.naturalWidth;
@@ -93,12 +94,12 @@ class DrawableObject {
     }
 
     /**
-     * DE: Findet den Bereich der nicht transparenten Bildpixel.
-     * EN: Finds the area occupied by nontransparent pixels.
-     * @param {Uint8ClampedArray} pixels - DE: Wert pixels. EN: Value pixels.
-     * @param {number} width - DE: Wert width. EN: Value width.
-     * @param {number} height - DE: Wert height. EN: Value height.
-     */
+ * DE: Sucht opaque bounds.
+ * EN: Finds opaque bounds.
+ * @param {Uint8ClampedArray} pixels - DE: Eingabewert. EN: Input value.
+ * @param {number} width - DE: Eingabewert. EN: Input value.
+ * @param {number} height - DE: Eingabewert. EN: Input value.
+ */
     findOpaqueBounds(pixels, width, height) {
         const bounds = { left: width, top: height, right: 0, bottom: 0 };
         for (let y = 0; y < height; y++) {
@@ -106,16 +107,17 @@ class DrawableObject {
                 if (pixels[(y * width + x) * 4 + 3] > 0) this.expandBounds(bounds, x, y);
             }
         }
-        return bounds.right > bounds.left ? bounds : null;
+        if (bounds.right > bounds.left) return bounds;
+        return null;
     }
 
     /**
-     * DE: Führt expand bounds im Spiel aus.
-     * EN: Runs expand bounds in the game.
-     * @param {Object} bounds - DE: Wert bounds. EN: Value bounds.
-     * @param {number} x - DE: Wert x. EN: Value x.
-     * @param {number} y - DE: Wert y. EN: Value y.
-     */
+ * DE: Verarbeitet bounds.
+ * EN: Processes bounds.
+ * @param {Object} bounds - DE: Eingabewert. EN: Input value.
+ * @param {number} x - DE: Eingabewert. EN: Input value.
+ * @param {number} y - DE: Eingabewert. EN: Input value.
+ */
     expandBounds(bounds, x, y) {
         bounds.left = Math.min(bounds.left, x);
         bounds.top = Math.min(bounds.top, y);

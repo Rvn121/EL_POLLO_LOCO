@@ -7,13 +7,14 @@ class CharacterBase extends MovableObject {
     getPreviousFeet() {
         if (this.previousFeet !== null && this.previousFeet !== undefined) return this.previousFeet;
         const hitbox = this.getHitbox();
-        return hitbox ? hitbox.y : this.y;
+        if (hitbox) return hitbox.y;
+        return this.y;
     }
 
     /**
-     * DE: Aktualisiert movement für das Spiel.
-     * EN: Updates movement for the game.
-     */
+ * DE: Aktualisiert Bewegung.
+ * EN: Updates movement.
+ */
     updateMovement() {
         if (this.energy <= 0) return;
         this.updateHorizontalMovement();
@@ -22,21 +23,25 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Aktualisiert horizontal movement für das Spiel.
-     * EN: Updates horizontal movement for the game.
-     */
+ * DE: Aktualisiert horizontal Bewegung.
+ * EN: Updates horizontal movement.
+ */
     updateHorizontalMovement() {
         if (this.keyboard.RIGHT && !this.keyboard.LEFT) this.moveCharacterRight();
         if (this.keyboard.LEFT && !this.keyboard.RIGHT) this.moveCharacterLeft();
     }
 
     /**
-     * DE: Bewegt character right für das Spiel.
-     * EN: Moves character right for the game.
-     */
+ * DE: Bewegt Spielfigur rechts.
+ * EN: Moves character right.
+ */
     moveCharacterRight() {
-        const boss = this.level.enemies.find(enemy => enemy.isMainBoss);
-        const bossLimit = boss ? boss.x + boss.width + 120 : Infinity;
+        let boss;
+        for (const enemy of this.level.enemies) {
+            if (enemy.isMainBoss) { boss = enemy; break; }
+        }
+        let bossLimit = Infinity;
+        if (boss) bossLimit = boss.x + boss.width + 120;
         const maxX = Math.min(this.level.level_end_x - this.width, bossLimit);
         this.x = Math.min(maxX, this.x + this.speed);
         this.otherDirection = false;
@@ -44,9 +49,9 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Bewegt character left für das Spiel.
-     * EN: Moves character left for the game.
-     */
+ * DE: Bewegt Spielfigur links.
+ * EN: Moves character left.
+ */
     moveCharacterLeft() {
         const minX = this.level.level_start_x + 100;
         this.x = Math.max(minX, this.x - this.speed);
@@ -55,9 +60,9 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Aktualisiert jump input für das Spiel.
-     * EN: Updates jump input for the game.
-     */
+ * DE: Aktualisiert Sprung Eingabe.
+ * EN: Updates jump input.
+ */
     updateJumpInput() {
         const jumpKeyPressed = this.keyboard.UP;
         if (jumpKeyPressed && !this.jumpPressed) this.jump();
@@ -65,10 +70,10 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Prüft, ob der Sprung oberhalb des Gegners begonnen hat.
-     * EN: Checks whether a jump started above the enemy.
-     * @param {MovableObject} enemy - DE: Wert enemy. EN: Value enemy.
-     */
+ * DE: Lässt die Figur springen: started above Gegner.
+ * EN: Makes the character jump: started above enemy.
+ * @param {MovableObject} enemy - DE: Eingabewert. EN: Input value.
+ */
     jumpStartedAboveEnemy(enemy) {
         const target = enemy.getHitbox();
         if (!target) return false;
@@ -77,10 +82,10 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Prüft, ob die Figur fallend von oben auf ein Objekt trifft.
-     * EN: Checks whether the player falls onto an object from above.
-     * @param {MovableObject} enemy - DE: Wert enemy. EN: Value enemy.
-     */
+ * DE: Prüft, ob descending onto.
+ * EN: Checks whether descending onto.
+ * @param {MovableObject} enemy - DE: Eingabewert. EN: Input value.
+ */
     isDescendingOnto(enemy) {
         const box = this.getHitbox();
         const target = enemy.getHitbox();
@@ -89,30 +94,31 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Wendet gravity für das Spiel.
-     * EN: Applies gravity for the game.
-     */
+ * DE: Wendet an: gravity.
+ * EN: Applies: gravity.
+ */
     applyGravity() {
         const box = this.getHitbox();
-        this.previousFeet = box ? box.y + box.height : this.y + this.height;
+        this.previousFeet = this.y + this.height;
+        if (box) this.previousFeet = box.y + box.height;
         this.y -= this.speedY;
         if (this.y < this.groundY) return this.continueJump();
         this.landOnGround();
     }
 
     /**
-     * DE: Führt continue jump im Spiel aus.
-     * EN: Runs continue jump in the game.
-     */
+ * DE: Verarbeitet Sprung.
+ * EN: Processes jump.
+ */
     continueJump() {
         this.speedY -= this.gravity;
         this.animateJump();
     }
 
     /**
-     * DE: Führt land on ground im Spiel aus.
-     * EN: Runs land on ground in the game.
-     */
+ * DE: Verarbeitet on Boden.
+ * EN: Processes on ground.
+ */
     landOnGround() {
         if (this.jumpFrame > 0 && !this.isHurt()) this.resetWalkingImage();
         this.y = this.groundY;
@@ -120,9 +126,9 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Setzt walking image für das Spiel.
-     * EN: Resets walking image for the game.
-     */
+ * DE: Setzt zurück: Laufen Bild.
+ * EN: Resets: walking image.
+ */
     resetWalkingImage() {
         this.img = this.imageCache[this.IMAGES_WALKING[0]];
         this.currentImage = 0;
@@ -130,9 +136,9 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Führt animate jump im Spiel aus.
-     * EN: Runs animate jump in the game.
-     */
+ * DE: Animiert Sprung.
+ * EN: Animates jump.
+ */
     animateJump() {
         const duration = Math.ceil(2 * this.jumpSpeed / this.gravity + 1);
         const frame = Math.floor(this.jumpFrame * this.IMAGES_JUMPING.length / duration);
@@ -142,9 +148,9 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Führt jump im Spiel aus.
-     * EN: Runs jump in the game.
-     */
+ * DE: Lässt die Figur springen:.
+ * EN: Makes the character jump:.
+ */
     jump() {
         if (this.y !== this.groundY) return;
         this.speedY = this.jumpSpeed;
@@ -155,9 +161,9 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Führt bounce from enemy im Spiel aus.
-     * EN: Runs bounce from enemy in the game.
-     */
+ * DE: Verarbeitet from Gegner.
+ * EN: Processes from enemy.
+ */
     bounceFromEnemy() {
         this.speedY = this.jumpSpeed * 0.6;
         this.jumpFrame = 0;
@@ -165,10 +171,10 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Verarbeitet damage für das Spiel.
-     * EN: Handles damage for the game.
-     * @param {number} damage - DE: damage. EN: damage.
-     */
+ * DE: Verarbeitet Schaden.
+ * EN: Processes damage.
+ * @param {number} damage - DE: damage. EN: damage.
+ */
     takeDamage(damage) {
         const nextEnergy = Math.max(0, this.energy - damage);
         if (this.energy <= 0) return;
@@ -181,9 +187,9 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Führt die im Spiel aus.
-     * EN: Runs die in the game.
-     */
+ * DE: Beendet das Leben der Figur.
+ * EN: Ends the character life.
+ */
     die() {
         this.energy = 0;
         this.clearTimers();
@@ -218,17 +224,17 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Prüft hurt für das Spiel.
-     * EN: Checks hurt for the game.
-     */
+ * DE: Prüft, ob Verletzung.
+ * EN: Checks whether hurt.
+ */
     isHurt() {
         return Date.now() - this.lastHit < 270;
     }
 
     /**
-     * DE: Zeigt hurt image für das Spiel.
-     * EN: Shows hurt image for the game.
-     */
+ * DE: Zeigt Verletzung Bild.
+ * EN: Shows hurt image.
+ */
     showHurtImage() {
         clearTimeout(this.hurtTimeout);
         this.img = this.imageCache[this.HURT_IMAGE];
@@ -239,18 +245,18 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Zeigt standing image für das Spiel.
-     * EN: Shows standing image for the game.
-     */
+ * DE: Zeigt standing Bild.
+ * EN: Shows standing image.
+ */
     showStandingImage() {
         if (this.energy <= 0 || this.idleStarted || this.y !== this.groundY) return;
         this.img = this.imageCache[this.IMAGES_WALKING[0]];
     }
 
     /**
-     * DE: Führt mark activity im Spiel aus.
-     * EN: Runs mark activity in the game.
-     */
+ * DE: Markiert activity.
+ * EN: Marks activity.
+ */
     markActivity() {
         this.lastActivity = Date.now();
         if (this.idleStarted) this.stopIdleAnimation();
@@ -291,9 +297,9 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Stoppt idle animation für das Spiel.
-     * EN: Stops idle animation for the game.
-     */
+ * DE: Stoppt Leerlauf animation.
+ * EN: Stops idle animation.
+ */
     stopIdleAnimation() {
         this.idleStarted = false;
         gameSounds.stop("snoring");
@@ -303,9 +309,9 @@ class CharacterBase extends MovableObject {
     }
 
     /**
-     * DE: Löscht timers für das Spiel.
-     * EN: Clears timers for the game.
-     */
+ * DE: Leert Zeitgeber.
+ * EN: Clears timers.
+ */
     clearTimers() {
         super.clearTimers();
         this.stopIdleAnimation();

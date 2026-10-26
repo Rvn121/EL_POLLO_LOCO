@@ -33,10 +33,10 @@ class ThrowableBottle extends DrawableObject {
     }
 
     /**
-     * DE: Führt update im Spiel aus.
-     * EN: Runs update in the game.
-     * @param {number} delta - DE: Wert delta. EN: Value delta.
-     */
+ * DE: Aktualisiert.
+ * EN: Updates.
+ * @param {number} delta - DE: Eingabewert. EN: Input value.
+ */
     update(delta) {
         if (this.state === "done") return;
         this.elapsed += delta;
