@@ -26,14 +26,12 @@ class World extends WorldBase {
     coins = [];
     thrownBottles = [];
     lastUpdate = Date.now();
-    /**
-     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
-     * EN: Creates the object and sets its initial values.
-     * @param {HTMLCanvasElement} canvas - DE: canvas. EN: canvas.
-     * @param {Keyboard} keyboard - DE: keyboard. EN: keyboard.
-     * @param {Function} onGameOver - DE: onGameOver. EN: onGameOver.
-     * @param {number} levelNumber - DE: levelNumber. EN: levelNumber.
-     */
+    /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values.
+ * @param {HTMLElement} canvas - DE: Parameter canvas. EN: canvas parameter.
+ * @param {*} keyboard - DE: Parameter keyboard. EN: keyboard parameter.
+ * @param {*} onGameOver - DE: Parameter onGameOver. EN: onGameOver parameter.
+ * @param {number} [levelNumber] - DE: Parameter levelNumber. EN: levelNumber parameter.
+ */
     constructor(canvas, keyboard, onGameOver, levelNumber = 1) {
         super();
         this.setupCanvas(canvas, keyboard, onGameOver);
@@ -42,7 +40,11 @@ class World extends WorldBase {
         this.startCollisionLoop();
         this.draw();
     }
-    /** DE: Richtet ein: canvas. EN: Sets up: canvas. */
+    /** DE: Richtet ein canvas. EN: Sets up canvas.
+ * @param {HTMLElement} canvas - DE: Parameter canvas. EN: canvas parameter.
+ * @param {*} keyboard - DE: Parameter keyboard. EN: keyboard parameter.
+ * @param {*} onGameOver - DE: Parameter onGameOver. EN: onGameOver parameter.
+ */
     setupCanvas(canvas, keyboard, onGameOver) {
         this.ctx = canvas.getContext("2d");
         this.canvas = canvas;
@@ -53,7 +55,9 @@ class World extends WorldBase {
         this.winImage = new Image();
         this.winImage.src = "img/You won, you lost/You won A.png";
     }
-    /** DE: Erstellt Level, Spielfigur und Statusanzeigen. EN: Creates the level, player, and status bars. */
+    /** DE: Erstellt Level, Spielfigur und Statusanzeigen. EN: Creates the level, player, and status bars.
+ * @param {number} levelNumber - DE: Parameter levelNumber. EN: levelNumber parameter.
+ */
     setupWorld(levelNumber) {
         this.levelNumber = levelNumber;
         if (levelNumber === 2) this.level = createLevel2();
@@ -66,25 +70,43 @@ class World extends WorldBase {
         this.character.x = this.characterScreenX - this.camera_x;
         this.isPaused = true;
     }
-    /** DE: Startet die regelmäßige Aktualisierung des Spiels. EN: Starts game loop for the game. */
+    /** DE: Startet Spiel loop. EN: Starts game loop. */
     startGameLoop() {
         this.gameLoopInterval = setInterval(() => this.updateGame(), 1000 / 60);
     }
-    /** DE: Aktualisiert die Spielwelt nur, wenn das Spiel aktiv ist. EN: Updates the world only while the game is running. */
+    /** DE: Aktualisiert die Spielwelt nur, wenn das Spiel aktiv ist. EN: Updates the world only while the game is running.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
     updateGame() {
         if (this.isDisposed || this.isPaused) return;
         this.updateAmbientSounds();
         this.updateClouds();
         if (this.isGameOver || this.isWin) return;
         if (this.character.energy <= 0) return this.checkCharacterDeath();
+        if (this.checkChickenEscape()) return;
         this.updateActiveGame();
     }
-    /** DE: Prüft Spielfigur Tod. EN: Checks character death. */
+    /** DE: Prüft, ob ein lebendes Huhn links aus dem Level entkommen ist. EN: Checks whether a living chicken escaped beyond the left level edge.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
+    checkChickenEscape() {
+        let escaped = false;
+        for (let i = 0; i < this.level.enemies.length; i++) {
+            const enemy = this.level.enemies[i];
+            const isChicken = enemy instanceof chicken || enemy instanceof chickenSmall;
+            if (isChicken && !enemy.isDead && enemy.x + enemy.width < this.level.level_start_x) escaped = true;
+        }
+        if (escaped) this.triggerGameOver("Chickens escaped!");
+        return escaped;
+    }
+
+    /** DE: Prüft, ob die Todesanimation der Spielfigur beendet ist. EN: Checks whether the character death animation has finished. */
     checkCharacterDeath() {
         if (this.character.deathFinished) this.triggerGameOver();
     }
     /** DE: Aktualisiert Bewegung, Kamera und eingesammelte Gegenstände. EN: Updates movement, camera, and collectibles. */
     updateActiveGame() {
+        this.updateBossUnlock();
         this.character.updateMovement();
         this.updateFootsteps();
         this.checkBossApproach();
@@ -113,23 +135,28 @@ class World extends WorldBase {
         if (moving && onGround) gameSounds.play("steps");
         else gameSounds.stop("steps");
     }
-    /** DE: Erkennt sichtbare Minibosse und spielt ihre Auftritts- und Todessounds. EN: Detects visible mini bosses and plays their entrance and death sounds. */
+    /** DE: Prüft die Geräusche der Minibosse. EN: Updates mini-boss sounds. */
     updateMiniBossSounds() {
-        this.level.enemies.forEach(boss => {
-            if (!(boss instanceof MiniBoss)) return;
-            const visible = boss.x + boss.width > -this.camera_x &&
-                boss.x < -this.camera_x + this.canvas.width;
-            if (visible && this.minibossSoundIds.indexOf(boss) === -1 && !boss.isDead) {
-                this.minibossSoundIds.push(boss);
-                gameSounds.play("miniboss_llive");
-            }
-            if (boss.energy <= 0 && this.minibossDeadIds.indexOf(boss) === -1) {
-                this.minibossDeadIds.push(boss);
-                gameSounds.play("miniboss_dead");
-            }
-        });
+        this.level.enemies.forEach(boss => this.checkMiniBossSound(boss));
     }
-    /** DE: Startet den Endboss-Sound bei ausreichender Nähe. EN: Starts the boss sound when the player gets close enough. */
+
+    /** DE: Spielt Auftritts- und Todesgeräusche eines Minibosses. EN: Plays a mini-boss entrance and death sounds.
+ * @param {*} boss - DE: Parameter boss. EN: boss parameter.
+ */
+    checkMiniBossSound(boss) {
+        if (!(boss instanceof MiniBoss)) return;
+        const visible = boss.x + boss.width > -this.camera_x &&
+            boss.x < -this.camera_x + this.canvas.width;
+        if (visible && this.minibossSoundIds.indexOf(boss) === -1 && !boss.isDead) {
+            this.minibossSoundIds.push(boss);
+            gameSounds.play("miniboss_llive");
+        }
+        if (boss.energy <= 0 && this.minibossDeadIds.indexOf(boss) === -1) {
+            this.minibossDeadIds.push(boss);
+            gameSounds.play("miniboss_dead");
+        }
+    }
+    /** DE: Prüft Boss approach. EN: Checks boss approach. */
     checkBossApproach() {
         const boss = this.getBoss();
         if (!boss || !this.bossUnlocked || this.bossSoundPlayed) return;
@@ -147,7 +174,7 @@ class World extends WorldBase {
             this.checkCollectibleCollisions();
         }, 1000 / 60);
     }
-    /** DE: Verarbeitet Sammelobjekte. EN: Processes collectibles. */
+    /** DE: Richtet ein collectibles. EN: Configures collectibles. */
     configureCollectibles() {
         this.setupBottleBar();
         this.setupCoinBar();
@@ -155,33 +182,33 @@ class World extends WorldBase {
         this.bottles = this.createBottles();
         this.coins = this.createCoins();
     }
-    /** DE: Richtet ein: Flasche Leiste. EN: Sets up: bottle bar. */
+
+    /** DE: Richtet ein Flasche Statusleiste. EN: Sets up bottle bar. */
     setupBottleBar() {
-        this.bottleBar.IMAGES_HEALTH = [0,20,40,60,80,100].map(n =>
-            `img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/${n}.png`);
+        this.bottleBar.IMAGES_HEALTH = this.createBarImages("img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/", "");
         this.bottleBar.loadImages(this.bottleBar.IMAGES_HEALTH);
         this.bottleBar.y = 42;
         this.bottleBar.setPercentage(0);
     }
-    /** DE: Richtet ein: Münze Leiste. EN: Sets up: coin bar. */
+    /** DE: Richtet ein Münze Statusleiste. EN: Sets up coin bar. */
     setupCoinBar() {
-        this.coinBar.IMAGES_HEALTH = [0,20,40,60,80,100].map(n =>
-            `img/7_statusbars/1_statusbar/1_statusbar_coin/green/${n}.png`);
+        this.coinBar.IMAGES_HEALTH = this.createBarImages("img/7_statusbars/1_statusbar/1_statusbar_coin/green/", "");
         this.coinBar.loadImages(this.coinBar.IMAGES_HEALTH);
         this.coinBar.y = 84;
         this.coinBar.setPercentage(0);
     }
-    /** DE: Richtet ein: Boss Leiste. EN: Sets up: boss bar. */
+    /** DE: Richtet ein Boss Statusleiste. EN: Sets up boss bar. */
     setupBossBar() {
         this.bossBar = new StatusBar();
-        this.bossBar.IMAGES_HEALTH = [0,20,40,60,80,100].map(n =>
-            `img/7_statusbars/2_statusbar_endboss/blue/blue${n}.png`);
+        this.bossBar.IMAGES_HEALTH = this.createBarImages("img/7_statusbars/2_statusbar_endboss/blue/blue", "");
         this.bossBar.loadImages(this.bossBar.IMAGES_HEALTH);
         this.bossBar.setPercentage(100);
         this.bossBar.x = this.canvas.width - this.bossBar.width - 20;
         this.bossBar.y = 0;
     }
-    /** DE: Verteilt einsammelbare Flaschen im Level. EN: Creates bottles for the game. */
+    /** DE: Erstellt Flaschen. EN: Creates bottles.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
     createBottles() {
         let count = 8;
         if (this.levelNumber === 2) count = 9;
@@ -193,7 +220,9 @@ class World extends WorldBase {
         }
         return bottles;
     }
-    /** DE: Verteilt Münzen im Level. EN: Creates coins for the game. */
+    /** DE: Erstellt Münzen. EN: Creates coins.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
     createCoins() {
         const count = 50;
         const coins = [];
@@ -201,34 +230,14 @@ class World extends WorldBase {
         return coins;
     }
 
-    /** DE: Erstellt Münze. EN: Creates coin. */
-    createCoin(index, count) {
-        const x = this.getCoinX(index, count);
-        let high = index % 3 === 0;
-        if (this.levelNumber === 2) high = index % 2 === 0;
-        let y = 245 + Math.random() * 30;
-        if (high) y = 140 + Math.random() * 35;
-        const coin = new Coin(x, y);
-        coin.behindCharacter = index % 2 === 0;
-        return coin;
-    }
 
-    /** DE: Ermittelt Münze x. EN: Gets coin x. */
-    getCoinX(index, count) {
-        const behindCount = 8;
-        const minX = this.level.level_start_x + 100;
-        const maxX = this.getBoss().x - 1150;
-        if (index < behindCount) return minX + (50 - minX) * (index + 0.4) / behindCount;
-        return 450 + (maxX - 450) * (index - behindCount + 0.4) / (count - behindCount);
-    }
-
-    /** DE: Aktualisiert Münze Leiste. EN: Updates coin bar. */
+    /** DE: Aktualisiert Münze Statusleiste. EN: Updates coin bar. */
     updateCoinBar() {
         const percentage = Math.min(100, Math.floor(this.coinInventory / 10) * 20);
         this.coinBar.setPercentage(percentage);
     }
 
-    /** DE: Startet das Level nach der Einblendung. EN: Starts level for the game. */
+    /** DE: Startet Level. EN: Starts level. */
     startLevel() {
         this.levelIntroActive = false;
         this.isPaused = false;
@@ -236,7 +245,7 @@ class World extends WorldBase {
         this.character.lastActivity = Date.now();
     }
 
-    /** DE: Aktualisiert Sammelobjekte. EN: Updates collectibles. */
+    /** DE: Aktualisiert collectibles. EN: Updates collectibles. */
     updateCollectibles() {
         const now = Date.now();
         const delta = Math.min(45, now - this.lastUpdate);
@@ -247,7 +256,9 @@ class World extends WorldBase {
         this.updateThrownBottles(delta);
     }
 
-    /** DE: Aktualisiert bosses. EN: Updates bosses. */
+    /** DE: Aktualisiert bosses. EN: Updates bosses.
+ * @param {number} delta - DE: Parameter delta. EN: delta parameter.
+ */
     updateBosses(delta) {
         const bosses = [];
         for (const enemy of this.level.enemies) {
@@ -262,7 +273,9 @@ class World extends WorldBase {
         if (this.character.energy <= 0 && this.character.deathFinished) this.triggerGameOver();
     }
 
-    /** DE: Aktualisiert geworfen Flaschen. EN: Updates thrown bottles. */
+    /** DE: Aktualisiert thrown Flaschen. EN: Updates thrown bottles.
+ * @param {number} delta - DE: Parameter delta. EN: delta parameter.
+ */
     updateThrownBottles(delta) {
         this.thrownBottles.forEach(b => this.updateThrownBottle(b, delta));
         const activeBottles = [];
@@ -272,11 +285,9 @@ class World extends WorldBase {
         this.thrownBottles = activeBottles;
     }
 
-    /**
- * DE: Aktualisiert geworfen Flasche.
- * EN: Updates thrown bottle.
- * @param {ThrowableBottle} bottle - DE: Eingabewert. EN: Input value.
- * @param {number} delta - DE: Eingabewert. EN: Input value.
+    /** DE: Aktualisiert thrown Flasche. EN: Updates thrown bottle.
+ * @param {*} bottle - DE: Parameter bottle. EN: bottle parameter.
+ * @param {number} delta - DE: Parameter delta. EN: delta parameter.
  */
     updateThrownBottle(bottle, delta) {
         const wasFlying = bottle.state === "flying";
@@ -286,10 +297,8 @@ class World extends WorldBase {
         this.level.enemies.forEach(enemy => this.hitEnemyWithBottle(bottle, enemy));
     }
 
-    /**
- * DE: Wendet an: Aufprall Schaden.
- * EN: Applies: splash damage.
- * @param {ThrowableBottle} bottle - DE: Eingabewert. EN: Input value.
+    /** DE: Verteilt den Flaschenschaden an Gegner am Aufprallpunkt. EN: Applies splash damage to enemies around the impact point.
+ * @param {*} bottle - DE: Parameter bottle. EN: bottle parameter.
  */
     applySplashDamage(bottle) {
         const x = bottle.x + bottle.width / 2;
@@ -303,14 +312,12 @@ class World extends WorldBase {
         });
     }
 
-    /**
-     * DE: Prüft einen Treffer im Umkreis von 13 Pixeln um den Aufprallpunkt.
-     * EN: Checks a hit within 13 pixels of the impact point.
-     * @param {number} x - Aufprall X / Impact X.
-     * @param {number} y - Aufprall Y / Impact Y.
-     * @param {Object} area - Trefferfläche / Hit area.
-     * @returns {boolean} Treffer / Hit.
-     */
+    /** DE: Prüft, ob ein Gegner innerhalb des Aufprallradius liegt. EN: Checks whether an enemy is inside the splash radius.
+ * @param {number} x - DE: Parameter x. EN: x parameter.
+ * @param {number} y - DE: Parameter y. EN: y parameter.
+ * @param {*} area - DE: Parameter area. EN: area parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
     isWithinSplashRadius(x, y, area) {
         const nearestX = Math.max(area.x, Math.min(x, area.x + area.width));
         const nearestY = Math.max(area.y, Math.min(y, area.y + area.height));
@@ -319,22 +326,18 @@ class World extends WorldBase {
         return dx * dx + dy * dy <= 13 * 13;
     }
 
-    /**
-     * DE: Gibt beim Boss die gesamte Zeichenfläche als Trefferbereich zurück.
-     * EN: Uses the entire drawn rectangle as the boss hit area.
-     * @param {MovableObject} enemy - Der Gegner / The enemy.
-     * @returns {Object|null} Trefferbereich / Hit area.
-     */
+    /** DE: Bestimmt die Trefferfläche für einen Flaschenaufprall. EN: Determines the hit area for a bottle impact.
+ * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
     getBottleTargetArea(enemy) {
         if (!(enemy instanceof Endboss)) return enemy.getHitbox();
         return { x: enemy.x, y: enemy.y, width: enemy.width, height: enemy.height };
     }
 
-    /**
- * DE: Verursacht Schaden an Gegner with Flasche.
- * EN: Damages enemy with bottle.
- * @param {MovableObject} enemy - DE: Eingabewert. EN: Input value.
- * @param {ThrowableBottle} bottle - DE: Eingabewert. EN: Input value.
+    /** DE: Verarbeitet enemy with Flasche. EN: Handles enemy with bottle.
+ * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
+ * @param {*} bottle - DE: Parameter bottle. EN: bottle parameter.
  */
     damageEnemyWithBottle(enemy, bottle) {
         if (!bottle.damagedEnemies) bottle.damagedEnemies = [];
@@ -351,11 +354,9 @@ class World extends WorldBase {
         }
     }
 
-    /**
- * DE: Prüft Treffer auf Gegner with Flasche.
- * EN: Checks hits on enemy with bottle.
- * @param {CollectibleBottle} bottle - DE: bottle. EN: bottle.
- * @param {MovableObject} enemy - DE: enemy. EN: enemy.
+    /** DE: Verarbeitet enemy with Flasche. EN: Handles enemy with bottle.
+ * @param {*} bottle - DE: Parameter bottle. EN: bottle parameter.
+ * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
  */
     hitEnemyWithBottle(bottle, enemy) {
         if (bottle.state !== "flying" || enemy.isDead) return;
@@ -368,12 +369,10 @@ class World extends WorldBase {
         this.damageEnemyWithBottle(enemy, bottle);
     }
 
-    /**
-     * DE: Platziert die Flasche direkt an der getroffenen Gegnerfläche.
-     * EN: Places the bottle at the point where it touches the enemy.
-     * @param {ThrowableBottle} bottle - Flasche / Bottle.
-     * @param {MovableObject} enemy - Gegner / Enemy.
-     */
+    /** DE: Verarbeitet Flasche at impact. EN: Handles bottle at impact.
+ * @param {*} bottle - DE: Parameter bottle. EN: bottle parameter.
+ * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
+ */
     placeBottleAtImpact(bottle, enemy) {
         const area = this.getBottleTargetArea(enemy);
         const centerX = bottle.x + bottle.width / 2;
@@ -384,11 +383,10 @@ class World extends WorldBase {
         bottle.y = y - bottle.height / 2;
     }
 
-    /**
- * DE: Verarbeitet overlap.
- * EN: Processes overlap.
- * @param {DrawableObject} a - DE: Eingabewert. EN: Input value.
- * @param {DrawableObject} b - DE: Eingabewert. EN: Input value.
+    /** DE: Prüft, ob sich zwei rechteckige Bereiche überschneiden. EN: Checks whether two rectangular areas overlap.
+ * @param {*} a - DE: Parameter a. EN: a parameter.
+ * @param {*} b - DE: Parameter b. EN: b parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     boxesOverlap(a, b) {
         const aa = a.getHitbox(), bb = this.getBottleTargetArea(b);

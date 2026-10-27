@@ -1,14 +1,12 @@
-/**
- * DE: Erstellt das zweite Level mit Gegnern, Wolken und Hintergründen.
- * EN: Creates the second level with enemies, clouds, and backgrounds.
+/** DE: Erstellt das zweite Level mit Gegnern, Wolken und Hintergründen. EN: Creates the second level with enemies, clouds, and backgrounds.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
 function createLevel2() {
     return new Level(createLevel2Enemies(), createLevelClouds(), createLevel2Backgrounds());
 }
 
-/**
- * DE: Erstellt die Gegner und Bosse für Level 2.
- * EN: Creates enemies and bosses for level 2.
+/** DE: Erstellt die Gegner und Bosse für Level 2. EN: Creates enemies and bosses for level 2.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
 function createLevel2Enemies() {
     const enemies = [];
@@ -20,9 +18,9 @@ function createLevel2Enemies() {
     return enemies;
 }
 
-/**
- * DE: Erstellt level2chicken für das Spiel.
- * EN: Creates level2chicken for the game.
+/** DE: Erstellt Level 2 Huhn. EN: Creates level 2 chicken.
+ * @param {number} index - DE: Parameter index. EN: index parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
 function createLevel2Chicken(index) {
     const small = index % 2 === 0;
@@ -38,18 +36,20 @@ function createLevel2Chicken(index) {
     return enemy;
 }
 
-/**
- * DE: Gibt small chicken x für das Spiel.
- * EN: Returns small chicken x for the game.
+/** DE: Bestimmt die Startposition eines kleinen Huhns. EN: Calculates the start position of a small chicken.
+ * @param {number} index - DE: Parameter index. EN: index parameter.
+ * @param {*} behindStart - DE: Parameter behindStart. EN: behindStart parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
 function getSmallChickenX(index, behindStart) {
     if (behindStart) return -600 + index * 120 + Math.random() * 20;
     return 1050 + (index - 3) * 335 + Math.random() * 80;
 }
 
-/**
- * DE: Setzt level2patrol für das Spiel.
- * EN: Sets level2patrol for the game.
+/** DE: Setzt Level 2 Patrouille. EN: Sets level 2 patrol.
+ * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
+ * @param {number} x - DE: Parameter x. EN: x parameter.
+ * @param {*} behindStart - DE: Parameter behindStart. EN: behindStart parameter.
  */
 function setLevel2Patrol(enemy, x, behindStart) {
     const range = 140 + Math.random() * 160;
@@ -59,9 +59,8 @@ function setLevel2Patrol(enemy, x, behindStart) {
     enemy.startPatrol(Math.max(minLimit, x - range), Math.min(maxLimit, x + range));
 }
 
-/**
- * DE: Erstellt level2backgrounds für das Spiel.
- * EN: Creates level2backgrounds for the game.
+/** DE: Erstellt Level 2 backgrounds. EN: Creates level 2 backgrounds.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
 function createLevel2Backgrounds() {
     const backgrounds = createLevelBackgrounds();
@@ -71,5 +70,6 @@ function createLevel2Backgrounds() {
         images.forEach(path => extra.push(new BackgroundObject(
             "img/5_background/layers/" + path.replace("air.png", "air.png"), i * 720)));
     }
-    return [...backgrounds, ...extra];
+    for (let i = 0; i < extra.length; i++) backgrounds.push(extra[i]);
+    return backgrounds;
 }

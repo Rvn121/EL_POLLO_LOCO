@@ -8,21 +8,17 @@ class DrawableObject {
     currentImage = 0;
     imageBounds = {};
 
-    /**
- * DE: Lädt Bild.
- * EN: Loads image.
- * @param {string} path - DE: path. EN: path.
+    /** DE: Lädt Bild. EN: Loads image.
+ * @param {string} path - DE: Parameter path. EN: path parameter.
  */
     loadImage(path) {
         this.img = new Image();
         this.img.src = path;
     }
 
-    /**
-     * DE: Lädt mehrere Bilder in den Bildspeicher.
-     * EN: Loads images for the game.
-     * @param {string[]} images - DE: images. EN: images.
-     */
+    /** DE: Lädt Bilder. EN: Loads images.
+ * @param {Array} images - DE: Parameter images. EN: images parameter.
+ */
     loadImages(images) {
         images.forEach(path => {
             const img = new Image();
@@ -31,10 +27,9 @@ class DrawableObject {
         });
     }
 
-    /**
-     * DE: Berechnet den sichtbaren Trefferbereich der aktuellen Grafik.
-     * EN: Calculates the visible hitbox of the current image.
-     */
+    /** DE: Berechnet die Hitbox des aktuellen Bildes. EN: Calculates the hitbox of the current image.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
     getHitbox() {
         if (!this.img || !this.img.complete || !this.img.naturalWidth) return null;
         if (!this.img.visibleBoundsCalculated) this.cacheImageBounds();
@@ -43,19 +38,30 @@ class DrawableObject {
         return this.scaleHitbox(bounds);
     }
 
-    /**
-     * DE: Speichert den sichtbaren Bildbereich für spätere Kollisionen.
-     * EN: Caches visible image bounds for later collisions.
-     */
+    /** DE: Speichert den sichtbaren Bildbereich für spätere Kollisionen. EN: Caches visible image bounds for later collisions.
+ * @param {number} x - DE: Parameter x. EN: x parameter.
+ * @param {number} y - DE: Parameter y. EN: y parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
+    hasVisiblePixelAt(x, y) {
+        const image = this.img;
+        if (!image || !image.collisionPixels) return false;
+        let sourceX = Math.floor((x - this.x) * image.naturalWidth / this.width);
+        const sourceY = Math.floor((y - this.y) * image.naturalHeight / this.height);
+        if (this.otherDirection) sourceX = image.naturalWidth - 1 - sourceX;
+        if (sourceX < 0 || sourceX >= image.naturalWidth || sourceY < 0 || sourceY >= image.naturalHeight) return false;
+        return image.collisionPixels[(sourceY * image.naturalWidth + sourceX) * 4 + 3] > 0;
+    }
+
+    /** DE: Verarbeitet Bild Grenzen. EN: Handles image bounds. */
     cacheImageBounds() {
         this.img.visibleBounds = this.measureImageBounds();
         this.img.visibleBoundsCalculated = true;
     }
 
-    /**
- * DE: Verarbeitet Trefferbereich.
- * EN: Processes hitbox.
- * @param {Object} bounds - DE: Eingabewert. EN: Input value.
+    /** DE: Skaliert Hitbox. EN: Scales hitbox.
+ * @param {*} bounds - DE: Parameter bounds. EN: bounds parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     scaleHitbox(bounds) {
         const scaleX = this.width / this.img.naturalWidth;
@@ -70,21 +76,20 @@ class DrawableObject {
         };
     }
 
-    /**
-     * DE: Liest Bildpixel aus, um den sichtbaren Bereich zu ermitteln.
-     * EN: Reads image pixels to measure the visible area.
-     */
+    /** DE: Liest Bildpixel aus, um den sichtbaren Bereich zu ermitteln. EN: Reads image pixels to measure the visible area.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
     measureImageBounds() {
         const canvas = this.createMeasurementCanvas();
         const ctx = canvas.getContext("2d");
         ctx.drawImage(this.img, 0, 0);
         const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        this.img.collisionPixels = pixels;
         return this.findOpaqueBounds(pixels, canvas.width, canvas.height);
     }
 
-    /**
- * DE: Erstellt measurement canvas.
- * EN: Creates measurement canvas.
+    /** DE: Erstellt measurement canvas. EN: Creates measurement canvas.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     createMeasurementCanvas() {
         const canvas = document.createElement("canvas");
@@ -93,12 +98,11 @@ class DrawableObject {
         return canvas;
     }
 
-    /**
- * DE: Sucht opaque bounds.
- * EN: Finds opaque bounds.
- * @param {Uint8ClampedArray} pixels - DE: Eingabewert. EN: Input value.
- * @param {number} width - DE: Eingabewert. EN: Input value.
- * @param {number} height - DE: Eingabewert. EN: Input value.
+    /** DE: Sucht opaque Grenzen. EN: Finds opaque bounds.
+ * @param {*} pixels - DE: Parameter pixels. EN: pixels parameter.
+ * @param {number} width - DE: Parameter width. EN: width parameter.
+ * @param {number} height - DE: Parameter height. EN: height parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     findOpaqueBounds(pixels, width, height) {
         const bounds = { left: width, top: height, right: 0, bottom: 0 };
@@ -111,12 +115,10 @@ class DrawableObject {
         return null;
     }
 
-    /**
- * DE: Verarbeitet bounds.
- * EN: Processes bounds.
- * @param {Object} bounds - DE: Eingabewert. EN: Input value.
- * @param {number} x - DE: Eingabewert. EN: Input value.
- * @param {number} y - DE: Eingabewert. EN: Input value.
+    /** DE: Erweitert Grenzen. EN: Expands bounds.
+ * @param {*} bounds - DE: Parameter bounds. EN: bounds parameter.
+ * @param {number} x - DE: Parameter x. EN: x parameter.
+ * @param {number} y - DE: Parameter y. EN: y parameter.
  */
     expandBounds(bounds, x, y) {
         bounds.left = Math.min(bounds.left, x);

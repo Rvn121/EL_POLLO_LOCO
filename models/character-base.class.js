@@ -1,9 +1,7 @@
 class CharacterBase extends MovableObject {
-    /**
-     * DE: Gibt die letzte Fußposition oder die aktuelle Position zurück.
-     * EN: Returns the previous foot position or the current position.
-     * @returns {number} Position der Füße / Position of the feet.
-     */
+    /** DE: Gibt die vorherige Fußposition der Spielfigur zurück. EN: Returns the character previous feet position.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
     getPreviousFeet() {
         if (this.previousFeet !== null && this.previousFeet !== undefined) return this.previousFeet;
         const hitbox = this.getHitbox();
@@ -11,10 +9,7 @@ class CharacterBase extends MovableObject {
         return this.y;
     }
 
-    /**
- * DE: Aktualisiert Bewegung.
- * EN: Updates movement.
- */
+    /** DE: Aktualisiert movement. EN: Updates movement. */
     updateMovement() {
         if (this.energy <= 0) return;
         this.updateHorizontalMovement();
@@ -22,19 +17,13 @@ class CharacterBase extends MovableObject {
         this.applyGravity();
     }
 
-    /**
- * DE: Aktualisiert horizontal Bewegung.
- * EN: Updates horizontal movement.
- */
+    /** DE: Aktualisiert horizontal movement. EN: Updates horizontal movement. */
     updateHorizontalMovement() {
         if (this.keyboard.RIGHT && !this.keyboard.LEFT) this.moveCharacterRight();
         if (this.keyboard.LEFT && !this.keyboard.RIGHT) this.moveCharacterLeft();
     }
 
-    /**
- * DE: Bewegt Spielfigur rechts.
- * EN: Moves character right.
- */
+    /** DE: Bewegt Spielfigur rechts. EN: Moves character right. */
     moveCharacterRight() {
         let boss;
         for (const enemy of this.level.enemies) {
@@ -48,10 +37,7 @@ class CharacterBase extends MovableObject {
         this.markActivity();
     }
 
-    /**
- * DE: Bewegt Spielfigur links.
- * EN: Moves character left.
- */
+    /** DE: Bewegt Spielfigur links. EN: Moves character left. */
     moveCharacterLeft() {
         const minX = this.level.level_start_x + 100;
         this.x = Math.max(minX, this.x - this.speed);
@@ -59,20 +45,16 @@ class CharacterBase extends MovableObject {
         this.markActivity();
     }
 
-    /**
- * DE: Aktualisiert Sprung Eingabe.
- * EN: Updates jump input.
- */
+    /** DE: Aktualisiert Sprung input. EN: Updates jump input. */
     updateJumpInput() {
         const jumpKeyPressed = this.keyboard.UP;
         if (jumpKeyPressed && !this.jumpPressed) this.jump();
         this.jumpPressed = jumpKeyPressed;
     }
 
-    /**
- * DE: Lässt die Figur springen: started above Gegner.
- * EN: Makes the character jump: started above enemy.
- * @param {MovableObject} enemy - DE: Eingabewert. EN: Input value.
+    /** DE: Lässt die Figur springen: started above Gegner. EN: Makes the character jump: started above enemy.
+ * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     jumpStartedAboveEnemy(enemy) {
         const target = enemy.getHitbox();
@@ -81,10 +63,9 @@ class CharacterBase extends MovableObject {
         return previousFeet <= target.y + 12;
     }
 
-    /**
- * DE: Prüft, ob descending onto.
- * EN: Checks whether descending onto.
- * @param {MovableObject} enemy - DE: Eingabewert. EN: Input value.
+    /** DE: Prüft, ob descending onto. EN: Checks whether descending onto.
+ * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     isDescendingOnto(enemy) {
         const box = this.getHitbox();
@@ -93,9 +74,8 @@ class CharacterBase extends MovableObject {
         return this.jumpStartedAboveEnemy(enemy) || box.y < target.y;
     }
 
-    /**
- * DE: Wendet an: gravity.
- * EN: Applies: gravity.
+    /** DE: Wendet an gravity. EN: Applies gravity.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     applyGravity() {
         const box = this.getHitbox();
@@ -106,39 +86,27 @@ class CharacterBase extends MovableObject {
         this.landOnGround();
     }
 
-    /**
- * DE: Verarbeitet Sprung.
- * EN: Processes jump.
- */
+    /** DE: Verarbeitet Sprung. EN: Handles jump. */
     continueJump() {
         this.speedY -= this.gravity;
         this.animateJump();
     }
 
-    /**
- * DE: Verarbeitet on Boden.
- * EN: Processes on ground.
- */
+    /** DE: Lässt landen on Boden. EN: Lands on ground. */
     landOnGround() {
         if (this.jumpFrame > 0 && !this.isHurt()) this.resetWalkingImage();
         this.y = this.groundY;
         this.speedY = 0;
     }
 
-    /**
- * DE: Setzt zurück: Laufen Bild.
- * EN: Resets: walking image.
- */
+    /** DE: Setzt zurück Laufen Bild. EN: Resets walking image. */
     resetWalkingImage() {
         this.img = this.imageCache[this.IMAGES_WALKING[0]];
         this.currentImage = 0;
         this.jumpFrame = 0;
     }
 
-    /**
- * DE: Animiert Sprung.
- * EN: Animates jump.
- */
+    /** DE: Animiert Sprung. EN: Animates jump. */
     animateJump() {
         const duration = Math.ceil(2 * this.jumpSpeed / this.gravity + 1);
         const frame = Math.floor(this.jumpFrame * this.IMAGES_JUMPING.length / duration);
@@ -147,10 +115,7 @@ class CharacterBase extends MovableObject {
         this.jumpFrame++;
     }
 
-    /**
- * DE: Lässt die Figur springen:.
- * EN: Makes the character jump:.
- */
+    /** DE: Lässt die Spielfigur springen. EN: Makes the character jump. */
     jump() {
         if (this.y !== this.groundY) return;
         this.speedY = this.jumpSpeed;
@@ -160,20 +125,16 @@ class CharacterBase extends MovableObject {
         this.markActivity();
     }
 
-    /**
- * DE: Verarbeitet from Gegner.
- * EN: Processes from enemy.
- */
+    /** DE: Lässt abprallen from enemy. EN: Bounces from enemy. */
     bounceFromEnemy() {
         this.speedY = this.jumpSpeed * 0.6;
         this.jumpFrame = 0;
         this.markActivity();
     }
 
-    /**
- * DE: Verarbeitet Schaden.
- * EN: Processes damage.
- * @param {number} damage - DE: damage. EN: damage.
+    /** DE: Verarbeitet Schaden. EN: Handles damage.
+ * @param {number} damage - DE: Parameter damage. EN: damage parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     takeDamage(damage) {
         const nextEnergy = Math.max(0, this.energy - damage);
@@ -186,33 +147,32 @@ class CharacterBase extends MovableObject {
         this.showHurtImage();
     }
 
-    /**
- * DE: Beendet das Leben der Figur.
- * EN: Ends the character life.
- */
+    /** DE: Beendet das Leben des Spielobjekts. EN: Marks the game object as dead. */
     die() {
         this.energy = 0;
         this.clearTimers();
         this.startDeathAnimation();
     }
 
-    /**
-     * DE: Startet die Todesanimation und verhindert normale Bewegung.
-     * EN: Starts the death animation and prevents normal movement.
-     */
+    /** DE: Erstellt die Bildpfade der Todesanimation. EN: Builds the image paths for the death animation.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
+    createDeathImages() {
+        const images = [];
+        for (let i = 51; i <= 56; i++) images.push("img/2_character_pepe/5_dead/D-" + i + ".png");
+        return images;
+    }
+
+    /** DE: Startet die Todesanimation und verhindert normale Bewegung. EN: Starts the death animation and prevents normal movement. */
     startDeathAnimation() {
-        this.deathImages = [51,52,53,54,55,56].map(n =>
-            `img/2_character_pepe/5_dead/D-${n}.png`);
+        this.deathImages = this.createDeathImages();
         this.loadImages(this.deathImages);
         this.deathIndex = 0;
         this.img = this.imageCache[this.deathImages[0]];
         this.deathInterval = setInterval(() => this.showNextDeathFrame(), 170);
     }
 
-    /**
-     * DE: Zeigt das nächste Bild der Todesanimation.
-     * EN: Shows the next death animation frame.
-     */
+    /** DE: Zeigt das nächste Bild der Todesanimation. EN: Shows the next death animation frame. */
     showNextDeathFrame() {
         if (++this.deathIndex >= this.deathImages.length) {
             clearInterval(this.deathInterval);
@@ -223,18 +183,14 @@ class CharacterBase extends MovableObject {
         if (this.deathIndex >= 2) this.y += 90;
     }
 
-    /**
- * DE: Prüft, ob Verletzung.
- * EN: Checks whether hurt.
+    /** DE: Prüft, ob hurt. EN: Checks whether hurt.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     isHurt() {
         return Date.now() - this.lastHit < 270;
     }
 
-    /**
- * DE: Zeigt Verletzung Bild.
- * EN: Shows hurt image.
- */
+    /** DE: Zeigt hurt Bild. EN: Shows hurt image. */
     showHurtImage() {
         clearTimeout(this.hurtTimeout);
         this.img = this.imageCache[this.HURT_IMAGE];
@@ -244,28 +200,19 @@ class CharacterBase extends MovableObject {
         }, 270);
     }
 
-    /**
- * DE: Zeigt standing Bild.
- * EN: Shows standing image.
- */
+    /** DE: Zeigt standing Bild. EN: Shows standing image. */
     showStandingImage() {
         if (this.energy <= 0 || this.idleStarted || this.y !== this.groundY) return;
         this.img = this.imageCache[this.IMAGES_WALKING[0]];
     }
 
-    /**
- * DE: Markiert activity.
- * EN: Marks activity.
- */
+    /** DE: Markiert activity. EN: Marks activity. */
     markActivity() {
         this.lastActivity = Date.now();
         if (this.idleStarted) this.stopIdleAnimation();
     }
 
-    /**
-     * DE: Startet die Ruheanimation nach einer Pause ohne Bewegung.
-     * EN: Starts the idle animation after the player stops moving.
-     */
+    /** DE: Startet die Ruheanimation nach einer Pause ohne Bewegung. EN: Starts the idle animation after the player stops moving. */
     startIdleAnimation() {
         if (this.idleStarted) return;
         this.idleStarted = true;
@@ -276,30 +223,23 @@ class CharacterBase extends MovableObject {
         }, 500);
     }
 
-    /**
-     * DE: Zeigt das nächste Bild der laufenden Ruheanimation.
-     * EN: Displays the next frame of the idle animation.
-     */
+    /** DE: Zeigt das nächste Bild der laufenden Ruheanimation. EN: Displays the next frame of the idle animation. */
     showNextIdleFrame() {
         const path = this.resolveIdleImage();
         this.img = this.imageCache[path];
         this.idleFrame++;
     }
 
-    /**
-     * DE: Wählt das nächste Bild der Ruheanimationsfolge aus.
-     * EN: Selects the next frame of the idle animation sequence.
-     */
+    /** DE: Wählt das nächste Bild der Ruheanimationsfolge aus. EN: Selects the next frame of the idle animation sequence.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
     resolveIdleImage() {
         if (this.idleFrame < this.IMAGES_IDLE.length) return this.IMAGES_IDLE[this.idleFrame];
         const loopIndex = (this.idleFrame - this.IMAGES_IDLE.length) % this.IDLE_LOOP_IMAGES.length;
         return this.IMAGES_IDLE[10 + (this.idleFrame - this.IMAGES_IDLE.length) % 10];
     }
 
-    /**
- * DE: Stoppt Leerlauf animation.
- * EN: Stops idle animation.
- */
+    /** DE: Stoppt Ruhe Animation. EN: Stops idle animation. */
     stopIdleAnimation() {
         this.idleStarted = false;
         gameSounds.stop("snoring");
@@ -308,10 +248,7 @@ class CharacterBase extends MovableObject {
         this.showStandingImage();
     }
 
-    /**
- * DE: Leert Zeitgeber.
- * EN: Clears timers.
- */
+    /** DE: Löscht Zeitgeber. EN: Clears timers. */
     clearTimers() {
         super.clearTimers();
         this.stopIdleAnimation();

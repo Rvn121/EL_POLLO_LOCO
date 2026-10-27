@@ -7,12 +7,10 @@ class Coin extends DrawableObject {
     phase = Math.random() * Math.PI * 2;
     IMAGES = ["img/8_coin/coin_1.png", "img/8_coin/coin_2.png"];
 
-    /**
-     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
-     * EN: Creates the object and sets its initial values.
-     * @param {number} x - DE: x. EN: x.
-     * @param {number} y - DE: y. EN: y.
-     */
+    /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values.
+ * @param {number} x - DE: Parameter x. EN: x parameter.
+ * @param {number} y - DE: Parameter y. EN: y parameter.
+ */
     constructor(x, y) {
         super();
         this.x = x;
@@ -23,18 +21,14 @@ class Coin extends DrawableObject {
         this.img = this.imageCache[this.IMAGES[0]];
     }
 
-    /**
- * DE: Sammelt.
- * EN: Collects.
- */
+    /** DE: Markiert ein Sammelobjekt als eingesammelt. EN: Marks a collectible as collected. */
     collect() {
         this.collected = true;
     }
 
-    /**
- * DE: Aktualisiert.
- * EN: Updates.
- * @param {number} delta - DE: Eingabewert. EN: Input value.
+    /** DE: Aktualisiert update. EN: Updates update.
+ * @param {number} delta - DE: Parameter delta. EN: delta parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     update(delta) {
         if (this.collected) return this.flyAway(delta);
@@ -44,18 +38,15 @@ class Coin extends DrawableObject {
         this.img = this.imageCache[this.IMAGES[Math.abs(frame)]];
     }
 
-    /**
-     * DE: Bewegt eine eingesammelte Münze nach oben aus dem Bild.
-     * EN: Moves a collected coin upward offscreen.
-     * @param {number} delta - DE: delta. EN: delta.
-     */
+    /** DE: Bewegt eine eingesammelte Münze nach oben aus dem Bild. EN: Moves a collected coin upward offscreen.
+ * @param {number} delta - DE: Parameter delta. EN: delta parameter.
+ */
     flyAway(delta) {
         this.y -= delta * 0.7;
     }
 
-    /**
- * DE: Prüft, ob sichtbar.
- * EN: Checks whether visible.
+    /** DE: Prüft, ob sichtbar. EN: Checks whether visible.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     isVisible() {
         return !this.collected || this.y + this.height > this.vanishY;

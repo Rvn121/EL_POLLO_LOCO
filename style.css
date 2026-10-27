@@ -42,7 +42,7 @@ body {
     margin: 0;
     min-height: 100vh;
     font-family: "Averia Sans Libre", sans-serif;
-    background: #e9bb43 url("./img/background_desert.png") center / cover no-repeat fixed;
+    background: #e9bb43 url("./img/icons_backgrounds/background_desert.png") center / cover no-repeat fixed;
     color: #412100;
 }
 
@@ -369,7 +369,7 @@ canvas {
 .level-choice img { display:block; width:100%; height:100%; object-fit:cover; }
 
 .level-transition-image { position:absolute; inset:0; z-index:5; display:block; width:100%; height:100%; object-fit:cover; pointer-events:none; }
-.level-announcement { top: auto; bottom: 7%; width: max-content; max-width: 88%; box-sizing: border-box; padding: 10px 18px; text-align: center; font-size: clamp(16px, 3.5vw, 26px); pointer-events: none; }
+.level-announcement { top: auto; bottom: 7%; width: max-content; max-width: 88%; box-sizing: border-box; padding: 10px 18px; text-align: center; font-size: 20px; pointer-events: none; }
 
 /*
  * DE: Legt Abstände der Menübuttons fest.
@@ -413,44 +413,42 @@ canvas {
  * DE: Zeigt Touchbuttons auf geeigneten Touchgeräten im Querformat.
  * EN: Shows touch buttons on supported touch devices in landscape mode.
  */
-.touch-controls { display: none; }
-@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
-    .canvas-shell:has(.game-running) .touch-controls,
-    .canvas-shell:has(#menuButtons.hidden) .touch-controls {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 10px;
-        z-index: 7;
-        display: flex;
-        justify-content: space-between;
-        padding: 0 18px;
-        pointer-events: none;
-    }
-    .touch-direction, .touch-actions { display: flex; gap: 12px; }
-    .touch-btn {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-width: 60px;
-        min-height: 60px;
-        padding: 8px 12px;
-        border: 2px solid #9e6a00;
-        border-radius: 18px;
-        background: rgba(255, 216, 77, 0.82);
-        color: #5a3000;
-        font: 700 16px "Averia Sans Libre", sans-serif;
-        touch-action: none;
-        user-select: none;
-        -webkit-user-select: none;
-        -webkit-touch-callout: none;
-        pointer-events: auto;
-        cursor: pointer;
-    }
-    .touch-btn.touch-pressed { background: #fff2a4; }
+ .touch-controls { display: none; }
+.touch-enabled .touch-controls:not(.hidden) {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 68px;
+    z-index: 11;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 12px;
+    pointer-events: none;
 }
-@media (max-height: 440px) and (hover: none) and (pointer: coarse) {
+.touch-direction, .touch-actions { display: flex; gap: 10px; }
+.touch-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 54px;
+    min-height: 54px;
+    padding: 8px 12px;
+    border: 2px solid #9e6a00;
+    border-radius: 16px;
+    background: rgba(255, 216, 77, .88);
+    color: #5a3000;
+    font: 700 16px "Averia Sans Libre", sans-serif;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    pointer-events: auto;
+    cursor: pointer;
+}
+.touch-btn.touch-pressed { background: #fff2a4; transform: scale(.95); }
+@media (max-height: 440px) {
     .touch-btn { min-width: 48px; min-height: 48px; font-size: 13px; }
+    .touch-enabled .touch-controls:not(.hidden) { bottom: 54px; }
 }
 
 /*
@@ -532,4 +530,186 @@ body {
     .game-toolbar .game-btn { padding: 4px 10px; font-size: 14px; }
     .legal-link { padding: 2px 10px; font-size: 12px; margin-bottom: 2px; }
     :fullscreen .canvas-top-buttons .main-start-btn { font-size: 18px; padding: 8px 18px; }
+}
+
+/* Canvas icon navigation. */
+.canvas-section, .canvas-section:not(:fullscreen), .canvas-section:fullscreen {
+    display: flex; gap: 0; padding: 0;
+}
+.canvas-section:not(:fullscreen) { width: min(720px, calc(100vw - 24px), calc((100dvh - 24px) * 1.5)); }
+.canvas-section:fullscreen .canvas-shell { width: 100%; height: 100%; }
+.canvas-actions { position: absolute; inset: auto 12px 12px; z-index: 10; display: flex; justify-content: space-between; gap: 12px; pointer-events: none; }
+.primary-actions, .settings-actions { display: flex; gap: 8px; pointer-events: auto; }
+.icon-control { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 5px; border: 0; border-radius: 0; background: transparent; cursor: pointer; text-decoration: none; transition: transform .15s ease; }
+.icon-control img { width: 100%; height: 100%; pointer-events: none; }
+.icon-control:hover, .icon-control:focus-visible { transform: translateY(-3px) scale(1.12); }
+.icon-control:focus-visible { outline: 2px solid #ffd84d; outline-offset: 2px; }
+.imprint-control { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 10; }
+.imprint-control:hover, .imprint-control:focus-visible { transform: translateX(-50%) translateY(-3px) scale(1.12); }
+.canvas-shell .modal-backdrop { z-index: 30; }
+.touch-controls { bottom: 68px; }
+@media(max-width: 480px), (max-height: 400px) {
+    .icon-control { width: 36px; height: 36px; }
+    .primary-actions, .settings-actions { gap: 4px; }
+    .canvas-actions { inset: auto 6px 6px; }
+    .imprint-control { bottom: 6px; }
+}
+
+/* A shared tooltip is positioned within the canvas, independently of icon scaling. */
+.canvas-tooltip {
+    position: absolute;
+    z-index: 15;
+    width: max-content;
+    max-width: calc(100% - 24px);
+    padding: 5px 8px;
+    border-radius: 5px;
+    background: #151515;
+    color: white;
+    font-size: 13px;
+    line-height: 1.35;
+    text-align: center;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+}
+
+/* Highlight the next action after the final win or a loss. */
+.icon-control.icon-pulse img {
+    animation: icon-pulse 1.4s ease-in-out infinite;
+}
+@keyframes icon-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); filter: drop-shadow(0 0 6px #ffd84d); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .icon-control.icon-pulse img { animation: none; filter: drop-shadow(0 0 6px #ffd84d); }
+}
+
+/* Larger controls in fullscreen, with space for mobile input above them. */
+.canvas-section:fullscreen .icon-control {
+    width: 60px;
+    height: 60px;
+    padding: 6px;
+}
+.canvas-section:fullscreen .primary-actions,
+.canvas-section:fullscreen .settings-actions { gap: 12px; }
+.canvas-section:fullscreen .touch-enabled .touch-controls:not(.hidden) { bottom: 88px; }
+@media (max-height: 440px) {
+    .canvas-section:fullscreen .icon-control { width: 48px; height: 48px; padding: 5px; }
+    .canvas-section:fullscreen .primary-actions,
+    .canvas-section:fullscreen .settings-actions { gap: 8px; }
+    .canvas-section:fullscreen .touch-enabled .touch-controls:not(.hidden) { bottom: 70px; }
+}
+
+/* The legal document scrolls independently of the fixed game layout. */
+body.legal-body {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: auto;
+    padding: 12px;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+        max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+.legal-body .legal-page {
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px;
+    overflow-wrap: anywhere;
+}
+
+/* Touch devices collect canvas actions in a centered pause menu. */
+.icon-menu-panel { display: contents; }
+.touch-menu-toggle { display: none; }
+.touch-enabled.touch-level .touch-menu-toggle {
+    display: inline-flex;
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 14;
+}
+.touch-enabled.touch-level .touch-menu-toggle:hover,
+.touch-enabled.touch-level .touch-menu-toggle:focus-visible { transform: translateX(-50%) scale(1.1); }
+.touch-enabled.touch-level .icon-menu-panel { display: none; }
+.touch-enabled.touch-level.touch-menu-open .icon-menu-panel {
+    position: absolute;
+    top: 62px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 13;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: max-content;
+    max-width: calc(100% - 24px);
+    max-height: calc(100% - 76px);
+    overflow-y: auto;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(30, 22, 10, .94);
+    box-shadow: 0 6px 20px #0006;
+}
+.touch-enabled.touch-level .icon-menu-panel .canvas-actions {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    pointer-events: auto;
+}
+.touch-enabled.touch-level .icon-menu-panel .primary-actions,
+.touch-enabled.touch-level .icon-menu-panel .settings-actions { justify-content: center; flex-wrap: wrap; }
+.touch-enabled.touch-level .icon-menu-panel .imprint-control {
+    position: relative;
+    inset: auto;
+    transform: none;
+}
+.touch-enabled.touch-level .icon-menu-panel .imprint-control:hover,
+.touch-enabled.touch-level .icon-menu-panel .imprint-control:focus-visible { transform: translateY(-3px) scale(1.12); }
+.canvas-section .touch-enabled.touch-level .touch-controls:not(.hidden),
+.canvas-section:fullscreen .touch-enabled.touch-level .touch-controls:not(.hidden) {
+    bottom: max(12px, env(safe-area-inset-bottom));
+}
+.canvas-section:fullscreen .touch-enabled.touch-level .icon-menu-panel { top: 80px; max-height: calc(100% - 94px); }
+@media (max-height: 440px) {
+    .touch-enabled.touch-level.touch-menu-open .icon-menu-panel,
+    .canvas-section:fullscreen .touch-enabled.touch-level .icon-menu-panel { top: 62px; max-height: calc(100% - 74px); padding: 8px; }
+}
+
+/* Result actions stay outside the touch menu after a win or loss. */
+.touch-result-actions { display: none; }
+.touch-enabled.touch-level.touch-result .touch-result-actions {
+    position: absolute;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 12;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+/* Keep the level introduction free of interactive overlays. */
+.canvas-shell.level-intro .icon-menu-panel,
+.canvas-shell.level-intro .touch-menu-toggle,
+.canvas-shell.level-intro .touch-controls,
+.canvas-shell.level-intro .touch-result-actions,
+.canvas-shell.level-intro .canvas-tooltip {
+    display: none !important;
+}
+
+/* DE: Kleine Bildschirme erhalten kompaktere Abstände und Beschriftungen.
+ * EN: Small screens use more compact spacing and labels. */
+@media (max-width: 600px) {
+    .level-announcement { font-size: 16px; }
+}
+
+/* The rotation notice must cover dialogs inside the fullscreen subtree as well. */
+.canvas-section .orientation-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    padding: 16px;
+    text-align: center;
 }

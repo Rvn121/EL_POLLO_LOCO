@@ -32,42 +32,51 @@
     <script src="./js/game.js"></script>
 </head>
 <body>
+
+
+    <main class="page-shell">
+        <h1 class="visually-hidden">El Pollo Loco</h1>
+        <section class="canvas-section" id="canvasShell">
     <div class="orientation-overlay hidden" id="orientationOverlay">
         <div class="orientation-card">
             <h2>Rotate your device</h2>
             <p>Play El Pollo Loco in landscape mode.</p>
         </div>
     </div>
-
-    <main class="page-shell">
-        <h1 class="visually-hidden">El Pollo Loco</h1>
-        <section class="canvas-section" id="canvasShell">
-            <div class="game-toolbar" id="gameToolbar">
-                <button class="game-btn pause-btn hidden" id="pauseBtn" type="button">Pause</button>
-                <button class="game-btn toolbar-controls" id="controlsBtn" type="button">Controls</button>
-                <button class="game-btn hidden" id="toolbarBackToStartBtn" type="button">Back to Start</button>
-                <button class="game-btn toolbar-sound hidden" id="allSoundsBtn" type="button" aria-pressed="false">All Sounds Off</button>
-                <button class="game-btn toolbar-sound" id="menuMuteBtn" type="button" aria-pressed="false">Music Off</button>
-                <button class="game-btn" id="menuEffectsBtn" type="button">Effects Off</button>
-                <button class="game-btn fullscreen-btn" id="fullscreenBtn" type="button">Fullscreen</button>
-            </div>
             <div class="canvas-shell" id="canvasFrame">
                 <canvas id="canvas" width="720" height="480"></canvas>
-
+                <button class="icon-control touch-menu-toggle" id="touchMenuBtn" type="button" aria-label="Open menu" data-tooltip="Open menu" aria-expanded="false" aria-controls="touchIconMenu"><img src="img/icons_backgrounds/menu.svg" alt=""></button>
+                <div class="icon-menu-panel" id="touchIconMenu">
+                <div class="canvas-actions">
+                    <div class="primary-actions">
+<button class="icon-control" id="startBtn" type="button" aria-label="Start game" data-tooltip="Start game"><img src="img/icons_backgrounds/play.svg" alt=""></button>
+<button class="icon-control" id="controlsBtn" type="button" aria-label="How to play" data-tooltip="How to play"><img src="img/icons_backgrounds/how_to_play_1.svg" alt=""></button>
+<button class="icon-control hidden" id="toolbarBackToStartBtn" type="button" aria-label="Back to start" data-tooltip="Back to start"><img src="img/icons_backgrounds/back_to_start.svg" alt=""></button>
+<button class="icon-control hidden" id="restartBtn" type="button" aria-label="Restart level" data-tooltip="Restart level"><img src="img/icons_backgrounds/restart.svg" alt=""></button>
+<button class="icon-control hidden" id="nextBtn" type="button" aria-label="Start next level" data-tooltip="Start next level"><img src="img/icons_backgrounds/play.svg" alt=""></button>
+                    </div>
+                    <div class="settings-actions">
+<button class="icon-control" id="menuMuteBtn" type="button" aria-label="Turn music off" data-tooltip="Turn music off"><img src="img/icons_backgrounds/music_on.svg" alt=""></button>
+<button class="icon-control" id="menuEffectsBtn" type="button" aria-label="Turn sound effects off" data-tooltip="Turn sound effects off"><img src="img/icons_backgrounds/sfx_on.svg" alt=""></button>
+<button class="icon-control" id="fullscreenBtn" type="button" aria-label="Enter fullscreen" data-tooltip="Enter fullscreen"><img src="img/icons_backgrounds/fullscreen.svg" alt=""></button>
+                    </div>
+                </div>
+                <a class="icon-control imprint-control" id="imprintLink" href="impressum.html" aria-label="Legal notice" data-tooltip="Legal notice"><img src="img/icons_backgrounds/imprint.svg" alt=""></a>
+                </div>
                 <div class="canvas-top-buttons" id="menuButtons">
-                    <button class="game-btn main-start-btn" id="startBtn" type="button">Start</button>
                     <div class="level-choices hidden" id="levelChoices">
                         <button class="level-choice" id="tutorialChoice" type="button" aria-label="Play Level 1">
-                            <img src="img/El_Pollo_Loco_Level_1_2D.png" alt="Level 1">
+                            <img src="img/icons_backgrounds/El_Pollo_Loco_Level_1_2D.png" alt="Level 1">
                         </button>
                         <button class="level-choice" id="levelOneChoice" type="button" aria-label="Play Level 2">
-                            <img src="img/El_Pollo_Loco_Level_2_2D.png" alt="Level 2">
+                            <img src="img/icons_backgrounds/El_Pollo_Loco_Level_2_2D.png" alt="Level 2">
                         </button>
                     </div>
                 </div>
 
 
-                <div class="touch-controls" id="touchControls" aria-label="Mobile controls">
+                <div class="touch-result-actions" id="touchResultActions" aria-label="Result actions"></div>
+                <div class="touch-controls hidden" id="touchControls" aria-label="Mobile controls">
                     <div class="touch-direction">
                         <button class="touch-btn" type="button" data-touch-key="LEFT" aria-label="Move left">&#8592;</button>
                         <button class="touch-btn" type="button" data-touch-key="RIGHT" aria-label="Move right">&#8594;</button>
@@ -80,12 +89,6 @@
 
                 <div class="level-announcement hidden" id="levelAnnouncement"></div>
                 <img class="level-transition-image hidden" id="levelTransitionImage" alt="Level transition">
-                <div class="end-buttons" id="endButtons">
-                    <button class="game-btn restart-btn hidden" id="restartBtn" type="button">Restart</button>
-                    <button class="game-btn hidden" id="nextBtn" type="button">Next</button>
-                    <button class="game-btn hidden" id="backToStartBtn" type="button">Back to Start</button>
-                </div>
-            </div>
                 <div class="modal-backdrop hidden" id="controlsModal">
                         <div class="modal-card">
                             <button class="modal-close" id="closeModalBtn" type="button">×</button>
@@ -94,7 +97,7 @@
                                 <li><strong>Left Arrow</strong> – Pepe moves left</li>
                                 <li><strong>Right Arrow</strong> – Pepe moves right</li>
                                 <li><strong>Up Arrow</strong> – Pepe jumps</li>
-                                <li><strong>Space</strong> – open level selection in the menu; hold and release to throw in-game</li>
+                                <li><strong>Space</strong> &ndash; hold to increase throwing power; release to throw a bottle</li>
                                 <li><strong>P / Pause</strong> – pause / resume the game</li>
                                 <li><strong>Jump onto chickens from above</strong> – defeat enemies</li>
                                 <li><strong>Fullscreen</strong> – expand the game</li>
@@ -102,7 +105,8 @@
                             </ul>
                         </div>
                     </div>
-            <a class="legal-link" href="impressum.html">Impressum</a>
+
+            </div>
         </section>
     </main>
     <audio id="menuMusic" src="./audio/Sombrero_Stomp.mp3" preload="auto" autoplay loop></audio>

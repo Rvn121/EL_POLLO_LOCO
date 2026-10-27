@@ -1,17 +1,12 @@
 class WorldBase extends WorldDrawBase {
-    /**
- * DE: Prüft einsammelbar Kollisionen.
- * EN: Checks collectible collisions.
- */
+    /** DE: Prüft collectible Kollisionen. EN: Checks collectible collisions. */
     checkCollectibleCollisions() {
         this.bottles.forEach(b => this.pickupBottle(b));
         this.coins.forEach(c => this.pickupCoin(c));
     }
 
-    /**
- * DE: Verarbeitet Flasche.
- * EN: Processes bottle.
- * @param {ThrowableBottle} bottle - DE: Eingabewert. EN: Input value.
+    /** DE: Sammelt ein Flasche. EN: Picks up bottle.
+ * @param {*} bottle - DE: Parameter bottle. EN: bottle parameter.
  */
     pickupBottle(bottle) {
         if (bottle.collected || this.bottleCount >= 20) return;
@@ -22,10 +17,19 @@ class WorldBase extends WorldDrawBase {
         this.bottleBar.setPercentage(this.getBottlePercentage());
     }
 
-    /**
- * DE: Verarbeitet Münze.
- * EN: Processes coin.
- * @param {Object} coin - DE: Eingabewert. EN: Input value.
+    /** DE: Prüft, ob die Voraussetzungen für den Endboss erfüllt sind. EN: Checks whether the boss unlock requirements are met. */
+    updateBossUnlock() {
+        const allCoinsCollected = this.coinsCollected === this.coins.length;
+        let allChickensDefeated = true;
+        for (const enemy of this.level.enemies) {
+            const isChicken = enemy instanceof chicken || enemy instanceof chickenSmall;
+            if (isChicken && !enemy.isDead) allChickensDefeated = false;
+        }
+        this.bossUnlocked = allCoinsCollected && allChickensDefeated;
+    }
+
+    /** DE: Sammelt ein Münze. EN: Picks up coin.
+ * @param {*} coin - DE: Parameter coin. EN: coin parameter.
  */
     pickupCoin(coin) {
         if (coin.collected || !this.boxesOverlap(this.character, coin)) return;
@@ -33,16 +37,14 @@ class WorldBase extends WorldDrawBase {
         this.coinsCollected++;
         this.coinInventory++;
         this.coinValue = Math.min(100, Math.floor(this.coinsCollected / 10) * 20);
-        this.bossUnlocked = this.coinsCollected === this.coins.length;
+        this.updateBossUnlock();
         this.updateCoinBar();
         gameSounds.play("drop_coin");
     }
 
-    /**
-     * DE: Erstellt eine geworfene Flasche und verringert den Vorrat.
-     * EN: Creates a thrown bottle and decreases the supply.
-     * @param {number} power - DE: power. EN: power.
-     */
+    /** DE: Erstellt eine geworfene Flasche und verringert den Vorrat. EN: Creates a thrown bottle and decreases the supply.
+ * @param {number} [power] - DE: Parameter power. EN: power parameter.
+ */
     throwBottle(power = 1) {
         if (this.isGameOver || this.isWin || this.isPaused || this.bottleCount <= 0) return;
         let dir = 1;
@@ -55,17 +57,15 @@ class WorldBase extends WorldDrawBase {
         this.bottleBar.setPercentage(this.getBottlePercentage());
     }
 
-    /**
-     * DE: Berechnet den Flaschenvorrat als Prozentwert.
-     * EN: Calculates bottle inventory as a percentage.
-     */
+    /** DE: Berechnet den Flaschenvorrat als Prozentwert. EN: Calculates bottle inventory as a percentage.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
     getBottlePercentage() {
         return Math.ceil(this.bottleCount / 4) * 20;
     }
 
-    /**
- * DE: Ermittelt Boss.
- * EN: Gets boss.
+    /** DE: Ermittelt Boss. EN: Gets boss.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     getBoss() {
         for (const enemy of this.level.enemies) {
@@ -74,30 +74,28 @@ class WorldBase extends WorldDrawBase {
         return undefined;
     }
 
-    /**
- * DE: Schaltet um: pause.
- * EN: Toggles: pause.
+    /** DE: Schaltet um Pause. EN: Toggles pause.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     togglePause() {
         if (this.levelIntroActive) return true;
         this.isPaused = !this.isPaused;
         if (this.isPaused) gameSounds.stopAll();
+        updatePauseMusic();
         this.lastUpdate = Date.now();
         if (!this.isPaused) this.character.lastActivity = Date.now();
         return this.isPaused;
     }
 
-    /**
- * DE: Prüft Boss attacks.
- * EN: Checks boss attacks.
- * @param {Object} bosses - DE: Eingabewert. EN: Input value.
+    /** DE: Prüft Boss attacks. EN: Checks boss attacks.
+ * @param {*} bosses - DE: Parameter bosses. EN: bosses parameter.
  */
     checkBossAttacks(bosses) {
         bosses.forEach(boss => {
             if (boss.isMainBoss && !this.bossUnlocked) return;
             if (!boss.moving || boss.state !== "attack" || boss.frame !== 4) return;
             if (boss.attackHitDone || this.character.energy <= 0) return;
-            if (Math.abs(boss.x - this.character.x) > 180) return;
+            if (!this.character.isTouchingVisiblePixels(boss)) return;
             boss.attackHitDone = true;
             let damage = 10;
             if (this.levelNumber === 2) damage = 20;
@@ -105,14 +103,11 @@ class WorldBase extends WorldDrawBase {
         });
     }
 
-    /**
-     * DE: Prüft, ob die Spielfigur den Endboss berührt.
-     * EN: Checks main boss contact for the game.
-     */
+    /** DE: Prüft, ob die Spielfigur den Endboss berührt. EN: Checks main boss contact for the game. */
     checkMainBossContact() {
         const boss = this.getBoss();
         if (!boss || boss.isDead || !this.bossUnlocked) return;
-        if (this.character.energy <= 0 || !this.character.isColliding(boss)) return;
+        if (this.character.energy <= 0 || !this.character.isTouchingVisiblePixels(boss)) return;
         if (!this.canTakeHitFrom(boss)) return;
         let damage = 10;
             if (this.levelNumber === 2) damage = 20;
@@ -120,17 +115,17 @@ class WorldBase extends WorldDrawBase {
         boss.lastHitPosition = { x: this.character.x, y: this.character.y };
     }
 
-    /**
-     * DE: Unterscheidet Sprungtreffer von schädlichen Gegnerkontakten.
-     * EN: Distinguishes stomp hits from harmful enemy contact.
-     * @param {MovableObject} enemy - DE: enemy. EN: enemy.
-     */
+    /** DE: Unterscheidet Sprungtreffer von schädlichen Gegnerkontakten. EN: Distinguishes stomp hits from harmful enemy contact.
+ * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
     checkEnemyCollision(enemy) {
         if (enemy instanceof MiniBoss && !enemy.isDead) return this.checkMiniBossCollision(enemy);
         const isChicken = enemy instanceof chicken || enemy instanceof chickenSmall;
         if (!isChicken || enemy.isDead || this.character.energy <= 0) return;
         if (!this.character.isColliding(enemy)) return;
         if (this.isJumpAttack(enemy)) return this.killChicken(enemy);
+        if (!this.character.isTouchingVisiblePixels(enemy)) return;
         if (!this.canChickenDamageCharacter(enemy) || !this.canTakeHitFrom(enemy)) return;
         let damage = 5;
         if (this.levelNumber === 2) damage = 10;
@@ -139,12 +134,11 @@ class WorldBase extends WorldDrawBase {
         this.statusBar.setPercentage(this.character.energy);
     }
 
-    /**
- * DE: Prüft mini Boss Kollision.
- * EN: Checks mini boss collision.
+    /** DE: Prüft Mini Boss Kollision. EN: Checks mini boss collision.
+ * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
  */
     checkMiniBossCollision(enemy) {
-        if (!this.character.isColliding(enemy) || !this.canTakeHitFrom(enemy)) return;
+        if (!this.character.isTouchingVisiblePixels(enemy) || !this.canTakeHitFrom(enemy)) return;
         let damage = 10;
             if (this.levelNumber === 2) damage = 20;
             this.damageCharacter(damage);
@@ -152,10 +146,9 @@ class WorldBase extends WorldDrawBase {
         this.statusBar.setPercentage(this.character.energy);
     }
 
-    /**
- * DE: Prüft, ob Sprung attack.
- * EN: Checks whether jump attack.
- * @param {MovableObject} enemy - DE: Eingabewert. EN: Input value.
+    /** DE: Prüft, ob die Spielfigur von oben auf einen Gegner fällt. EN: Checks whether the character lands on an enemy from above.
+ * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     isJumpAttack(enemy) {
         const player = this.character.getHitbox();
@@ -166,10 +159,9 @@ class WorldBase extends WorldDrawBase {
         return startedAbove && feet >= target.y && player.y < target.y;
     }
 
-    /**
- * DE: Prüft, ob Huhn Schaden Spielfigur.
- * EN: Checks whether chicken damage character.
- * @param {MovableObject} enemy - DE: Eingabewert. EN: Input value.
+    /** DE: Prüft, ob ein Huhn seitlichen Schaden verursachen darf. EN: Checks whether a chicken may deal side-contact damage.
+ * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     canChickenDamageCharacter(enemy) {
         const player = this.character.getHitbox();
@@ -180,11 +172,9 @@ class WorldBase extends WorldDrawBase {
             player.y < target.y + target.height;
     }
 
-    /**
-     * DE: Zieht Lebenspunkte ab und aktualisiert Trefferfolgen.
-     * EN: Removes health points and updates hit consequences.
-     * @param {number} amount - DE: amount. EN: amount.
-     */
+    /** DE: Zieht Lebensenergie nach einem Gegnertreffer ab. EN: Reduces player energy after an enemy hit.
+ * @param {number} amount - DE: Parameter amount. EN: amount parameter.
+ */
     damageCharacter(amount) {
         if (this.character.energy <= 0) return;
         this.character.takeDamage(amount);
@@ -193,10 +183,9 @@ class WorldBase extends WorldDrawBase {
         this.statusBar.setPercentage(this.character.energy);
     }
 
-    /**
- * DE: Prüft, ob take hit from.
- * EN: Checks whether take hit from.
- * @param {MovableObject} enemy - DE: Eingabewert. EN: Input value.
+    /** DE: Prüft, ob der Gegner die Spielfigur erneut treffen darf. EN: Checks whether the enemy may hit the character again.
+ * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     canTakeHitFrom(enemy) {
         if (!enemy.lastHitPosition) return true;
@@ -205,14 +194,54 @@ class WorldBase extends WorldDrawBase {
         return Math.hypot(dx, dy) >= 45;
     }
 
-    /**
- * DE: Besiegt Huhn.
- * EN: Defeats chicken.
- * @param {MovableObject} enemy - DE: enemy. EN: enemy.
+    /** DE: Verarbeitet Huhn. EN: Handles chicken.
+ * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
  */
     killChicken(enemy) {
         gameSounds.play("hit_chickens");
         enemy.die();
         this.character.bounceFromEnemy();
+    }
+
+    /** DE: Erstellt Bildpfade für die sechs Stufen einer Statusleiste. EN: Builds image paths for six status-bar levels.
+ * @param {string} folder - DE: Parameter folder. EN: folder parameter.
+ * @param {string} ending - DE: Parameter ending. EN: ending parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
+    createBarImages(folder, ending) {
+        const images = [];
+        for (let value = 0; value <= 100; value += 20) {
+            images.push(folder + value + ending + ".png");
+        }
+        return images;
+    }
+
+    /** DE: Erstellt Münze. EN: Creates coin.
+ * @param {number} index - DE: Parameter index. EN: index parameter.
+ * @param {number} count - DE: Parameter count. EN: count parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
+    createCoin(index, count) {
+        const x = this.getCoinX(index, count);
+        let high = index % 3 === 0;
+        if (this.levelNumber === 2) high = index % 2 === 0;
+        let y = 245 + Math.random() * 30;
+        if (high) y = 140 + Math.random() * 35;
+        const coin = new Coin(x, y);
+        coin.behindCharacter = index % 2 === 0;
+        return coin;
+    }
+
+    /** DE: Bestimmt die horizontale Position einer Münze. EN: Calculates a coin horizontal position.
+ * @param {number} index - DE: Parameter index. EN: index parameter.
+ * @param {number} count - DE: Parameter count. EN: count parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
+    getCoinX(index, count) {
+        const behindCount = 8;
+        const minX = this.level.level_start_x + 100;
+        const maxX = this.getBoss().x - 1150;
+        if (index < behindCount) return minX + (50 - minX) * (index + 0.4) / behindCount;
+        return 450 + (maxX - 450) * (index - behindCount + 0.4) / (count - behindCount);
     }
 }

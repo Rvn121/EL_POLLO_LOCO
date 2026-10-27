@@ -1,6 +1,5 @@
-/**
- * DE: Erstellt das Tutorial mit Gegnern, Wolken und Hintergründen.
- * EN: Creates the tutorial with enemies, clouds, and backgrounds.
+/** DE: Erstellt das Tutorial mit Gegnern, Wolken und Hintergründen. EN: Creates the tutorial with enemies, clouds, and backgrounds.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
 function createLevel1() {
     return new Level(
@@ -10,12 +9,13 @@ function createLevel1() {
     );
 }
 
-/**
- * DE: Erstellt die Gegner für das Tutorial.
- * EN: Creates enemies for the tutorial.
+/** DE: Erstellt Level enemies. EN: Creates level enemies.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
 function createLevelEnemies() {
-    const enemies = [ ...createSmallChickens(), ...createNormalChickens() ];
+    const enemies = createSmallChickens();
+    const normalChickens = createNormalChickens();
+    for (let i = 0; i < normalChickens.length; i++) enemies.push(normalChickens[i]);
     for (let i = 0; i < 7; i++) {
         const x = 1120 + i * 640 + Math.random() * 100;
         enemies.push(new chicken(x));
@@ -26,9 +26,8 @@ function createLevelEnemies() {
     return enemies;
 }
 
-/**
- * DE: Erstellt small chickens für das Spiel.
- * EN: Creates small chickens for the game.
+/** DE: Erstellt small Hühner. EN: Creates small chickens.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
 function createSmallChickens() {
     const enemies = [];
@@ -36,9 +35,9 @@ function createSmallChickens() {
     return enemies;
 }
 
-/**
- * DE: Erstellt small chicken für das Spiel.
- * EN: Creates small chicken for the game.
+/** DE: Erstellt small Huhn. EN: Creates small chicken.
+ * @param {number} index - DE: Parameter index. EN: index parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
 function createSmallChicken(index) {
     const behindStart = index < 3;
@@ -55,9 +54,8 @@ function createSmallChicken(index) {
     return enemy;
 }
 
-/**
- * DE: Erstellt normal chickens für das Spiel.
- * EN: Creates normal chickens for the game.
+/** DE: Erstellt normal Hühner. EN: Creates normal chickens.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
 function createNormalChickens() {
     const enemies = [];
@@ -68,9 +66,8 @@ function createNormalChickens() {
     return enemies;
 }
 
-/**
- * DE: Erstellt level clouds für das Spiel.
- * EN: Creates level clouds for the game.
+/** DE: Erstellt Level Wolken. EN: Creates level clouds.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
 function createLevelClouds() {
     const clouds = [];
@@ -82,9 +79,8 @@ function createLevelClouds() {
     return clouds;
 }
 
-/**
- * DE: Erstellt level backgrounds für das Spiel.
- * EN: Creates level backgrounds for the game.
+/** DE: Erstellt Level backgrounds. EN: Creates level backgrounds.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
 function createLevelBackgrounds() {
     const backgrounds = [];

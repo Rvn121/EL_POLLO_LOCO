@@ -13,21 +13,17 @@ class Endboss extends MovableObject {
     direction = -1;
     retreatUntil = 0;
     approachUntil = 0;
-    IMAGES_WALKING = [1, 2, 3, 4].map(i => `img/4_enemie_boss_chicken/1_walk/G${i}.png`);
+    IMAGES_WALKING = this.createBossImages("1_walk", 1, 4);
     IMAGES_ALERT = this.createBossImages("2_alert", 5, 12);
     IMAGES_ATTACK = this.createBossImages("3_attack", 13, 20);
-    IMAGES_HURT = [21, 22, 23].map(i => `img/4_enemie_boss_chicken/4_hurt/G${i}.png`);
-    IMAGES_DEAD = [24, 25, 26].map(i => `img/4_enemie_boss_chicken/5_dead/G${i}.png`);
+    IMAGES_HURT = this.createBossImages("4_hurt", 21, 23);
+    IMAGES_DEAD = this.createBossImages("5_dead", 24, 26);
 
-    /**
- * DE: Erstellt Boss Bilder.
- * EN: Creates boss images.
- * @param {number} x - DE: x. EN: x.
- * @param {Object} moving - DE: Eingabewert. EN: Input value.
- * @param {string} folder - Ordner / Folder.
- * @param {number} first - Erstes Bild / First image.
- * @param {number} last - Letztes Bild / Last image.
- * @returns {string[]} Die Bildpfade / The image paths.
+    /** DE: Erstellt die Bildpfade einer Bossanimation. EN: Builds the image paths for a boss animation.
+ * @param {string} folder - DE: Parameter folder. EN: folder parameter.
+ * @param {number} first - DE: Parameter first. EN: first parameter.
+ * @param {number} last - DE: Parameter last. EN: last parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     createBossImages(folder, first, last) {
         const images = [];
@@ -37,20 +33,24 @@ class Endboss extends MovableObject {
         return images;
     }
 
+    /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values.
+ * @param {number} [x] - DE: Parameter x. EN: x parameter.
+ * @param {boolean} [moving] - DE: Parameter moving. EN: moving parameter.
+ */
     constructor(x = 6100, moving = false) {
         super();
         this.x = x;
         this.originX = x;
         this.moving = moving;
-        this.loadImages([...this.IMAGES_WALKING, ...this.IMAGES_ALERT,
-            ...this.IMAGES_ATTACK, ...this.IMAGES_HURT, ...this.IMAGES_DEAD]);
+        this.loadImages(this.IMAGES_WALKING);
+        this.loadImages(this.IMAGES_ALERT);
+        this.loadImages(this.IMAGES_ATTACK);
+        this.loadImages(this.IMAGES_HURT);
+        this.loadImages(this.IMAGES_DEAD);
         this.img = this.imageCache[this.IMAGES_ALERT[0]];
     }
 
-    /**
- * DE: Verarbeitet Flasche hit.
- * EN: Processes bottle hit.
- */
+    /** DE: Verarbeitet Flasche hit. EN: Handles bottle hit. */
     takeBottleHit() {
         if (this.energy <= 0) return;
         let damage = 100 / 3;
@@ -64,11 +64,10 @@ class Endboss extends MovableObject {
         else this.setState("dead");
     }
 
-    /**
- * DE: Aktualisiert.
- * EN: Updates.
- * @param {number} delta - DE: Eingabewert. EN: Input value.
- * @param {Object} player - DE: Eingabewert. EN: Input value.
+    /** DE: Aktualisiert update. EN: Updates update.
+ * @param {number} delta - DE: Parameter delta. EN: delta parameter.
+ * @param {*} player - DE: Parameter player. EN: player parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     update(delta, player) {
         if (this.state === "finished") return;
@@ -85,11 +84,10 @@ class Endboss extends MovableObject {
         this.updateImage();
     }
 
-    /**
- * DE: Bewegt and attack.
- * EN: Moves and attack.
- * @param {number} delta - DE: Eingabewert. EN: Input value.
- * @param {Object} player - DE: Eingabewert. EN: Input value.
+    /** DE: Bewegt and attack. EN: Moves and attack.
+ * @param {number} delta - DE: Parameter delta. EN: delta parameter.
+ * @param {*} player - DE: Parameter player. EN: player parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     moveAndAttack(delta, player) {
         const distance = Math.abs(player.x - this.x);
@@ -103,13 +101,18 @@ class Endboss extends MovableObject {
         this.walk(delta);
     }
 
-    /** DE: Bewegt den Boss innerhalb seiner Strecke. EN: Moves the boss along its path. */
+    /** DE: Bewegt gehend walk. EN: Walks walk.
+ * @param {number} delta - DE: Parameter delta. EN: delta parameter.
+ */
     walk(delta) {
         this.x += this.direction * delta * this.getMovementSpeed();
         this.otherDirection = this.direction > 0;
     }
 
-    /** DE: Nach einem Treffer nähert sich der Boss und zieht sich zurück. EN: Approaches after a hit, then retreats. */
+    /** DE: Nach einem Treffer nähert sich der Boss und zieht sich zurück. EN: Approaches after a hit, then retreats.
+ * @param {number} delta - DE: Parameter delta. EN: delta parameter.
+ * @param {*} player - DE: Parameter player. EN: player parameter.
+ */
     moveAfterHit(delta, player) {
         const approaching = Date.now() < this.approachUntil;
         if (player.x > this.x) this.direction = 1;
@@ -118,26 +121,28 @@ class Endboss extends MovableObject {
         this.walk(delta);
     }
 
-    /** DE: Unter 20 Prozent verfolgt und attackiert der Boss Pepe. EN: Below 20 percent the boss chases and attacks Pepe. */
+    /** DE: Unter 20 Prozent verfolgt und attackiert der Boss Pepe. EN: Below 20 percent the boss chases and attacks Pepe.
+ * @param {number} delta - DE: Parameter delta. EN: delta parameter.
+ * @param {*} player - DE: Parameter player. EN: player parameter.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
     chasePlayer(delta, player) {
         this.facePlayer(player);
         if (Math.abs(player.x - this.x) < 220 && !this.attackCooldown) return this.beginAttack();
         if (Math.abs(player.x - this.x) > 110) this.walk(delta);
     }
 
-    /**
-     * DE: Dreht den Boss in Richtung der Spielfigur.
-     * EN: Turns the boss towards the player.
-     */
+    /** DE: Dreht sich zu Spieler. EN: Faces player.
+ * @param {*} player - DE: Parameter player. EN: player parameter.
+ */
     facePlayer(player) {
         if (player.x > this.x) this.direction = 1;
         else this.direction = -1;
         this.otherDirection = this.direction > 0;
     }
 
-    /**
- * DE: Verarbeitet Laufen direction.
- * EN: Processes walking direction.
+    /** DE: Wählt Laufen Richtung. EN: Chooses walking direction.
+ * @param {*} player - DE: Parameter player. EN: player parameter.
  */
     chooseWalkingDirection(player) {
         let range = 180;
@@ -146,9 +151,8 @@ class Endboss extends MovableObject {
         if (this.x >= this.originX + range) this.direction = -1;
     }
 
-    /**
- * DE: Ermittelt Bewegung speed.
- * EN: Gets movement speed.
+    /** DE: Ermittelt die Geschwindigkeit des Endbosses für seine aktuelle Phase. EN: Returns the boss movement speed for its current phase.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     getMovementSpeed() {
         if (!this.healthPhases) return 0.09;
@@ -158,10 +162,10 @@ class Endboss extends MovableObject {
         return 0.16;
     }
 
-    /**
-     * DE: Setzt die laufende Bossangriffsanimation fort.
-     * EN: Advances the current boss attack animation.
-     */
+    /** DE: Setzt die laufende Bossangriffsanimation fort. EN: Advances the current boss attack animation.
+ * @param {number} delta - DE: Parameter delta. EN: delta parameter.
+ * @param {*} player - DE: Parameter player. EN: player parameter.
+ */
     advanceAttack(delta, player) {
         this.facePlayer(player);
         const distance = Math.abs(player.x - this.x);
@@ -169,10 +173,7 @@ class Endboss extends MovableObject {
         this.x += this.direction * step;
     }
 
-    /**
-     * DE: Startet den Angriff des Bosses.
-     * EN: Starts a boss attack.
-     */
+    /** DE: Beginnt attack. EN: Begins attack. */
     beginAttack() {
         this.attackHitDone = false;
         this.attackCooldown = 1500;
@@ -180,10 +181,8 @@ class Endboss extends MovableObject {
         this.setState("attack");
     }
 
-    /**
- * DE: Setzt state.
- * EN: Sets state.
- * @param {Object} state - DE: Eingabewert. EN: Input value.
+    /** DE: Setzt Zustand. EN: Sets state.
+ * @param {string} state - DE: Parameter state. EN: state parameter.
  */
     setState(state) {
         this.state = state;
@@ -192,9 +191,8 @@ class Endboss extends MovableObject {
         this.updateImage();
     }
 
-    /**
- * DE: Aktualisiert Bild.
- * EN: Updates image.
+    /** DE: Aktualisiert Bild. EN: Updates image.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     updateImage() {
         const images = this.getStateImages();
@@ -202,10 +200,9 @@ class Endboss extends MovableObject {
         this.img = this.imageCache[images[this.frame]];
     }
 
-    /**
-     * DE: Liefert die Bilder für den aktuellen Bosszustand.
-     * EN: Returns images for the current boss state.
-     */
+    /** DE: Gibt die Bilder für den aktuellen Animationszustand zurück. EN: Returns images for the current animation state.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
     getStateImages() {
         if (this.state === "hurt") return this.IMAGES_HURT;
         if (this.state === "dead") return this.IMAGES_DEAD;
@@ -215,10 +212,8 @@ class Endboss extends MovableObject {
     }
 
 
-    /**
- * DE: Aktualisiert falling.
- * EN: Updates falling.
- * @param {number} delta - DE: Eingabewert. EN: Input value.
+    /** DE: Aktualisiert falling. EN: Updates falling.
+ * @param {number} delta - DE: Parameter delta. EN: delta parameter.
  */
     updateFalling(delta) {
         this.fallSpeed += 0.0012 * delta;
@@ -226,10 +221,7 @@ class Endboss extends MovableObject {
         if (this.y > 480) this.state = "finished";
     }
 
-    /**
- * DE: Beendet animation.
- * EN: Finishes animation.
- */
+    /** DE: Beendet Animation. EN: Finishes animation. */
     finishAnimation() {
         if (this.state === "dead") {
             this.isDead = true;
@@ -250,11 +242,9 @@ class MiniBoss extends Endboss {
     y = 180;
     isMainBoss = false;
 
-    /**
-     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
-     * EN: Creates the object and sets its initial values.
-     * @param {number} x - DE: x. EN: x.
-     */
+    /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values.
+ * @param {number} x - DE: Parameter x. EN: x parameter.
+ */
     constructor(x) {
         super(x, false);
     }

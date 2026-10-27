@@ -9,12 +9,10 @@ class cloud extends MovableObject {
         "img/5_background/layers/4_clouds/2.png"
     ];
 
-    /**
-     * DE: Erstellt das Objekt und legt seine Anfangswerte fest.
-     * EN: Creates the object and sets its initial values.
-     * @param {number} x - DE: x. EN: x.
-     * @param {number} y - DE: y. EN: y.
-     */
+    /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values.
+ * @param {number} [x] - DE: Parameter x. EN: x parameter.
+ * @param {number} [y] - DE: Parameter y. EN: y parameter.
+ */
     constructor(x = null, y = null) {
         super();
         const path = this.IMAGES[Math.floor(Math.random() * this.IMAGES.length)];
@@ -26,18 +24,15 @@ class cloud extends MovableObject {
         this.moveLeft();
     }
 
-    /**
- * DE: Ermittelt random y.
- * EN: Gets random y.
+    /** DE: Ermittelt eine zufällige vertikale Wolkenposition. EN: Returns a random vertical cloud position.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     getRandomY() {
         return 5 + Math.random() * 110;
     }
 
-    /**
- * DE: Setzt zurück: Position.
- * EN: Resets: position.
- * @param {number} x - DE: Eingabewert. EN: Input value.
+    /** DE: Setzt zurück Position. EN: Resets position.
+ * @param {number} x - DE: Parameter x. EN: x parameter.
  */
     resetPosition(x) {
         this.x = x;
