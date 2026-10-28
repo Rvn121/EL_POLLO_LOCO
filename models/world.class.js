@@ -72,25 +72,7 @@ class World extends WorldBase {
         this.isPaused = true;
     }
 
-    /** Places scenery signs along the route from Pepe's spawn to the boss. */
-    createLevelSigns() {
-        const startX = this.character.x;
-        const bossX = this.getBoss().x;
-        const placements = [
-            ["coinsarrow", startX + this.character.width + 30, 1191 / 1320],
-            ["keep_enough", startX + (bossX - startX) * 0.75, 800 / 1000],
-            ["danger", bossX - 550, 640 / 830]
-        ];
-        return placements.map(([name, x, ratio]) => {
-            const sign = new DrawableObject();
-            sign.height = 150;
-            sign.width = sign.height * ratio;
-            sign.x = x;
-            sign.y = this.character.groundY + this.character.height - sign.height;
-            sign.loadImage(`img/icons_backgrounds/${name}.svg`);
-            return sign;
-        });
-    }
+
     /** DE: Startet Spiel loop. EN: Starts game loop. */
     startGameLoop() {
         this.gameLoopInterval = setInterval(() => this.updateGame(), 1000 / 60);
@@ -232,37 +214,9 @@ class World extends WorldBase {
         this.bossBar.x = this.canvas.width - this.bossBar.width - 20;
         this.bossBar.y = 0;
     }
-    /** DE: Erstellt Flaschen. EN: Creates bottles.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
-    createBottles() {
-        const bossX = this.getBoss().x;
-        const keepEnoughX = 200 + (bossX - 200) * 0.75;
-        const dangerX = bossX - 550;
-        if (this.levelNumber === 2) return this.createLevelTwoBottles(keepEnoughX, dangerX);
-        // Keep the final bottle wholly between the two signs. The other
-        // random bottles remain earlier along the route, making this the last.
-        const zones = [[350, 470], [600, keepEnoughX - 80],
-            [600, keepEnoughX - 80], [600, keepEnoughX - 80],
-            [keepEnoughX + 120 + 20, dangerX - 52 - 20]];
-        return zones.map(([min, max]) => new CollectibleBottle(min + Math.random() * (max - min)));
-    }
 
-    /** Supplies spaced bottle groups before each level-two encounter and sign. */
-    createLevelTwoBottles(keepEnoughX, dangerX) {
-        const bottles = [new CollectibleBottle(350 + Math.random() * 120)];
-        const addGroup = (targetX, count) => {
-            for (let index = 0; index < count; index++) {
-                const x = targetX - (count - index) * 130 - 60 + Math.random() * 30;
-                bottles.push(new CollectibleBottle(x));
-            }
-        };
-        this.level.enemies.filter(enemy => enemy instanceof MiniBoss)
-            .forEach(boss => addGroup(boss.x, 3));
-        addGroup(keepEnoughX, 3);
-        addGroup(dangerX, 2);
-        return bottles;
-    }
+
+
     /** DE: Erstellt Münzen. EN: Creates coins.
  * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */

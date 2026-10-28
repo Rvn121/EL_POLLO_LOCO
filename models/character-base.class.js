@@ -101,14 +101,18 @@ class CharacterBase extends MovableObject {
         }
         this.y = this.groundY;
         this.speedY = 0;
-        if (this.landingFrames > 0) {
-            if (!this.isHurt()) {
-                const index = this.landingFrames > 4 ? 7 : 8;
-                this.img = this.imageCache[this.IMAGES_JUMPING[index]];
-            }
-            this.landingFrames--;
-            if (this.landingFrames === 0 && !this.isHurt()) this.showStandingImage();
+        if (this.landingFrames > 0) this.showLandingFrame();
+    }
+
+    /** DE: Zeigt das passende Landebild. EN: Shows the correct landing frame. */
+    showLandingFrame() {
+        if (!this.isHurt()) {
+            let index = 8;
+            if (this.landingFrames > 4) index = 7;
+            this.img = this.imageCache[this.IMAGES_JUMPING[index]];
         }
+        this.landingFrames--;
+        if (this.landingFrames === 0 && !this.isHurt()) this.showStandingImage();
     }
 
     /** DE: Setzt zurück Laufen Bild. EN: Resets walking image. */
@@ -127,7 +131,8 @@ class CharacterBase extends MovableObject {
             const progress = 1 - this.speedY / launchSpeed;
             index = Math.min(3, Math.max(0, Math.floor(progress * 4)));
         } else {
-            index = Math.abs(this.speedY) < launchSpeed * 0.55 ? 5 : 6;
+            index = 6;
+            if (Math.abs(this.speedY) < launchSpeed * 0.55) index = 5;
         }
         if (!this.isHurt()) this.img = this.imageCache[this.IMAGES_JUMPING[index]];
         this.jumpFrame++;
@@ -163,18 +168,21 @@ class CharacterBase extends MovableObject {
         const nextEnergy = Math.max(0, this.energy - damage);
         if (this.energy <= 0) return;
         gameSounds.play("hit_pepe");
-        if (nextEnergy === 0) {
-            if (attacker) {
-                const attackerCenter = attacker.x + attacker.width / 2;
-                const ownCenter = this.x + this.width / 2;
-                if (attackerCenter !== ownCenter) this.otherDirection = attackerCenter < ownCenter;
-            }
-            return this.die();
-        }
+        if (nextEnergy === 0) return this.handleFatalDamage(attacker);
         this.energy = nextEnergy;
         this.lastHit = Date.now();
         this.markActivity();
         this.showHurtImage();
+    }
+
+    /** DE: Bestimmt die Fallrichtung und startet den Tod. EN: Sets the falling direction and starts death. */
+    handleFatalDamage(attacker) {
+        if (attacker) {
+            const attackerCenter = attacker.x + attacker.width / 2;
+            const ownCenter = this.x + this.width / 2;
+            if (attackerCenter !== ownCenter) this.otherDirection = attackerCenter < ownCenter;
+        }
+        return this.die();
     }
 
     /** DE: Beendet das Leben des Spielobjekts. EN: Marks the game object as dead. */
@@ -200,7 +208,8 @@ class CharacterBase extends MovableObject {
         this.deathFinished = false;
         this.deathFrameTicks = 0;
         this.deathVelocityY = 7;
-        this.deathVelocityX = this.otherDirection ? 2.4 : -2.4;
+        this.deathVelocityX = -2.4;
+        if (this.otherDirection) this.deathVelocityX = 2.4;
         this.img = this.imageCache[this.deathImages[0]];
         this.deathInterval = setInterval(() => this.updateDeathAnimation(), 1000 / 60);
     }
@@ -213,6 +222,11 @@ class CharacterBase extends MovableObject {
             this.showNextDeathFrame();
         }
         if (this.deathIndex < 2) return;
+        this.moveDyingCharacter();
+    }
+
+    /** DE: Bewegt Pepe während der Todesanimation. EN: Moves Pepe during the death animation. */
+    moveDyingCharacter() {
         this.x += this.deathVelocityX;
         this.y -= this.deathVelocityY;
         this.deathVelocityY -= 0.45;

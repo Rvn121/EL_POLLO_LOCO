@@ -34,9 +34,21 @@ async function init() {
     initTitleClouds();
     startTitleScreen();
     setupMenuMusic();
-    await Promise.allSettled([titleBackground.decode(), startScreenImage.decode(),
-        ...Array.from(document.images, image => image.decode())]);
+    await waitForMenuImages();
     setLoading(false);
+}
+
+/**
+ * DE: Wartet, bis die Bilder des Menüs geladen wurden.
+ * EN: Waits until the menu images have finished loading.
+ * @returns {Promise<void>} DE: Abschluss des Ladens. EN: Loading completion.
+ */
+async function waitForMenuImages() {
+    const promises = [titleBackground.decode(), startScreenImage.decode()];
+    for (let i = 0; i < document.images.length; i++) {
+        promises.push(document.images[i].decode());
+    }
+    await Promise.allSettled(promises);
 }
 
 /** Shows loading feedback over the start screen or the current level image. */
@@ -86,6 +98,11 @@ function bindMenuButtons() {
     });
     menuMuteBtn.addEventListener("click", toggleMenuMute);
     menuEffectsBtn.addEventListener("click", toggleEffectsMute);
+    bindLevelMenuButtons();
+}
+
+/** DE: Verbindet die Levelauswahl und Steuerung mit ihren Buttons. EN: Binds level selection and control buttons. */
+function bindLevelMenuButtons() {
     document.getElementById("startBtn").addEventListener("click", openLevelSelection);
     document.getElementById("tutorialChoice").addEventListener("click", () => startSelectedLevel(1));
     document.getElementById("levelOneChoice").addEventListener("click", () => startSelectedLevel(2));
@@ -211,6 +228,8 @@ function startSelectedLevel(levelNumber) {
 
 /** DE: Richtet ein Menü Musik. EN: Sets up menu music. */
 function setupMenuMusic() {
+    // DE: Ohne gespeicherte Wahl bleibt Musik stumm.
+    // EN: Music stays muted until the user enables it.
     menuMuted = localStorage.getItem("elPolloLocoMusicMuted") !== "false";
     menuMusic.muted = menuMuted;
     pauseMusic.muted = menuMuted;
@@ -221,6 +240,11 @@ function setupMenuMusic() {
     menuMusic.volume = 0.45;
     menuMusic.addEventListener("canplay", playMenuMusic);
     playMenuMusic();
+    bindMenuMusicEvents();
+}
+
+/** DE: Startet die Musik nach einer erlaubten Benutzeraktion. EN: Starts music after an allowed user action. */
+function bindMenuMusicEvents() {
     document.addEventListener("pointerdown", playMenuMusicOnInteraction);
     document.addEventListener("pointerup", playMenuMusicOnInteraction);
     document.addEventListener("keydown", playMenuMusicOnInteraction);
@@ -366,4 +390,27 @@ function updatePauseMusic() {
 function stopPauseMusic() {
     pauseMusic.pause();
     pauseMusic.currentTime = 0;
+}
+
+
+/**
+ * DE: Zeigt das Musiksymbol im Menü, bei Pause, Sieg oder Game Over.
+ * EN: Shows the music icon in the menu, while paused, on win or game over.
+ */
+function updateMusicButtonVisibility() {
+    if (!menuMuteBtn) return;
+    const show = !world || world.isPaused || world.isWin || world.isGameOver;
+    menuMuteBtn.classList.toggle("music-hidden", !show);
+}
+
+/**
+ * DE: Zeigt bei einer Spielpause den Text mittig über dem Canvas.
+ * EN: Displays centered pause text over the canvas while playing is paused.
+ */
+function updatePauseOverlay() {
+    const overlay = document.getElementById("pausedOverlay");
+    if (!overlay) return;
+    const paused = world && world.isPaused && !world.levelIntroActive;
+    const active = paused && !world.isGameOver && !world.isWin;
+    overlay.classList.toggle("hidden", !active);
 }

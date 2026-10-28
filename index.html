@@ -45,6 +45,7 @@
     </div>
             <div class="canvas-shell" id="canvasFrame">
                 <canvas id="canvas" width="720" height="480"></canvas>
+                <div class="paused-overlay hidden" id="pausedOverlay" aria-live="polite"><span><u>P</u>aused...</span></div>
                 <div class="loading-screen" id="loadingScreen" role="status" aria-live="polite">
                     <img class="loading-bottle" src="img/6_salsa_bottle/bottle_rotation/1_bottle_rotation.png" alt="">
                     <span>loading ...</span>
@@ -60,7 +61,7 @@
 <button class="icon-control hidden" id="nextBtn" type="button" aria-label="Start next level" data-tooltip="Start next level"><img src="img/icons_backgrounds/play.svg" alt=""></button>
                     </div>
                     <div class="settings-actions">
-<button class="icon-control" id="menuMuteBtn" type="button" aria-label="Turn music off" data-tooltip="Turn music off"><img src="img/icons_backgrounds/music_on.svg" alt=""></button>
+<button class="icon-control" id="menuMuteBtn" type="button" aria-label="Turn music on" data-tooltip="Turn music on"><img src="img/icons_backgrounds/music_off.svg" alt=""></button>
 <button class="icon-control" id="menuEffectsBtn" type="button" aria-label="Turn sound effects off" data-tooltip="Turn sound effects off"><img src="img/icons_backgrounds/sfx_on.svg" alt=""></button>
 <button class="icon-control" id="fullscreenBtn" type="button" aria-label="Enter fullscreen" data-tooltip="Enter fullscreen"><img src="img/icons_backgrounds/fullscreen.svg" alt=""></button>
                     </div>
@@ -129,7 +130,7 @@
             </dialog>
         </section>
     </main>
-    <audio id="menuMusic" src="./audio/Sombrero_Stomp.mp3" preload="auto" loop></audio>
+    <audio id="menuMusic" src="./audio/Sombrero_Stomp.mp3" preload="auto" loop muted></audio>
 
 
 </body>

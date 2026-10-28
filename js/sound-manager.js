@@ -3,7 +3,11 @@ class SoundManager {
     musicNames = new Set(["gameover", "win", "L1_win", "L2_win", "lose"]);
     /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values. */
     constructor() {
+        // DE: Soundeffekte sind beim ersten Besuch eingeschaltet.
+        // EN: Sound effects are enabled on the first visit.
         this.muted = localStorage.getItem("elPolloLocoEffectsMuted") === "true";
+        // DE: Musik ist beim ersten Besuch stumm.
+        // EN: Music is muted on the first visit.
         this.musicMuted = localStorage.getItem("elPolloLocoMusicMuted") !== "false";
         this.sounds = {};
         this.pendingSequence = null;
@@ -126,10 +130,17 @@ stop(name) {
         }
     }
 
+    /** DE: Prüft, ob ein Sound abgespielt werden darf. EN: Checks whether a sound may play.
+     * @param {string} name - DE: Soundname. EN: Sound name.
+     * @returns {boolean} DE: Wiedergabe erlaubt. EN: Playback allowed.
+     */
     canPlay(name) {
         return !!this.sounds[name] && (this.musicNames.has(name) || !this.muted);
     }
 
+    /** DE: Schaltet die Musik stumm oder ein. EN: Mutes or unmutes music.
+     * @param {boolean} muted - DE: Stummschaltung aktiv. EN: Whether music is muted.
+     */
     setMusicMuted(muted) {
         this.musicMuted = muted;
         this.musicNames.forEach(name => { this.sounds[name].muted = muted; });

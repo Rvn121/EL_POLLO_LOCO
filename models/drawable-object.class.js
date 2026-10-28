@@ -11,8 +11,15 @@ class DrawableObject {
         return this.sharedImages.get(path);
     }
 
+    /** DE: Wartet auf das Laden aller zwischengespeicherten Bilder. EN: Waits for all cached images to load.
+     * @returns {Promise<void>} DE: Ladeabschluss. EN: Loading completion.
+     */
     static async waitForImages() {
-        await Promise.allSettled([...this.sharedImages.values()].map(image => image.decode()));
+        const promises = [];
+        for (const image of this.sharedImages.values()) {
+            promises.push(image.decode());
+        }
+        await Promise.allSettled(promises);
     }
     x = 20;
     y = 180;

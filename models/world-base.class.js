@@ -178,8 +178,6 @@ class WorldBase extends WorldDrawBase {
     damageCharacter(amount, attacker) {
         if (this.character.energy <= 0) return;
         this.character.takeDamage(amount, attacker);
-        if (this.coinInventory > 0) this.coinInventory--;
-        this.updateCoinBar();
         this.statusBar.setPercentage(this.character.energy);
     }
 
@@ -249,4 +247,83 @@ class WorldBase extends WorldDrawBase {
         const section = (end - start) / (count - 1);
         return start + section * (index - 1 + Math.random() * 0.8);
     }
+    /** Places scenery signs along the route from Pepe's spawn to the boss. */
+    createLevelSigns() {
+        const startX = this.character.x;
+        const bossX = this.getBoss().x;
+        const placements = [
+            ["coinsarrow", startX + this.character.width + 30, 1191 / 1320],
+            ["keep_enough", startX + (bossX - startX) * 0.75, 800 / 1000],
+            ["danger", bossX - 550, 640 / 830]
+        ];
+        const signs = [];
+        for (let i = 0; i < placements.length; i++) {
+            signs.push(this.createLevelSign(placements[i]));
+        }
+        return signs;
+    }
+
+    /** DE: Erstellt Flaschen. EN: Creates bottles.
+ * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+ */
+    createBottles() {
+        const bossX = this.getBoss().x;
+        const keepEnoughX = 200 + (bossX - 200) * 0.75;
+        const dangerX = bossX - 550;
+        if (this.levelNumber === 2) return this.createLevelTwoBottles(keepEnoughX, dangerX);
+        // Keep the final bottle wholly between the two signs. The other
+        // random bottles remain earlier along the route, making this the last.
+        const zones = [[350, 470], [600, keepEnoughX - 80],
+            [600, keepEnoughX - 80], [600, keepEnoughX - 80],
+            [keepEnoughX + 120 + 20, dangerX - 52 - 20]];
+        return this.createBottlesInZones(zones);
+    }
+
+    /** DE: Verteilt Flaschen zufällig in den Bereichen. EN: Places bottles randomly in the given zones. */
+    createBottlesInZones(zones) {
+        const bottles = [];
+        for (let i = 0; i < zones.length; i++) {
+            const min = zones[i][0];
+            const max = zones[i][1];
+            bottles.push(new CollectibleBottle(min + Math.random() * (max - min)));
+        }
+        return bottles;
+    }
+
+    /** Supplies spaced bottle groups before each level-two encounter and sign. */
+    createLevelTwoBottles(keepEnoughX, dangerX) {
+        const bottles = [new CollectibleBottle(350 + Math.random() * 120)];
+        for (let i = 0; i < this.level.enemies.length; i++) {
+            const enemy = this.level.enemies[i];
+            if (enemy instanceof MiniBoss) this.addBottleGroup(bottles, enemy.x, 3);
+        }
+        this.addBottleGroup(bottles, keepEnoughX, 3);
+        this.addBottleGroup(bottles, dangerX, 2);
+        return bottles;
+    }
+
+    /** DE: Fügt eine Gruppe von Flaschen hinzu. EN: Adds a group of bottles. */
+    addBottleGroup(bottles, targetX, count) {
+        for (let index = 0; index < count; index++) {
+            const x = targetX - (count - index) * 130 - 60 + Math.random() * 30;
+            bottles.push(new CollectibleBottle(x));
+        }
+    }
+
+    /**
+     * DE: Erstellt ein Holzschild aus den angegebenen Positionsdaten.
+     * EN: Creates a wooden sign using the given position data.
+     * @param {Array} placement - DE: Name, Position und Seitenverhältnis. EN: Name, position and aspect ratio.
+     * @returns {DrawableObject} DE: Das neue Schild. EN: The new sign.
+     */
+    createLevelSign(placement) {
+        const sign = new DrawableObject();
+        sign.height = 150;
+        sign.width = sign.height * placement[2];
+        sign.x = placement[1];
+        sign.y = this.character.groundY + this.character.height - sign.height;
+        sign.loadImage("img/icons_backgrounds/" + placement[0] + ".svg");
+        return sign;
+    }
+
 }

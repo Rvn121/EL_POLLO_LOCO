@@ -29,13 +29,27 @@ async function prepareGameView() {
     transition.src = `img/icons_backgrounds/El_Pollo_Loco_Level_${currentLevel}_2D.png`;
     showLevelAnnouncement();
     setLoading(true);
-    // Allow the loading overlay to paint before creating the level.
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await waitForGameFrame();
     world = new World(canvas, keyboard, handleGameOver, currentLevel);
     const loadingWorld = world;
-    await Promise.allSettled([DrawableObject.waitForImages(), transition.decode(),
-        world.gameOverImage.decode(), world.winImage.decode()]);
+    await loadLevelImages(loadingWorld, transition);
     if (world !== loadingWorld) return;
+    finishPreparingGame(loadingWorld);
+}
+
+/** DE: Wartet auf den nächsten Zeichenzyklus. EN: Waits for the next drawing frame. */
+async function waitForGameFrame() {
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+}
+
+/** DE: Lädt die Bilder der neuen Spielwelt. EN: Loads the images of the new world. */
+async function loadLevelImages(loadingWorld, transition) {
+    await Promise.allSettled([DrawableObject.waitForImages(), transition.decode(),
+        loadingWorld.gameOverImage.decode(), loadingWorld.winImage.decode()]);
+}
+
+/** DE: Beendet die Ladeanzeige und zeigt das Spiel. EN: Hides loading feedback and shows the game. */
+function finishPreparingGame(loadingWorld) {
     gameLoading = false;
     setLoading(false);
     finishLevelLoading(loadingWorld);
@@ -120,6 +134,7 @@ function disposeWorld() {
  */
 function handleGameOver(won = false) {
     stopPauseMusic();
+    updateMusicButtonVisibility();
     updateTouchControls();
     window.gamePaused = false;
     const finishedWorld = world;
@@ -245,6 +260,7 @@ function togglePause() {
     if (paused) resetTouchControls();
     window.gamePaused = paused;
     updateTouchControls();
+    updatePauseOverlay();
 }
 
 /** DE: Setzt Taste. EN: Sets key.
@@ -299,6 +315,8 @@ function updateFullscreenUi() {
     document.getElementById("controlsBtn").classList.toggle("hidden", !startScreen);
     document.getElementById("imprintLink").classList.toggle("hidden", !startScreen);
     document.getElementById("toolbarBackToStartBtn").classList.toggle("hidden", startScreen);
+    updateMusicButtonVisibility();
+    updatePauseOverlay();
 }
 
 /** DE: Setzt Steuerung Symbol. EN: Sets control icon.

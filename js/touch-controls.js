@@ -105,6 +105,8 @@ function updateTouchControls() {
     if (touchDevice) frame.classList.add("touch-enabled");
     document.getElementById("canvasShell").classList.toggle("touch-layout", frame.classList.contains("touch-enabled"));
     frame.classList.toggle("touch-level", !!world);
+    updateMusicButtonVisibility();
+    updatePauseOverlay();
     frame.classList.toggle("level-intro", !!world && world.levelIntroActive);
     updateTouchResultActions(frame);
     const active = !touchMenuOpen && !!world && !world.isPaused && !world.levelIntroActive && !world.isGameOver && !world.isWin;
@@ -127,6 +129,7 @@ function setTouchMenuOpen(open, resume = true) {
         resetTouchControls();
     } else closeTouchMenu(resume);
     updateTouchControls();
+    updatePauseOverlay();
 }
 
 /** DE: Aktualisiert den Zustand der mobilen Menüschaltfläche. EN: Updates the mobile menu button state.
@@ -149,6 +152,7 @@ function closeTouchMenu(resume) {
         window.gamePaused = world.togglePause();
     }
     touchMenuPausedWorld = null;
+    updatePauseOverlay();
 }
 
 /** DE: Verarbeitet for Touch Menü. EN: Handles for touch menu. */
@@ -156,6 +160,7 @@ function pauseForTouchMenu() {
     if (!touchMenuOpen || !world || world.isPaused || world.levelIntroActive || world.isWin || world.isGameOver) return;
     window.gamePaused = world.togglePause();
     touchMenuPausedWorld = world;
+    updatePauseOverlay();
 }
 
 /** DE: Aktualisiert Touch Ergebnis Aktionen. EN: Updates touch result actions.
