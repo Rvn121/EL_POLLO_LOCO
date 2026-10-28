@@ -23,7 +23,7 @@ class CollectibleBottle extends DrawableObject {
     /** DE: Markiert ein Sammelobjekt als eingesammelt. EN: Marks a collectible as collected. */
     collect() {
         this.collected = true;
-        this.respawnAt = 30000;
+        this.respawnAt = 10000;
     }
 
     /** DE: Aktualisiert update. EN: Updates update.

@@ -20,10 +20,10 @@ class World extends WorldBase {
     minibossSoundIds = [];
     minibossDeadIds = [];
     bossUnlocked = false;
-    bossSoundPlayed = false;
     levelIntroActive = true;
     bottles = [];
     coins = [];
+    signs = [];
     thrownBottles = [];
     lastUpdate = Date.now();
     /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values.
@@ -68,7 +68,28 @@ class World extends WorldBase {
         this.coinBar = new StatusBar();
         this.configureCollectibles();
         this.character.x = this.characterScreenX - this.camera_x;
+        this.signs = this.createLevelSigns();
         this.isPaused = true;
+    }
+
+    /** Places scenery signs along the route from Pepe's spawn to the boss. */
+    createLevelSigns() {
+        const startX = this.character.x;
+        const bossX = this.getBoss().x;
+        const placements = [
+            ["coinsarrow", startX + this.character.width + 30, 1191 / 1320],
+            ["keep_enough", startX + (bossX - startX) * 0.75, 800 / 1000],
+            ["danger", bossX - 550, 640 / 830]
+        ];
+        return placements.map(([name, x, ratio]) => {
+            const sign = new DrawableObject();
+            sign.height = 150;
+            sign.width = sign.height * ratio;
+            sign.x = x;
+            sign.y = this.character.groundY + this.character.height - sign.height;
+            sign.loadImage(`img/icons_backgrounds/${name}.svg`);
+            return sign;
+        });
     }
     /** DE: Startet Spiel loop. EN: Starts game loop. */
     startGameLoop() {
@@ -109,8 +130,8 @@ class World extends WorldBase {
         this.updateBossUnlock();
         this.character.updateMovement();
         this.updateFootsteps();
-        this.checkBossApproach();
         this.updateCamera();
+        this.checkBossApproach();
         this.updateCollectibles();
         this.updateMiniBossSounds();
     }
@@ -159,10 +180,15 @@ class World extends WorldBase {
     /** DE: Prüft Boss approach. EN: Checks boss approach. */
     checkBossApproach() {
         const boss = this.getBoss();
-        if (!boss || !this.bossUnlocked || this.bossSoundPlayed) return;
-        if (Math.abs(this.character.x - boss.x) > 600) return;
-        this.bossSoundPlayed = true;
-        gameSounds.play("chicken_boss");
+        const margin = 80;
+        const left = -this.camera_x;
+        const right = left + this.canvas.width;
+        const nearScreen = boss && boss.x + boss.width > left - margin && boss.x < right + margin;
+        if (nearScreen && this.bossUnlocked && boss.energy > 0 && !boss.isDead) {
+            gameSounds.play("chicken_boss");
+        } else {
+            gameSounds.stop("chicken_boss");
+        }
     }
     /** DE: Prüft regelmäßig Treffer und das Einsammeln von Gegenständen. EN: Regularly checks collisions and collectible pickups. */
     startCollisionLoop() {
@@ -210,21 +236,38 @@ class World extends WorldBase {
  * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     createBottles() {
-        let count = 8;
-        if (this.levelNumber === 2) count = 9;
-        const maxX = this.getBoss().x - 950;
-        const bottles = [];
-        for (let index = 0; index < count; index++) {
-            const x = 550 + (maxX - 800) * (index + Math.random() * 0.4) / count;
-            bottles.push(new CollectibleBottle(x));
-        }
+        const bossX = this.getBoss().x;
+        const keepEnoughX = 200 + (bossX - 200) * 0.75;
+        const dangerX = bossX - 550;
+        if (this.levelNumber === 2) return this.createLevelTwoBottles(keepEnoughX, dangerX);
+        // Keep the final bottle wholly between the two signs. The other
+        // random bottles remain earlier along the route, making this the last.
+        const zones = [[350, 470], [600, keepEnoughX - 80],
+            [600, keepEnoughX - 80], [600, keepEnoughX - 80],
+            [keepEnoughX + 120 + 20, dangerX - 52 - 20]];
+        return zones.map(([min, max]) => new CollectibleBottle(min + Math.random() * (max - min)));
+    }
+
+    /** Supplies spaced bottle groups before each level-two encounter and sign. */
+    createLevelTwoBottles(keepEnoughX, dangerX) {
+        const bottles = [new CollectibleBottle(350 + Math.random() * 120)];
+        const addGroup = (targetX, count) => {
+            for (let index = 0; index < count; index++) {
+                const x = targetX - (count - index) * 130 - 60 + Math.random() * 30;
+                bottles.push(new CollectibleBottle(x));
+            }
+        };
+        this.level.enemies.filter(enemy => enemy instanceof MiniBoss)
+            .forEach(boss => addGroup(boss.x, 3));
+        addGroup(keepEnoughX, 3);
+        addGroup(dangerX, 2);
         return bottles;
     }
     /** DE: Erstellt Münzen. EN: Creates coins.
  * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     createCoins() {
-        const count = 50;
+        const count = 5;
         const coins = [];
         for (let index = 0; index < count; index++) coins.push(this.createCoin(index, count));
         return coins;
@@ -233,7 +276,7 @@ class World extends WorldBase {
 
     /** DE: Aktualisiert Münze Statusleiste. EN: Updates coin bar. */
     updateCoinBar() {
-        const percentage = Math.min(100, Math.floor(this.coinInventory / 10) * 20);
+        const percentage = Math.min(100, this.coinInventory * 20);
         this.coinBar.setPercentage(percentage);
     }
 

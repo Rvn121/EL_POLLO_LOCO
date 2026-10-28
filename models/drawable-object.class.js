@@ -1,4 +1,19 @@
 class DrawableObject {
+    static sharedImages = new Map();
+
+    /** Reuses decoded graphics across actors and level restarts. */
+    static getImage(path) {
+        if (!this.sharedImages.has(path)) {
+            const image = new Image();
+            image.src = path;
+            this.sharedImages.set(path, image);
+        }
+        return this.sharedImages.get(path);
+    }
+
+    static async waitForImages() {
+        await Promise.allSettled([...this.sharedImages.values()].map(image => image.decode()));
+    }
     x = 20;
     y = 180;
     img;
@@ -12,8 +27,7 @@ class DrawableObject {
  * @param {string} path - DE: Parameter path. EN: path parameter.
  */
     loadImage(path) {
-        this.img = new Image();
-        this.img.src = path;
+        this.img = DrawableObject.getImage(path);
     }
 
     /** DE: Lädt Bilder. EN: Loads images.
@@ -21,9 +35,7 @@ class DrawableObject {
  */
     loadImages(images) {
         images.forEach(path => {
-            const img = new Image();
-            img.src = path;
-            this.imageCache[path] = img;
+            this.imageCache[path] = DrawableObject.getImage(path);
         });
     }
 

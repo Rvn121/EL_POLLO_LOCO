@@ -81,6 +81,7 @@ class WorldDrawBase {
 
     /** DE: Zeichnet Level actors. EN: Draws level actors. */
     drawLevelActors() {
+        this.addObjectsToMap(this.signs);
         this.drawCoins(true);
         this.addToMap(this.character);
         this.drawVisibleEnemies();

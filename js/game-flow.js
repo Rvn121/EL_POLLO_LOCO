@@ -1,3 +1,5 @@
+let gameLoading = false;
+
 /** DE: Stoppt Menü Musik. EN: Stops menu music. */
 function stopMenuMusic() {
     gameSounds.stopAll();
@@ -7,7 +9,8 @@ function stopMenuMusic() {
 
 /** DE: Startet Spiel. EN: Starts game. */
 function startGame() {
-    if (world) return;
+    if (world || gameLoading) return;
+    gameLoading = true;
     setTouchMenuOpen(false, false);
     stopMenuMusic();
     titleActive = false;
@@ -15,44 +18,53 @@ function startGame() {
     resetTouchControls();
     hideStartMenu();
     hideRestartButton();
+    document.getElementById("canvasFrame").classList.add("level-loading");
     prepareGameView();
 }
 
 /** DE: Führt prepare game view im Spiel aus. EN: Runs prepare game view in the game. */
-function prepareGameView() {
-    if (isTabletOrMobile()) requestFullscreenMode();
+async function prepareGameView() {
     window.gamePaused = true;
-    world = new World(canvas, keyboard, handleGameOver, currentLevel);
+    const transition = document.getElementById("levelTransitionImage");
+    transition.src = `img/icons_backgrounds/El_Pollo_Loco_Level_${currentLevel}_2D.png`;
     showLevelAnnouncement();
+    setLoading(true);
+    // Allow the loading overlay to paint before creating the level.
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    world = new World(canvas, keyboard, handleGameOver, currentLevel);
+    const loadingWorld = world;
+    await Promise.allSettled([DrawableObject.waitForImages(), transition.decode(),
+        world.gameOverImage.decode(), world.winImage.decode()]);
+    if (world !== loadingWorld) return;
+    gameLoading = false;
+    setLoading(false);
+    finishLevelLoading(loadingWorld);
     updateFullscreenUi();
+    document.getElementById("canvasFrame").classList.remove("level-loading");
 }
 
 /** DE: Zeigt das Übergangsbild vor dem Start des Levels. EN: Shows the transition image before the level begins. */
 function showLevelAnnouncement() {
     const image = document.getElementById("levelTransitionImage");
-    const currentWorld = world;
     image.src = "img/icons_backgrounds/El_Pollo_Loco_Level_2_2D.png";
     if (currentLevel === 1) image.src = "img/icons_backgrounds/El_Pollo_Loco_Level_1_2D.png";
     image.classList.remove("hidden");
-    showLevelGoal(currentWorld);
-}
-
-/** DE: Zeigt das Spielziel kurz vor Beginn jedes Levels. EN: Briefly shows the objective before each level starts.
- * @param {*} currentWorld - DE: Parameter currentWorld. EN: currentWorld parameter.
- */
-function showLevelGoal(currentWorld) {
     const announcement = document.getElementById("levelAnnouncement");
     announcement.textContent = "Collect all coins and defeat all chickens to unlock the final boss!";
     announcement.classList.remove("hidden");
-    window.setTimeout(() => {
-        if (world !== currentWorld) return;
-        announcement.classList.add("hidden");
-        document.getElementById("levelTransitionImage").classList.add("hidden");
-        world.startLevel();
-        window.gamePaused = false;
-        pauseForTouchMenu();
-        updateTouchControls();
-    }, 2800);
+}
+
+/** DE: Startet das Level direkt nach dem Laden. EN: Starts the level immediately after loading.
+ * @param {*} currentWorld - DE: Parameter currentWorld. EN: currentWorld parameter.
+ */
+function finishLevelLoading(currentWorld) {
+    if (world !== currentWorld) return;
+    document.getElementById("levelAnnouncement").classList.add("hidden");
+    document.getElementById("levelTransitionImage").classList.add("hidden");
+    world.startLevel();
+    window.gamePaused = false;
+    pauseForTouchMenu();
+    updateTouchControls();
 }
 
 /** DE: Verarbeitet Level. EN: Handles level. */
@@ -92,6 +104,9 @@ function resetMenuElements() {
 
 /** DE: Beendet und bereinigt Spielwelt. EN: Disposes world. */
 function disposeWorld() {
+    document.getElementById("canvasFrame").classList.remove("level-loading");
+    gameLoading = false;
+    setLoading(false);
     stopPauseMusic();
     setTouchMenuOpen(false, false);
     gameSounds.stopAll();

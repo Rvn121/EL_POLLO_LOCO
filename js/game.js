@@ -15,7 +15,7 @@ let controlsModal;
 let orientationOverlay;
 let canvasShell;
 let menuMusic;
-let menuMuted = false;
+let menuMuted = true;
 let menuMuteBtn;
 let menuEffectsBtn;
 const pauseMusic = new Audio("img/icons_backgrounds/pause.mp3");
@@ -25,7 +25,7 @@ pauseMusic.volume = 0.45;
 document.addEventListener("DOMContentLoaded", init);
 
 /** DE: Initialisiert das Spiel und seine Bedienelemente. EN: Initializes the game and its controls. */
-function init() {
+async function init() {
     cacheDomElements();
     loadTitleAssets();
     bindUiEvents();
@@ -34,6 +34,16 @@ function init() {
     initTitleClouds();
     startTitleScreen();
     setupMenuMusic();
+    await Promise.allSettled([titleBackground.decode(), startScreenImage.decode(),
+        ...Array.from(document.images, image => image.decode())]);
+    setLoading(false);
+}
+
+/** Shows loading feedback over the start screen or the current level image. */
+function setLoading(loading) {
+    const screen = document.getElementById("loadingScreen");
+    screen.classList.toggle("hidden", !loading);
+    canvasShell.setAttribute("aria-busy", String(loading));
 }
 
 /** DE: Speichert häufig verwendete HTML-Elemente. EN: Stores frequently used HTML elements. */
@@ -67,6 +77,13 @@ function bindUiEvents() {
 
 /** DE: Richtet die Schaltflächen des Hauptmenüs ein. EN: Sets up the main menu buttons. */
 function bindMenuButtons() {
+    const legalDialog = document.getElementById("legalNoticeDialog");
+    document.getElementById("imprintLink").addEventListener("click", () => legalDialog.showModal());
+    legalDialog.addEventListener("click", event => {
+        const bounds = legalDialog.getBoundingClientRect();
+        if (event.target === legalDialog && (event.clientX < bounds.left || event.clientX > bounds.right ||
+            event.clientY < bounds.top || event.clientY > bounds.bottom)) legalDialog.close();
+    });
     menuMuteBtn.addEventListener("click", toggleMenuMute);
     menuEffectsBtn.addEventListener("click", toggleEffectsMute);
     document.getElementById("startBtn").addEventListener("click", openLevelSelection);
@@ -194,8 +211,10 @@ function startSelectedLevel(levelNumber) {
 
 /** DE: Richtet ein Menü Musik. EN: Sets up menu music. */
 function setupMenuMusic() {
-    menuMuted = false;
+    menuMuted = localStorage.getItem("elPolloLocoMusicMuted") !== "false";
     menuMusic.muted = menuMuted;
+    pauseMusic.muted = menuMuted;
+    gameSounds.setMusicMuted(menuMuted);
     updateMenuMuteButton();
     updateAllSoundsButton();
     updateEffectsMuteButton();
@@ -215,16 +234,18 @@ function playMenuMusicOnInteraction() {
 
 /** DE: Versucht die Titelmusik abzuspielen, sofern sie erlaubt ist. EN: Attempts to play title music when playback is allowed. */
 function playMenuMusic() {
-    if (menuMuted || !titleActive || world || !menuMusic.paused) return;
+    if (!titleActive || world || !menuMusic.paused) return;
     menuMusic.play().catch(() => {});
 }
 
 /** DE: Schaltet um Menü mute. EN: Toggles menu mute. */
 function toggleMenuMute() {
     menuMuted = !menuMuted;
+    localStorage.setItem("elPolloLocoMusicMuted", String(menuMuted));
+    gameSounds.setMusicMuted(menuMuted);
     menuMusic.muted = menuMuted;
-    if (menuMuted) menuMusic.pause();
-    else playMenuMusic();
+    pauseMusic.muted = menuMuted;
+    playMenuMusic();
     updateMenuMuteButton();
     updatePauseMusic();
 }
@@ -337,7 +358,7 @@ function positionIconTooltip(control, tooltip) {
 function updatePauseMusic() {
     const pausedLevel = world && world.isPaused && !world.levelIntroActive && !world.isWin && !world.isGameOver;
     if (!pausedLevel) return stopPauseMusic();
-    if (menuMuted) return pauseMusic.pause();
+    pauseMusic.muted = menuMuted;
     if (pauseMusic.paused) pauseMusic.play().catch(() => {});
 }
 

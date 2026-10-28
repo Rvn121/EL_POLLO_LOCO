@@ -103,6 +103,7 @@ function updateTouchControls() {
     const frame = document.getElementById("canvasFrame");
     const touchDevice = navigator.maxTouchPoints > 0 || window.matchMedia("(any-pointer: coarse)").matches;
     if (touchDevice) frame.classList.add("touch-enabled");
+    document.getElementById("canvasShell").classList.toggle("touch-layout", frame.classList.contains("touch-enabled"));
     frame.classList.toggle("touch-level", !!world);
     frame.classList.toggle("level-intro", !!world && world.levelIntroActive);
     updateTouchResultActions(frame);

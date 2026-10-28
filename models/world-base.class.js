@@ -9,11 +9,11 @@ class WorldBase extends WorldDrawBase {
  * @param {*} bottle - DE: Parameter bottle. EN: bottle parameter.
  */
     pickupBottle(bottle) {
-        if (bottle.collected || this.bottleCount >= 20) return;
+        if (bottle.collected || this.bottleCount >= 5) return;
         if (!this.boxesOverlap(this.character, bottle)) return;
         bottle.collect();
         gameSounds.play("bottlecollect");
-        this.bottleCount = Math.min(20, this.bottleCount + 4);
+        this.bottleCount++;
         this.bottleBar.setPercentage(this.getBottlePercentage());
     }
 
@@ -36,7 +36,7 @@ class WorldBase extends WorldDrawBase {
         coin.collect();
         this.coinsCollected++;
         this.coinInventory++;
-        this.coinValue = Math.min(100, Math.floor(this.coinsCollected / 10) * 20);
+        this.coinValue = Math.min(100, this.coinsCollected * 20);
         this.updateBossUnlock();
         this.updateCoinBar();
         gameSounds.play("drop_coin");
@@ -61,7 +61,7 @@ class WorldBase extends WorldDrawBase {
  * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     getBottlePercentage() {
-        return Math.ceil(this.bottleCount / 4) * 20;
+        return this.bottleCount * 20;
     }
 
     /** DE: Ermittelt Boss. EN: Gets boss.
@@ -99,7 +99,7 @@ class WorldBase extends WorldDrawBase {
             boss.attackHitDone = true;
             let damage = 10;
             if (this.levelNumber === 2) damage = 20;
-            this.damageCharacter(damage);
+            this.damageCharacter(damage, boss);
         });
     }
 
@@ -111,7 +111,7 @@ class WorldBase extends WorldDrawBase {
         if (!this.canTakeHitFrom(boss)) return;
         let damage = 10;
             if (this.levelNumber === 2) damage = 20;
-            this.damageCharacter(damage);
+            this.damageCharacter(damage, boss);
         boss.lastHitPosition = { x: this.character.x, y: this.character.y };
     }
 
@@ -129,7 +129,7 @@ class WorldBase extends WorldDrawBase {
         if (!this.canChickenDamageCharacter(enemy) || !this.canTakeHitFrom(enemy)) return;
         let damage = 5;
         if (this.levelNumber === 2) damage = 10;
-        this.damageCharacter(damage);
+        this.damageCharacter(damage, enemy);
         enemy.lastHitPosition = { x: this.character.x, y: this.character.y };
         this.statusBar.setPercentage(this.character.energy);
     }
@@ -141,7 +141,7 @@ class WorldBase extends WorldDrawBase {
         if (!this.character.isTouchingVisiblePixels(enemy) || !this.canTakeHitFrom(enemy)) return;
         let damage = 10;
             if (this.levelNumber === 2) damage = 20;
-            this.damageCharacter(damage);
+            this.damageCharacter(damage, enemy);
         enemy.lastHitPosition = { x: this.character.x, y: this.character.y };
         this.statusBar.setPercentage(this.character.energy);
     }
@@ -175,9 +175,9 @@ class WorldBase extends WorldDrawBase {
     /** DE: Zieht Lebensenergie nach einem Gegnertreffer ab. EN: Reduces player energy after an enemy hit.
  * @param {number} amount - DE: Parameter amount. EN: amount parameter.
  */
-    damageCharacter(amount) {
+    damageCharacter(amount, attacker) {
         if (this.character.energy <= 0) return;
-        this.character.takeDamage(amount);
+        this.character.takeDamage(amount, attacker);
         if (this.coinInventory > 0) this.coinInventory--;
         this.updateCoinBar();
         this.statusBar.setPercentage(this.character.energy);
@@ -223,10 +223,14 @@ class WorldBase extends WorldDrawBase {
  */
     createCoin(index, count) {
         const x = this.getCoinX(index, count);
-        let high = index % 3 === 0;
-        if (this.levelNumber === 2) high = index % 2 === 0;
-        let y = 245 + Math.random() * 30;
-        if (high) y = 140 + Math.random() * 35;
+        const jumpHeight = this.character.jumpSpeed * this.character.jumpSpeed / (2 * this.character.gravity);
+        const ground = this.character.groundY + this.character.height;
+        // Keep the center between belly and jump height, including the 7px bob.
+        const bellyHeight = this.character.height * 0.45;
+        const minHeight = bellyHeight + 7;
+        const maxHeight = Math.max(minHeight, jumpHeight - 7);
+        const height = minHeight + Math.random() * (maxHeight - minHeight);
+        const y = ground - height - 186 / 2 + 20;
         const coin = new Coin(x, y);
         coin.behindCharacter = index % 2 === 0;
         return coin;
@@ -238,10 +242,11 @@ class WorldBase extends WorldDrawBase {
  * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     getCoinX(index, count) {
-        const behindCount = 8;
         const minX = this.level.level_start_x + 100;
-        const maxX = this.getBoss().x - 1150;
-        if (index < behindCount) return minX + (50 - minX) * (index + 0.4) / behindCount;
-        return 450 + (maxX - 450) * (index - behindCount + 0.4) / (count - behindCount);
+        if (index === 0) return minX + Math.random() * (50 - minX);
+        const start = 450;
+        const end = this.getBoss().x - 250;
+        const section = (end - start) / (count - 1);
+        return start + section * (index - 1 + Math.random() * 0.8);
     }
 }

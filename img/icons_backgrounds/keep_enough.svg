@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000" role="img" aria-label="Holzschild mit Salsa-Flasche und der Aufschrift KEEP ENOUGH">
+<defs>
+ <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffa737"/><stop offset=".34" stop-color="#ef7917"/><stop offset=".7" stop-color="#df6210"/><stop offset="1" stop-color="#a83b0a"/></linearGradient>
+ <linearGradient id="pole" x1="0" x2="1"><stop stop-color="#9d3909"/><stop offset=".23" stop-color="#f18a22"/><stop offset=".7" stop-color="#c65a12"/><stop offset="1" stop-color="#812a08"/></linearGradient>
+ <radialGradient id="gold" cx=".3" cy=".25" r=".8"><stop stop-color="#fff0a3"/><stop offset="1" stop-color="#f8c266"/></radialGradient>
+ <linearGradient id="glass" x1="0" x2="1"><stop stop-color="#a90004"/><stop offset=".45" stop-color="#df0710"/><stop offset="1" stop-color="#a40005"/></linearGradient>
+</defs>
+<!-- post -->
+<path d="M345 40 Q350 20 372 18 L435 18 Q459 20 462 46 L462 923 Q442 951 401 960 Q361 948 345 923Z" fill="url(#pole)" stroke="#512108" stroke-width="15" stroke-linejoin="round"/>
+<path d="M370 55 Q387 92 378 145 L387 266 Q371 337 383 420 L372 586 Q396 704 380 887" fill="none" stroke="#8d3407" stroke-width="12" stroke-linecap="round" opacity=".75"/>
+<path d="M432 63 Q416 156 431 238 Q442 344 425 429 M423 655 Q441 743 421 883" fill="none" stroke="#7c2b07" stroke-width="9" stroke-linecap="round"/>
+<!-- 3 square wooden planks -->
+<g stroke="#4a200c" stroke-width="16" stroke-linejoin="round">
+<path d="M103 148 Q127 119 171 133 L630 129 Q682 129 701 171 L696 321 Q682 345 643 346 L151 350 Q104 348 96 317Z" fill="url(#wood)"/>
+<path d="M104 339 Q93 356 103 374 L96 533 Q110 564 150 568 L645 566 Q699 567 702 527 L693 368 Q675 338 643 343 L160 343Z" fill="url(#wood)"/>
+<path d="M103 557 Q83 580 100 608 L97 735 Q110 772 155 773 L647 770 Q694 773 706 729 L693 592 Q680 554 639 558 L157 558Z" fill="url(#wood)"/>
+</g>
+<!-- edge glows -->
+<path d="M128 173 Q154 148 189 154 L621 150" fill="none" stroke="#ffd17c" stroke-width="12" stroke-linecap="round" opacity=".75"/>
+<path d="M127 384 L125 501 M130 609 L124 702" fill="none" stroke="#ffb355" stroke-width="9" stroke-linecap="round" opacity=".6"/>
+<!-- grain -->
+<g fill="none" stroke="#923707" stroke-width="9" stroke-linecap="round" opacity=".45">
+<path d="M157 216 Q255 196 333 213 M471 204 Q556 184 653 201 M166 305 Q258 289 321 307 M517 305 Q579 294 656 304"/>
+<path d="M159 399 Q250 375 317 401 M498 395 Q585 379 654 401 M156 526 Q234 507 293 526 M500 521 Q600 505 656 519"/>
+<path d="M155 632 Q236 618 319 634 M477 636 Q555 613 651 627 M159 734 Q233 716 310 735 M485 722 Q580 715 649 726"/>
+</g>
+<!-- nails -->
+<g stroke="#401e12" stroke-width="6"><circle cx="154" cy="204" r="24" fill="#55555a"/><circle cx="646" cy="204" r="24" fill="#55555a"/><circle cx="149" cy="704" r="24" fill="#55555a"/><circle cx="647" cy="704" r="24" fill="#55555a"/></g>
+<g fill="#ceced0" opacity=".9"><ellipse cx="148" cy="193" rx="11" ry="7" transform="rotate(-30 148 193)"/><ellipse cx="639" cy="193" rx="11" ry="7" transform="rotate(-30 639 193)"/><ellipse cx="142" cy="695" rx="11" ry="7" transform="rotate(-30 142 695)"/><ellipse cx="640" cy="695" rx="11" ry="7" transform="rotate(-30 640 695)"/></g>
+<!-- bottle in center, closely echoes user's provided salsa bottle -->
+<g transform="translate(311 176) scale(.76)">
+ <path d="M76 16 L156 16 Q165 17 165 28 L165 60 L68 60 L68 28 Q68 16 76 16Z" fill="#00884c" stroke="#4c210e" stroke-width="7"/>
+ <path d="M72 61 L163 61 L168 83 L167 147 Q169 166 195 205 Q206 223 206 254 L206 413 Q205 438 174 442 L61 442 Q29 440 29 413 L29 256 Q29 224 43 207 Q68 174 68 149 L68 86Z" fill="url(#glass)" stroke="#57210c" stroke-width="8"/>
+ <path d="M31 246 Q116 265 205 245 L205 376 Q110 396 30 377Z" fill="#f67f3e" stroke="#006e39" stroke-width="11"/>
+ <path d="M42 276 Q77 284 86 307 M171 274 Q148 278 145 289" fill="none" stroke="#ed3519" stroke-width="8"/>
+ <path d="M115 270 Q64 319 115 367 Q165 319 115 270Z" fill="#ffb326" stroke="#bf2208" stroke-width="6"/>
+ <path d="M120 291 Q103 312 109 335 Q113 356 125 350 Q143 324 129 310 Q122 301 120 291Z" fill="#d60005"/>
+ <path d="M165 100 Q174 106 174 122 L174 153 M176 181 Q172 201 186 217 M181 399 Q179 417 168 422" fill="none" stroke="#fff4dd" stroke-width="9" stroke-linecap="round"/>
+ <g fill="#cf3120"><path d="M47 309 l13 -8 -5 17Z"/><path d="M171 343 l10 -7 -2 14Z"/><path d="M53 351 l11 -6 1 13Z"/></g>
+</g>
+<!-- lettering, readable on wood -->
+<g text-anchor="middle" font-family="DejaVu Sans,Arial,sans-serif" font-weight="900" letter-spacing="3">
+ <text x="400" y="633" font-size="49" fill="#54220c" stroke="#54220c" stroke-width="9" paint-order="stroke">KEEP ENOUGH</text>
+ <text x="400" y="633" font-size="49" fill="url(#gold)" stroke="#fff0b7" stroke-width="1.5" paint-order="stroke">KEEP ENOUGH</text>
+</g>
+<!-- grass and stones at foot -->
+<g stroke="#41690b" stroke-width="4" stroke-linejoin="round"><path d="M353 935 Q312 902 300 864 Q341 865 365 907 Q353 861 371 826 Q395 870 385 937Z" fill="#80a916"/><path d="M438 936 Q470 897 505 884 Q490 928 459 950 Q480 914 476 864 Q440 886 425 932Z" fill="#81b51a"/></g>
+<g stroke="#666165" stroke-width="5"><path d="M291 950 Q298 918 343 920 Q369 920 384 954Z" fill="#b9b8b7"/><path d="M412 949 Q433 913 475 928 Q494 933 497 955Z" fill="#aaa9ac"/><ellipse cx="398" cy="957" rx="30" ry="14" fill="#c4c1bf"/></g>
+</svg>

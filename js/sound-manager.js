@@ -1,8 +1,10 @@
-/** Centralized sound effects, controlled by the existing Sound On/Off setting. */
+/** Controls music and sound effects independently. */
 class SoundManager {
+    musicNames = new Set(["gameover", "win", "L1_win", "L2_win", "lose"]);
     /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values. */
     constructor() {
         this.muted = localStorage.getItem("elPolloLocoEffectsMuted") === "true";
+        this.musicMuted = localStorage.getItem("elPolloLocoMusicMuted") !== "false";
         this.sounds = {};
         this.pendingSequence = null;
         this.addBackgroundSounds();
@@ -52,6 +54,7 @@ class SoundManager {
         sound.preload = "auto";
         sound.volume = volume;
         sound.loop = loop;
+        if (this.musicNames.has(name)) sound.muted = this.musicMuted;
         this.sounds[name] = sound;
     }
 
@@ -59,7 +62,7 @@ class SoundManager {
  * @param {string} name - DE: Parameter name. EN: name parameter.
  */
     play(name) {
-        if (this.muted || !this.sounds[name]) return;
+        if (!this.canPlay(name)) return;
         const sound = this.sounds[name];
         if (sound.loop && !sound.paused) return;
         if (!sound.loop) sound.currentTime = 0;
@@ -72,7 +75,8 @@ class SoundManager {
  */
     playSequence(first, next) {
         this.cancelSequence();
-        if (this.muted || !this.sounds[first] || !this.sounds[next]) return;
+        if (!this.sounds[first] || !this.sounds[next]) return;
+        if (!this.canPlay(first)) return this.play(next);
         const sound = this.sounds[first];
         const onEnded = () => {
             this.cancelSequence();
@@ -115,7 +119,20 @@ stop(name) {
  */
     setMuted(muted) {
         this.muted = muted;
-        if (muted) this.stopAll();
+        if (muted) {
+            for (const name in this.sounds) {
+                if (!this.musicNames.has(name)) this.stop(name);
+            }
+        }
+    }
+
+    canPlay(name) {
+        return !!this.sounds[name] && (this.musicNames.has(name) || !this.muted);
+    }
+
+    setMusicMuted(muted) {
+        this.musicMuted = muted;
+        this.musicNames.forEach(name => { this.sounds[name].muted = muted; });
     }
 }
 

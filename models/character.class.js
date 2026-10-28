@@ -5,6 +5,7 @@ class Character extends CharacterBase {
     speedY = 0;
     jumpPressed = false;
     jumpFrame = 0;
+    landingFrames = 0;
     jumpSpeed = 15;
     gravity = 0.8;
     lastHit = 0;
@@ -70,10 +71,11 @@ class Character extends CharacterBase {
  */
     constructor(keyboard, level) {
         super();
-        this.loadImage(this.IMAGES_WALKING[0]);
+        this.loadImage(this.IMAGES_IDLE[0]);
         this.keyboard = keyboard;
         this.level = level;
         this.loadCharacterImages();
+        this.startIdleAnimation();
         this.startAnimationLoop();
     }
 
@@ -82,6 +84,7 @@ class Character extends CharacterBase {
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages(this.IMAGES_JUMPING);
         this.loadImages(this.IMAGES_IDLE);
+        this.loadImages(this.createDeathImages());
         this.loadImages([this.HURT_IMAGE]);
     }
 
@@ -89,7 +92,8 @@ class Character extends CharacterBase {
     startAnimationLoop() {
         this.animationInterval = setInterval(() => {
             if (window.gamePaused) return;
-            if (this.energy <= 0 || this.idleStarted) return;
+            if (this.energy <= 0) return;
+            if (this.landingFrames > 0) return;
             if (this.isHurt()) return;
             if (this.shouldStartIdle()) return this.startIdleAnimation();
             if (this.y !== this.groundY || this.keyboard.LEFT === this.keyboard.RIGHT) return;
@@ -101,8 +105,8 @@ class Character extends CharacterBase {
  * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     shouldStartIdle() {
-        const standingStill = !this.keyboard.LEFT && !this.keyboard.RIGHT;
-        return standingStill && this.y === this.groundY && Date.now() - this.lastActivity >= 7000;
+        const standingStill = this.keyboard.LEFT === this.keyboard.RIGHT;
+        return standingStill && this.y === this.groundY;
     }
 
     /** DE: Spielt Laufen Animation. EN: Plays walking animation. */

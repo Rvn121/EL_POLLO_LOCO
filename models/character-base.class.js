@@ -94,24 +94,42 @@ class CharacterBase extends MovableObject {
 
     /** DE: Lässt landen on Boden. EN: Lands on ground. */
     landOnGround() {
-        if (this.jumpFrame > 0 && !this.isHurt()) this.resetWalkingImage();
+        if (this.jumpFrame > 0) {
+            this.jumpFrame = 0;
+            this.landingFrames = 8;
+            this.currentImage = 0;
+        }
         this.y = this.groundY;
         this.speedY = 0;
+        if (this.landingFrames > 0) {
+            if (!this.isHurt()) {
+                const index = this.landingFrames > 4 ? 7 : 8;
+                this.img = this.imageCache[this.IMAGES_JUMPING[index]];
+            }
+            this.landingFrames--;
+            if (this.landingFrames === 0 && !this.isHurt()) this.showStandingImage();
+        }
     }
 
     /** DE: Setzt zurück Laufen Bild. EN: Resets walking image. */
     resetWalkingImage() {
-        this.img = this.imageCache[this.IMAGES_WALKING[0]];
         this.currentImage = 0;
         this.jumpFrame = 0;
+        this.showStandingImage();
     }
 
     /** DE: Animiert Sprung. EN: Animates jump. */
     animateJump() {
-        const duration = Math.ceil(2 * this.jumpSpeed / this.gravity + 1);
-        const frame = Math.floor(this.jumpFrame * this.IMAGES_JUMPING.length / duration);
-        const index = Math.min(frame, this.IMAGES_JUMPING.length - 1);
-        this.img = this.imageCache[this.IMAGES_JUMPING[index]];
+        const launchSpeed = this.jumpLaunchSpeed || this.jumpSpeed;
+        let index;
+        if (Math.abs(this.speedY) <= this.gravity * 2) index = 4;
+        else if (this.speedY > 0) {
+            const progress = 1 - this.speedY / launchSpeed;
+            index = Math.min(3, Math.max(0, Math.floor(progress * 4)));
+        } else {
+            index = Math.abs(this.speedY) < launchSpeed * 0.55 ? 5 : 6;
+        }
+        if (!this.isHurt()) this.img = this.imageCache[this.IMAGES_JUMPING[index]];
         this.jumpFrame++;
     }
 
@@ -119,15 +137,20 @@ class CharacterBase extends MovableObject {
     jump() {
         if (this.y !== this.groundY) return;
         this.speedY = this.jumpSpeed;
+        this.jumpLaunchSpeed = this.speedY;
+        this.landingFrames = 0;
         this.jumpFrame = 0;
         gameSounds.stop("steps");
         gameSounds.play("jump");
         this.markActivity();
+        if (!this.isHurt()) this.img = this.imageCache[this.IMAGES_JUMPING[0]];
     }
 
     /** DE: Lässt abprallen from enemy. EN: Bounces from enemy. */
     bounceFromEnemy() {
         this.speedY = this.jumpSpeed * 0.6;
+        this.jumpLaunchSpeed = this.speedY;
+        this.landingFrames = 0;
         this.jumpFrame = 0;
         this.markActivity();
     }
@@ -136,11 +159,18 @@ class CharacterBase extends MovableObject {
  * @param {number} damage - DE: Parameter damage. EN: damage parameter.
  * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
-    takeDamage(damage) {
+    takeDamage(damage, attacker) {
         const nextEnergy = Math.max(0, this.energy - damage);
         if (this.energy <= 0) return;
         gameSounds.play("hit_pepe");
-        if (nextEnergy === 0) return this.die();
+        if (nextEnergy === 0) {
+            if (attacker) {
+                const attackerCenter = attacker.x + attacker.width / 2;
+                const ownCenter = this.x + this.width / 2;
+                if (attackerCenter !== ownCenter) this.otherDirection = attackerCenter < ownCenter;
+            }
+            return this.die();
+        }
         this.energy = nextEnergy;
         this.lastHit = Date.now();
         this.markActivity();
@@ -166,21 +196,36 @@ class CharacterBase extends MovableObject {
     /** DE: Startet die Todesanimation und verhindert normale Bewegung. EN: Starts the death animation and prevents normal movement. */
     startDeathAnimation() {
         this.deathImages = this.createDeathImages();
-        this.loadImages(this.deathImages);
         this.deathIndex = 0;
+        this.deathFinished = false;
+        this.deathFrameTicks = 0;
+        this.deathVelocityY = 7;
+        this.deathVelocityX = this.otherDirection ? 2.4 : -2.4;
         this.img = this.imageCache[this.deathImages[0]];
-        this.deathInterval = setInterval(() => this.showNextDeathFrame(), 170);
+        this.deathInterval = setInterval(() => this.updateDeathAnimation(), 1000 / 60);
+    }
+
+    /** Advances the death sequence and launches Pepe backwards from frame three. */
+    updateDeathAnimation() {
+        if (window.gamePaused) return;
+        if (++this.deathFrameTicks >= 10) {
+            this.deathFrameTicks = 0;
+            this.showNextDeathFrame();
+        }
+        if (this.deathIndex < 2) return;
+        this.x += this.deathVelocityX;
+        this.y -= this.deathVelocityY;
+        this.deathVelocityY -= 0.45;
+        if (this.deathIndex === this.deathImages.length - 1 && this.y > 480) {
+            clearInterval(this.deathInterval);
+            this.deathFinished = true;
+        }
     }
 
     /** DE: Zeigt das nächste Bild der Todesanimation. EN: Shows the next death animation frame. */
     showNextDeathFrame() {
-        if (++this.deathIndex >= this.deathImages.length) {
-            clearInterval(this.deathInterval);
-            this.deathFinished = true;
-            return;
-        }
+        this.deathIndex = Math.min(this.deathIndex + 1, this.deathImages.length - 1);
         this.img = this.imageCache[this.deathImages[this.deathIndex]];
-        if (this.deathIndex >= 2) this.y += 90;
     }
 
     /** DE: Prüft, ob hurt. EN: Checks whether hurt.
@@ -196,14 +241,16 @@ class CharacterBase extends MovableObject {
         this.img = this.imageCache[this.HURT_IMAGE];
         this.hurtTimeout = setTimeout(() => {
             this.lastHit = 0;
-            this.img = this.imageCache[this.IMAGES_WALKING[0]];
+            this.showStandingImage();
         }, 270);
     }
 
     /** DE: Zeigt standing Bild. EN: Shows standing image. */
     showStandingImage() {
-        if (this.energy <= 0 || this.idleStarted || this.y !== this.groundY) return;
-        this.img = this.imageCache[this.IMAGES_WALKING[0]];
+        if (this.energy <= 0 || this.idleStarted || this.y !== this.groundY || this.landingFrames > 0) return;
+        const moving = this.keyboard.LEFT !== this.keyboard.RIGHT;
+        if (moving) this.img = this.imageCache[this.IMAGES_WALKING[0]];
+        else this.startIdleAnimation();
     }
 
     /** DE: Markiert activity. EN: Marks activity. */
@@ -216,15 +263,16 @@ class CharacterBase extends MovableObject {
     startIdleAnimation() {
         if (this.idleStarted) return;
         this.idleStarted = true;
-        gameSounds.play("snoring");
         this.idleFrame = 0;
+        this.showNextIdleFrame();
         this.idleInterval = setInterval(() => {
             if (!window.gamePaused) this.showNextIdleFrame();
-        }, 500);
+        }, 350);
     }
 
     /** DE: Zeigt das nächste Bild der laufenden Ruheanimation. EN: Displays the next frame of the idle animation. */
     showNextIdleFrame() {
+        if (this.idleFrame === 40) gameSounds.play("snoring");
         const path = this.resolveIdleImage();
         this.img = this.imageCache[path];
         this.idleFrame++;
@@ -234,9 +282,11 @@ class CharacterBase extends MovableObject {
  * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
  */
     resolveIdleImage() {
-        if (this.idleFrame < this.IMAGES_IDLE.length) return this.IMAGES_IDLE[this.idleFrame];
-        const loopIndex = (this.idleFrame - this.IMAGES_IDLE.length) % this.IDLE_LOOP_IMAGES.length;
-        return this.IMAGES_IDLE[10 + (this.idleFrame - this.IMAGES_IDLE.length) % 10];
+        // Repeat each opening group six times, then finish idle and loop long idle.
+        if (this.idleFrame < 18) return this.IMAGES_IDLE[this.idleFrame % 3];
+        if (this.idleFrame < 36) return this.IMAGES_IDLE[3 + (this.idleFrame - 18) % 3];
+        if (this.idleFrame < 40) return this.IMAGES_IDLE[this.idleFrame - 30];
+        return this.IMAGES_IDLE[10 + (this.idleFrame - 40) % 10];
     }
 
     /** DE: Stoppt Ruhe Animation. EN: Stops idle animation. */
@@ -245,7 +295,6 @@ class CharacterBase extends MovableObject {
         gameSounds.stop("snoring");
         this.idleFrame = 0;
         clearInterval(this.idleInterval);
-        this.showStandingImage();
     }
 
     /** DE: Löscht Zeitgeber. EN: Clears timers. */
