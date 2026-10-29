@@ -1,13 +1,13 @@
 /** Controls music and sound effects independently. */
 class SoundManager {
     musicNames = new Set(["gameover", "win", "L1_win", "L2_win", "lose"]);
-    /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values. */
+    /**
+     * Initializes this object and sets up its required game data.
+     */
     constructor() {
-        // DE: Soundeffekte sind beim ersten Besuch eingeschaltet.
-        // EN: Sound effects are enabled on the first visit.
+        // Sound effects are enabled on the first visit.
         this.muted = localStorage.getItem("elPolloLocoEffectsMuted") === "true";
-        // DE: Musik ist beim ersten Besuch stumm.
-        // EN: Music is muted on the first visit.
+        // Music is muted on the first visit.
         this.musicMuted = localStorage.getItem("elPolloLocoMusicMuted") !== "false";
         this.sounds = {};
         this.pendingSequence = null;
@@ -16,7 +16,9 @@ class SoundManager {
         this.addBossSounds();
     }
 
-    /** DE: Fügt hinzu Hintergrund Geräusche. EN: Adds background sounds. */
+    /**
+     * Registers looping footsteps, wind, chickens, and sleeping sounds.
+     */
     addBackgroundSounds() {
         this.addSound("steps", "audio/steps.mp3", 0.32, true);
         this.addSound("wind", "audio/wind.mp3", 0.26, true);
@@ -24,7 +26,9 @@ class SoundManager {
         this.addSound("snoring", "audio/snoring.mp3", 0.32, true);
     }
 
-    /** DE: Fügt hinzu action Geräusche. EN: Adds action sounds. */
+    /**
+     * Registers short sounds for jumping, collecting items, and impacts.
+     */
     addActionSounds() {
         this.addSound("jump", "audio/jump.mp3", 0.55);
         this.addSound("splash", "audio/slime_splash.mp3", 0.55);
@@ -34,7 +38,9 @@ class SoundManager {
         this.addSound("hit_chickens", "audio/hit_chickens.mp3", 0.65);
     }
 
-    /** DE: Fügt hinzu Boss Geräusche. EN: Adds boss sounds. */
+    /**
+     * Registers sounds played during boss fights and result screens.
+     */
     addBossSounds() {
         this.addSound("miniboss_llive", "audio/miniboss_llive.mp3", 0.50);
         this.addSound("miniboss_dead", "audio/miniboss_dead.mp3", 0.65);
@@ -47,12 +53,13 @@ class SoundManager {
         this.addSound("boss_hit", "audio/hit.mp3", 0.65);
     }
 
-    /** DE: Fügt hinzu Geräusch. EN: Adds sound.
- * @param {string} name - DE: Parameter name. EN: name parameter.
- * @param {string} path - DE: Parameter path. EN: path parameter.
- * @param {*} volume - DE: Parameter volume. EN: volume parameter.
- * @param {*} [loop] - DE: Parameter loop. EN: loop parameter.
- */
+    /**
+     * Creates an audio object and saves it under the supplied name.
+     * @param {string} name - The identifier of the sound or game object.
+     * @param {string} path - The file path of the image or audio asset.
+     * @param {*} volume - Audio volume between 0 and 1.
+     * @param {*} loop - Whether the sound repeats.
+     */
     addSound(name, path, volume, loop = false) {
         const sound = new Audio(path);
         sound.preload = "auto";
@@ -62,9 +69,10 @@ class SoundManager {
         this.sounds[name] = sound;
     }
 
-    /** DE: Spielt play. EN: Plays play.
- * @param {string} name - DE: Parameter name. EN: name parameter.
- */
+    /**
+     * Starts the named sound if the current audio settings allow it.
+     * @param {string} name - The identifier of the sound or game object.
+     */
     play(name) {
         if (!this.canPlay(name)) return;
         const sound = this.sounds[name];
@@ -73,10 +81,11 @@ class SoundManager {
         sound.play().catch(() => {});
     }
 
-    /** DE: Spielt sequence. EN: Plays sequence.
- * @param {number} first - DE: Parameter first. EN: first parameter.
- * @param {*} next - DE: Parameter next. EN: next parameter.
- */
+    /**
+     * Plays the first sound and starts the next sound when it ends.
+     * @param {number} first - The first sound or frame in the sequence.
+     * @param {*} next - The sound or frame played next.
+     */
     playSequence(first, next) {
         this.cancelSequence();
         if (!this.sounds[first] || !this.sounds[next]) return;
@@ -91,7 +100,9 @@ class SoundManager {
         this.play(first);
     }
 
-    /** DE: Verarbeitet sequence. EN: Handles sequence. */
+    /**
+     * Removes the event handler for a scheduled sound sequence.
+     */
     cancelSequence() {
         if (!this.pendingSequence) return;
         const { sound, onEnded } = this.pendingSequence;
@@ -99,8 +110,9 @@ class SoundManager {
         this.pendingSequence = null;
     }
 
-    /** DE: Stoppt stop. EN: Stops stop.
- * @param {string} name - DE: Parameter name. EN: name parameter.
+/**
+ * Pauses the named sound and resets it to the beginning.
+ * @param {string} name - The identifier of the sound or game object.
  */
 stop(name) {
         if (this.pendingSequence && this.pendingSequence.name === name) this.cancelSequence();
@@ -110,7 +122,9 @@ stop(name) {
         sound.currentTime = 0;
     }
 
-    /** DE: Stoppt alle. EN: Stops all. */
+    /**
+     * Stops every registered game sound.
+     */
     stopAll() {
         this.cancelSequence();
         for (const name in this.sounds) {
@@ -118,9 +132,10 @@ stop(name) {
         }
     }
 
-    /** DE: Setzt muted. EN: Sets muted.
- * @param {boolean} muted - DE: Parameter muted. EN: muted parameter.
- */
+    /**
+     * Enables or disables sound effects without changing music mute settings.
+     * @param {boolean} muted - Whether audio should be muted.
+     */
     setMuted(muted) {
         this.muted = muted;
         if (muted) {
@@ -130,16 +145,18 @@ stop(name) {
         }
     }
 
-    /** DE: Prüft, ob ein Sound abgespielt werden darf. EN: Checks whether a sound may play.
-     * @param {string} name - DE: Soundname. EN: Sound name.
-     * @returns {boolean} DE: Wiedergabe erlaubt. EN: Playback allowed.
+    /**
+     * Checks whether a sound exists and is allowed by the mute settings.
+     * @param {string} name - The identifier of the sound or game object.
+     * @returns {boolean} The result of can play().
      */
     canPlay(name) {
         return !!this.sounds[name] && (this.musicNames.has(name) || !this.muted);
     }
 
-    /** DE: Schaltet die Musik stumm oder ein. EN: Mutes or unmutes music.
-     * @param {boolean} muted - DE: Stummschaltung aktiv. EN: Whether music is muted.
+    /**
+     * Mutes or unmutes registered music tracks.
+     * @param {boolean} muted - Whether audio should be muted.
      */
     setMusicMuted(muted) {
         this.musicMuted = muted;

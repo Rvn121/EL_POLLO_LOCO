@@ -24,7 +24,9 @@ pauseMusic.volume = 0.45;
 
 document.addEventListener("DOMContentLoaded", init);
 
-/** DE: Initialisiert das Spiel und seine Bedienelemente. EN: Initializes the game and its controls. */
+/**
+ * Loads the start menu, sets up controls, and prepares the game screen.
+ */
 async function init() {
     cacheDomElements();
     loadTitleAssets();
@@ -39,9 +41,8 @@ async function init() {
 }
 
 /**
- * DE: Wartet, bis die Bilder des Menüs geladen wurden.
- * EN: Waits until the menu images have finished loading.
- * @returns {Promise<void>} DE: Abschluss des Ladens. EN: Loading completion.
+ * Waits for the menu images to finish loading before showing the menu.
+ * @returns {Promise<void>} The result of wait for menu images().
  */
 async function waitForMenuImages() {
     const promises = [titleBackground.decode(), startScreenImage.decode()];
@@ -51,14 +52,19 @@ async function waitForMenuImages() {
     await Promise.allSettled(promises);
 }
 
-/** Shows loading feedback over the start screen or the current level image. */
+/**
+ * Shows or hides the loading indicator while assets are prepared.
+ * @param {*} loading - The loading used by this method.
+ */
 function setLoading(loading) {
     const screen = document.getElementById("loadingScreen");
     screen.classList.toggle("hidden", !loading);
     canvasShell.setAttribute("aria-busy", String(loading));
 }
 
-/** DE: Speichert häufig verwendete HTML-Elemente. EN: Stores frequently used HTML elements. */
+/**
+ * Stores the HTML elements needed by the game interface.
+ */
 function cacheDomElements() {
     canvas = document.getElementById("canvas");
     menuButtons = document.getElementById("menuButtons");
@@ -72,13 +78,17 @@ function cacheDomElements() {
     menuEffectsBtn = document.getElementById("menuEffectsBtn");
 }
 
-/** DE: Lädt die Grafiken des Startmenüs. EN: Loads the start menu graphics. */
+/**
+ * Loads the images used on the title screen.
+ */
 function loadTitleAssets() {
     titleBackground.src = "img/5_background/layers/air.png";
     startScreenImage.src = "img/9_intro_outro_screens/start/startscreen_1.png";
 }
 
-/** DE: Verbindet die Bedienelemente mit ihren Funktionen. EN: Connects user interface elements with their actions. */
+/**
+ * Connects the menu and gameplay buttons to their event handlers.
+ */
 function bindUiEvents() {
     bindMenuButtons();
     bindGameplayButtons();
@@ -87,7 +97,9 @@ function bindUiEvents() {
     updateFullscreenUi();
 }
 
-/** DE: Richtet die Schaltflächen des Hauptmenüs ein. EN: Sets up the main menu buttons. */
+/**
+ * Connects the start menu buttons to their actions.
+ */
 function bindMenuButtons() {
     const legalDialog = document.getElementById("legalNoticeDialog");
     document.getElementById("imprintLink").addEventListener("click", () => legalDialog.showModal());
@@ -101,7 +113,9 @@ function bindMenuButtons() {
     bindLevelMenuButtons();
 }
 
-/** DE: Verbindet die Levelauswahl und Steuerung mit ihren Buttons. EN: Binds level selection and control buttons. */
+/**
+ * Connects the level selection buttons to their actions.
+ */
 function bindLevelMenuButtons() {
     document.getElementById("startBtn").addEventListener("click", openLevelSelection);
     document.getElementById("tutorialChoice").addEventListener("click", () => startSelectedLevel(1));
@@ -111,7 +125,9 @@ function bindLevelMenuButtons() {
     controlsModal.addEventListener("click", handleBackdropClick);
 }
 
-/** DE: Richtet die Schaltflächen während des Spiels ein. EN: Sets up the in-game buttons. */
+/**
+ * Connects gameplay buttons to pause, sound, and fullscreen controls.
+ */
 function bindGameplayButtons() {
     document.getElementById("restartBtn").addEventListener("click", restartGame);
     document.getElementById("nextBtn").addEventListener("click", nextLevel);
@@ -119,7 +135,9 @@ function bindGameplayButtons() {
     document.getElementById("fullscreenBtn").addEventListener("click", toggleFullscreen);
 }
 
-/** DE: Richtet die Tastatursteuerung ein. EN: Sets up keyboard controls. */
+/**
+ * Registers keyboard input and key release handlers.
+ */
 function bindKeyboardEvents() {
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
@@ -129,7 +147,9 @@ function bindKeyboardEvents() {
     window.addEventListener("orientationchange", updateOrientationState);
 }
 
-/** DE: Führt init title clouds im Spiel aus. EN: Runs init title clouds in the game. */
+/**
+ * Creates clouds at random starting positions for the title screen.
+ */
 function initTitleClouds() {
     titleClouds = [];
     for (let index = 0; index < 8; index++) {
@@ -143,14 +163,18 @@ function initTitleClouds() {
     }
 }
 
-/** DE: Startet title Bildschirm. EN: Starts title screen. */
+/**
+ * Starts the animation of the title screen.
+ */
 function startTitleScreen() {
     titleActive = true;
     cancelAnimationFrame(titleLoopId);
     titleLoopId = requestAnimationFrame(drawTitleScreen);
 }
 
-/** DE: Zeichnet title Bildschirm. EN: Draws title screen. */
+/**
+ * Draws the title background and animated clouds for the current frame.
+ */
 function drawTitleScreen() {
     if (!titleActive || world) return;
     const ctx = canvas.getContext("2d");
@@ -163,8 +187,9 @@ function drawTitleScreen() {
     titleLoopId = requestAnimationFrame(drawTitleScreen);
 }
 
-/** DE: Zeichnet title Hintergrund. EN: Draws title background.
- * @param {*} ctx - DE: Parameter ctx. EN: ctx parameter.
+/**
+ * Draws the background picture of the start menu.
+ * @param {*} ctx - The canvas drawing context.
  */
 function drawTitleBackground(ctx) {
     if (titleBackground.complete && titleBackground.naturalWidth) ctx.drawImage(titleBackground, 0, 0, canvas.width, canvas.height);
@@ -174,8 +199,9 @@ function drawTitleBackground(ctx) {
     }
 }
 
-/** DE: Zeichnet title Wolken. EN: Draws title clouds.
- * @param {*} ctx - DE: Parameter ctx. EN: ctx parameter.
+/**
+ * Draws the moving clouds above the start menu.
+ * @param {*} ctx - The canvas drawing context.
  */
 function drawTitleClouds(ctx) {
     ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
@@ -191,7 +217,9 @@ function drawTitleClouds(ctx) {
     });
 }
 
-/** DE: Aktualisiert title Wolken. EN: Updates title clouds. */
+/**
+ * Moves the title screen clouds and replaces clouds that leave the screen.
+ */
 function updateTitleClouds() {
     titleClouds.forEach(cloudObject => {
         cloudObject.x -= cloudObject.speed;
@@ -199,15 +227,18 @@ function updateTitleClouds() {
     });
 }
 
-/** DE: Setzt zurück title Wolke. EN: Resets title cloud.
- * @param {*} cloudObject - DE: Parameter cloudObject. EN: cloudObject parameter.
+/**
+ * Moves a cloud back to the right side of the title screen.
+ * @param {*} cloudObject - The cloud object used by this method.
  */
 function resetTitleCloud(cloudObject) {
     cloudObject.x = canvas.width + 120 + Math.random() * 120;
     cloudObject.y = 10 + Math.random() * 95;
 }
 
-/** DE: Öffnet Level Auswahl. EN: Opens level selection. */
+/**
+ * Hides the start button and displays the tutorial and level selection images.
+ */
 function openLevelSelection() {
     if (world || menuSelectionOpen) return;
     setTouchMenuOpen(false);
@@ -217,8 +248,9 @@ function openLevelSelection() {
     updateFullscreenUi();
 }
 
-/** DE: Startet selected Level. EN: Starts selected level.
- * @param {number} levelNumber - DE: Parameter levelNumber. EN: levelNumber parameter.
+/**
+ * Starts the level chosen by the player.
+ * @param {number} levelNumber - The level number used by this method.
  */
 function startSelectedLevel(levelNumber) {
     if (world) return;
@@ -226,10 +258,11 @@ function startSelectedLevel(levelNumber) {
     startGame();
 }
 
-/** DE: Richtet ein Menü Musik. EN: Sets up menu music. */
+/**
+ * Prepares title music and restores the saved music setting.
+ */
 function setupMenuMusic() {
-    // DE: Ohne gespeicherte Wahl bleibt Musik stumm.
-    // EN: Music stays muted until the user enables it.
+    // Music stays muted until the user enables it.
     menuMuted = localStorage.getItem("elPolloLocoMusicMuted") !== "false";
     menuMusic.muted = menuMuted;
     pauseMusic.muted = menuMuted;
@@ -238,31 +271,46 @@ function setupMenuMusic() {
     updateAllSoundsButton();
     updateEffectsMuteButton();
     menuMusic.volume = 0.45;
+    startMenuMusicEvents();
+}
+
+/**
+ * Registers user interactions that can start the title music.
+ */
+function startMenuMusicEvents() {
     menuMusic.addEventListener("canplay", playMenuMusic);
     playMenuMusic();
     bindMenuMusicEvents();
 }
 
-/** DE: Startet die Musik nach einer erlaubten Benutzeraktion. EN: Starts music after an allowed user action. */
+/**
+ * Connects the menu music button to its mute control.
+ */
 function bindMenuMusicEvents() {
     document.addEventListener("pointerdown", playMenuMusicOnInteraction);
     document.addEventListener("pointerup", playMenuMusicOnInteraction);
     document.addEventListener("keydown", playMenuMusicOnInteraction);
 }
 
-/** DE: Spielt Menü Musik on interaction. EN: Plays menu music on interaction. */
+/**
+ * Tries to start menu music after the player interacts with the page.
+ */
 function playMenuMusicOnInteraction() {
     if (!titleActive || world) return;
     playMenuMusic();
 }
 
-/** DE: Versucht die Titelmusik abzuspielen, sofern sie erlaubt ist. EN: Attempts to play title music when playback is allowed. */
+/**
+ * Plays the title music unless playback is blocked by the browser.
+ */
 function playMenuMusic() {
     if (!titleActive || world || !menuMusic.paused) return;
     menuMusic.play().catch(() => {});
 }
 
-/** DE: Schaltet um Menü mute. EN: Toggles menu mute. */
+/**
+ * Switches menu music between muted and unmuted and saves the setting.
+ */
 function toggleMenuMute() {
     menuMuted = !menuMuted;
     localStorage.setItem("elPolloLocoMusicMuted", String(menuMuted));
@@ -274,7 +322,9 @@ function toggleMenuMute() {
     updatePauseMusic();
 }
 
-/** DE: Aktualisiert Menü mute Schaltfläche. EN: Updates menu mute button. */
+/**
+ * Updates the menu music button to show its current state.
+ */
 function updateMenuMuteButton() {
     let icon = "music_on";
     let label = "Turn music off";
@@ -283,7 +333,9 @@ function updateMenuMuteButton() {
     menuMuteBtn.setAttribute("aria-pressed", String(menuMuted));
 }
 
-/** DE: Schaltet um Effekte mute. EN: Toggles effects mute. */
+/**
+ * Switches sound effects on or off and saves the setting.
+ */
 function toggleEffectsMute() {
     gameSounds.setMuted(!gameSounds.muted);
     localStorage.setItem("elPolloLocoEffectsMuted", String(gameSounds.muted));
@@ -292,7 +344,9 @@ function toggleEffectsMute() {
     updateAllSoundsButton();
 }
 
-/** DE: Aktualisiert Effekte mute Schaltfläche. EN: Updates effects mute button. */
+/**
+ * Displays the current sound effects setting on the button.
+ */
 function updateEffectsMuteButton() {
     let icon = "sfx_on";
     let label = "Turn sound effects off";
@@ -301,116 +355,16 @@ function updateEffectsMuteButton() {
     menuEffectsBtn.setAttribute("aria-pressed", String(gameSounds.muted));
 }
 
-/** DE: Schaltet um alle Geräusche. EN: Toggles all sounds. */
+/**
+ * Enables or disables all game audio from the gameplay controls.
+ */
 function toggleAllSounds() {
     toggleEffectsMute();
 }
 
-/** DE: Aktualisiert die Beschriftung des Schalters für alle Sounds. EN: Updates the label of the all-sounds toggle. */
+/**
+ * Updates the text or icon of the all-sounds button.
+ */
 function updateAllSoundsButton() {
 
-}
-
-
-/** Keeps hover and keyboard hints inside the canvas at every screen size. */
-let currentTooltipControl = null;
-
-/** DE: Erstellt die kleinen Hinweise für Symbolschaltflächen. EN: Creates tooltips for icon buttons. */
-function setupIconTooltips() {
-    const frame = document.getElementById("canvasFrame");
-    const tooltip = document.createElement("div");
-    tooltip.id = "canvasTooltip";
-    tooltip.className = "canvas-tooltip hidden";
-    tooltip.setAttribute("role", "tooltip");
-    frame.appendChild(tooltip);
-    bindIconTooltips(frame);
-}
-
-/** DE: Verbindet die Symbolschaltflächen mit ihren Hinweisen. EN: Connects icon buttons to their tooltips.
- * @param {number} frame - DE: Parameter frame. EN: frame parameter.
- */
-function bindIconTooltips(frame) {
-    frame.querySelectorAll(".icon-control").forEach(control => {
-        control.addEventListener("pointerenter", () => showIconTooltip(control));
-        control.addEventListener("pointerleave", hideIconTooltip);
-        control.addEventListener("focus", () => showIconTooltip(control));
-        control.addEventListener("blur", hideIconTooltip);
-        control.addEventListener("click", hideIconTooltip);
-    });
-    window.addEventListener("resize", hideIconTooltip);
-    document.addEventListener("fullscreenchange", hideIconTooltip);
-}
-
-/** DE: Blendet einen Hinweis aus. EN: Hides a tooltip. */
-function hideIconTooltip() {
-    if (currentTooltipControl) currentTooltipControl.removeAttribute("aria-describedby");
-    currentTooltipControl = null;
-    document.getElementById("canvasTooltip").classList.add("hidden");
-}
-
-/** DE: Zeigt den Hinweis einer Schaltfläche an. EN: Shows the tooltip for a button.
- * @param {HTMLElement} control - DE: Parameter control. EN: control parameter.
- */
-function showIconTooltip(control) {
-    hideIconTooltip();
-    currentTooltipControl = control;
-    const tooltip = document.getElementById("canvasTooltip");
-    tooltip.textContent = control.dataset.tooltip;
-    tooltip.classList.remove("hidden");
-    control.setAttribute("aria-describedby", tooltip.id);
-    positionIconTooltip(control, tooltip);
-}
-
-/** DE: Positioniert den Hinweis innerhalb des Spielfeldbereichs. EN: Positions a tooltip inside the game frame.
- * @param {HTMLElement} control - DE: Parameter control. EN: control parameter.
- * @param {HTMLElement} tooltip - DE: Parameter tooltip. EN: tooltip parameter.
- */
-function positionIconTooltip(control, tooltip) {
-    const frame = document.getElementById("canvasFrame");
-    const bounds = frame.getBoundingClientRect();
-    const icon = control.getBoundingClientRect();
-    const inset = 12;
-    const left = icon.left - bounds.left + (icon.width - tooltip.offsetWidth) / 2;
-    const top = icon.top - bounds.top - tooltip.offsetHeight - 10;
-    tooltip.style.left = `${Math.max(inset, Math.min(left, frame.clientWidth - tooltip.offsetWidth - inset))}px`;
-    tooltip.style.top = `${Math.max(inset, Math.min(top, frame.clientHeight - tooltip.offsetHeight - inset))}px`;
-}
-
-/** DE: Steuert die Musik bei pausiertem Spiel. EN: Controls music while the game is paused.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
-function updatePauseMusic() {
-    const pausedLevel = world && world.isPaused && !world.levelIntroActive && !world.isWin && !world.isGameOver;
-    if (!pausedLevel) return stopPauseMusic();
-    pauseMusic.muted = menuMuted;
-    if (pauseMusic.paused) pauseMusic.play().catch(() => {});
-}
-
-/** DE: Stoppt die Pausenmusik. EN: Stops the pause music. */
-function stopPauseMusic() {
-    pauseMusic.pause();
-    pauseMusic.currentTime = 0;
-}
-
-
-/**
- * DE: Zeigt das Musiksymbol im Menü, bei Pause, Sieg oder Game Over.
- * EN: Shows the music icon in the menu, while paused, on win or game over.
- */
-function updateMusicButtonVisibility() {
-    if (!menuMuteBtn) return;
-    const show = !world || world.isPaused || world.isWin || world.isGameOver;
-    menuMuteBtn.classList.toggle("music-hidden", !show);
-}
-
-/**
- * DE: Zeigt bei einer Spielpause den Text mittig über dem Canvas.
- * EN: Displays centered pause text over the canvas while playing is paused.
- */
-function updatePauseOverlay() {
-    const overlay = document.getElementById("pausedOverlay");
-    if (!overlay) return;
-    const paused = world && world.isPaused && !world.levelIntroActive;
-    const active = paused && !world.isGameOver && !world.isWin;
-    overlay.classList.toggle("hidden", !active);
 }

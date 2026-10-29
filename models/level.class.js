@@ -5,11 +5,12 @@ class Level {
     level_start_x;
     level_end_x;
 
-    /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values.
- * @param {Array} enemies - DE: Parameter enemies. EN: enemies parameter.
- * @param {Array} clouds - DE: Parameter clouds. EN: clouds parameter.
- * @param {Array} backgroundObjects - DE: Parameter backgroundObjects. EN: backgroundObjects parameter.
- */
+    /**
+     * Initializes this object and sets up its required game data.
+     * @param {*} enemies - The enemies used by this method.
+     * @param {*} clouds - The clouds used by this method.
+     * @param {*} backgroundObjects - The background objects used by this method.
+     */
     constructor(enemies, clouds, backgroundObjects){
         this.enemies = enemies;
         this.clouds = clouds;

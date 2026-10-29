@@ -1,13 +1,17 @@
 let gameLoading = false;
 
-/** DE: Stoppt Menü Musik. EN: Stops menu music. */
+/**
+ * Stops the title music when a level starts.
+ */
 function stopMenuMusic() {
     gameSounds.stopAll();
     menuMusic.pause();
     menuMusic.currentTime = 0;
 }
 
-/** DE: Startet Spiel. EN: Starts game. */
+/**
+ * Begins the selected level and removes the start menu.
+ */
 function startGame() {
     if (world || gameLoading) return;
     gameLoading = true;
@@ -22,7 +26,9 @@ function startGame() {
     prepareGameView();
 }
 
-/** DE: Führt prepare game view im Spiel aus. EN: Runs prepare game view in the game. */
+/**
+ * Prepares the canvas and controls for the selected level.
+ */
 async function prepareGameView() {
     window.gamePaused = true;
     const transition = document.getElementById("levelTransitionImage");
@@ -37,27 +43,38 @@ async function prepareGameView() {
     finishPreparingGame(loadingWorld);
 }
 
-/** DE: Wartet auf den nächsten Zeichenzyklus. EN: Waits for the next drawing frame. */
+/**
+ * Waits until the game screen is ready for the next step.
+ */
 async function waitForGameFrame() {
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 }
 
-/** DE: Lädt die Bilder der neuen Spielwelt. EN: Loads the images of the new world. */
+/**
+ * Loads the level images before gameplay begins.
+ * @param {*} loadingWorld - The loading world used by this method.
+ * @param {*} transition - The transition used by this method.
+ */
 async function loadLevelImages(loadingWorld, transition) {
     await Promise.allSettled([DrawableObject.waitForImages(), transition.decode(),
         loadingWorld.gameOverImage.decode(), loadingWorld.winImage.decode()]);
 }
 
-/** DE: Beendet die Ladeanzeige und zeigt das Spiel. EN: Hides loading feedback and shows the game. */
+/**
+ * Completes level setup after its images are ready.
+ * @param {*} loadingWorld - The loading world used by this method.
+ */
 function finishPreparingGame(loadingWorld) {
     gameLoading = false;
     setLoading(false);
-    finishLevelLoading(loadingWorld);
+    window.setTimeout(() => finishLevelLoading(loadingWorld), 3000);
     updateFullscreenUi();
     document.getElementById("canvasFrame").classList.remove("level-loading");
 }
 
-/** DE: Zeigt das Übergangsbild vor dem Start des Levels. EN: Shows the transition image before the level begins. */
+/**
+ * Displays the level name before the player can move.
+ */
 function showLevelAnnouncement() {
     const image = document.getElementById("levelTransitionImage");
     image.src = "img/icons_backgrounds/El_Pollo_Loco_Level_2_2D.png";
@@ -68,8 +85,9 @@ function showLevelAnnouncement() {
     announcement.classList.remove("hidden");
 }
 
-/** DE: Startet das Level direkt nach dem Laden. EN: Starts the level immediately after loading.
- * @param {*} currentWorld - DE: Parameter currentWorld. EN: currentWorld parameter.
+/**
+ * Enables gameplay after the level introduction.
+ * @param {*} currentWorld - The current world used by this method.
  */
 function finishLevelLoading(currentWorld) {
     if (world !== currentWorld) return;
@@ -81,20 +99,26 @@ function finishLevelLoading(currentWorld) {
     updateTouchControls();
 }
 
-/** DE: Verarbeitet Level. EN: Handles level. */
+/**
+ * Advances from the completed level to the next level.
+ */
 function nextLevel() {
     currentLevel = 2;
     disposeWorld();
     startGame();
 }
 
-/** DE: Verarbeitet Spiel. EN: Handles game. */
+/**
+ * Restarts the current level without reloading the page.
+ */
 function restartGame() {
     disposeWorld();
     startGame();
 }
 
-/** DE: Beendet die aktuelle Spielrunde und zeigt das Hauptmenü. EN: Ends the current run and returns to the main menu. */
+/**
+ * Stops the current game and returns to the title screen.
+ */
 function backToStart() {
     disposeWorld();
     currentLevel = 1;
@@ -108,7 +132,9 @@ function backToStart() {
     playMenuMusic();
 }
 
-/** DE: Setzt zurück Menü Elemente. EN: Resets menu elements. */
+/**
+ * Restores the menu buttons and images to their initial state.
+ */
 function resetMenuElements() {
     document.getElementById("levelAnnouncement").classList.add("hidden");
     document.getElementById("levelTransitionImage").classList.add("hidden");
@@ -116,7 +142,9 @@ function resetMenuElements() {
     showStartMenu();
 }
 
-/** DE: Beendet und bereinigt Spielwelt. EN: Disposes world. */
+/**
+ * Stops the previous game world and clears its running timers.
+ */
 function disposeWorld() {
     document.getElementById("canvasFrame").classList.remove("level-loading");
     gameLoading = false;
@@ -129,8 +157,9 @@ function disposeWorld() {
     window.gamePaused = false;
 }
 
-/** DE: Zeigt nach einem Sieg oder einer Niederlage die Aktionsbuttons. EN: Shows action buttons after a win or a loss.
- * @param {*} [won] - DE: Parameter won. EN: won parameter.
+/**
+ * Displays the result screen after the player loses.
+ * @param {*} won - The won used by this method.
  */
 function handleGameOver(won = false) {
     stopPauseMusic();
@@ -138,22 +167,33 @@ function handleGameOver(won = false) {
     updateTouchControls();
     window.gamePaused = false;
     const finishedWorld = world;
-    window.setTimeout(() => {
-        if (world !== finishedWorld) return;
-        if (won && currentLevel === 1) document.getElementById("nextBtn").classList.remove("hidden");
-        showRestartButton();
-        restartBtn.classList.toggle("icon-pulse", !won);
-        document.getElementById("nextBtn").classList.toggle("icon-pulse", won && currentLevel === 1);
-        document.getElementById("toolbarBackToStartBtn").classList.toggle("icon-pulse", won && currentLevel === 2);
-    }, 2000);
+    window.setTimeout(() => showResultButtons(finishedWorld, won), 2000);
 }
 
-/** DE: Zeigt restart Schaltfläche. EN: Shows restart button. */
+/**
+ * Shows the available actions after a win or loss.
+ * @param {*} finishedWorld - The finished world used by this method.
+ * @param {boolean} won - The won used by this method.
+ */
+function showResultButtons(finishedWorld, won) {
+    if (world !== finishedWorld) return;
+    if (won && currentLevel === 1) document.getElementById("nextBtn").classList.remove("hidden");
+    showRestartButton();
+    restartBtn.classList.toggle("icon-pulse", !won);
+    document.getElementById("nextBtn").classList.toggle("icon-pulse", won && currentLevel === 1);
+    document.getElementById("toolbarBackToStartBtn").classList.toggle("icon-pulse", won && currentLevel === 2);
+}
+
+/**
+ * Makes the restart button visible on the result screen.
+ */
 function showRestartButton() {
     restartBtn.classList.remove("hidden");
 }
 
-/** DE: Verbirgt restart Schaltfläche. EN: Hides restart button. */
+/**
+ * Hides the restart button outside the result screen.
+ */
 function hideRestartButton() {
     restartBtn.classList.remove("icon-pulse");
     document.getElementById("nextBtn").classList.remove("icon-pulse");
@@ -162,14 +202,18 @@ function hideRestartButton() {
     restartBtn.classList.add("hidden");
 }
 
-/** DE: Verbirgt start Menü. EN: Hides start menu. */
+/**
+ * Hides the start menu when gameplay begins.
+ */
 function hideStartMenu() {
     levelChoices.classList.add("hidden");
     menuButtons.classList.add("hidden");
     menuButtons.classList.add("game-running");
 }
 
-/** DE: Zeigt start Menü. EN: Shows start menu. */
+/**
+ * Displays the title menu again after leaving the game.
+ */
 function showStartMenu() {
     menuSelectionOpen = false;
     levelChoices.classList.add("hidden");
@@ -178,37 +222,47 @@ function showStartMenu() {
     menuButtons.classList.remove("game-running");
 }
 
-/** DE: Öffnet Steuerung modal. EN: Opens controls modal. */
+/**
+ * Opens the dialog explaining keyboard and touch controls.
+ */
 function openControlsModal() {
     controlsModal.classList.remove("hidden");
 }
 
-/** DE: Schließt Steuerung modal. EN: Closes controls modal. */
+/**
+ * Closes the controls explanation dialog.
+ */
 function closeControlsModal() {
     controlsModal.classList.add("hidden");
 }
 
-/** DE: Verarbeitet backdrop click. EN: Handles backdrop click.
- * @param {Event} event - DE: Parameter event. EN: event parameter.
+/**
+ * Closes the controls dialog when the backdrop is clicked.
+ * @param {Event} event - The keyboard, pointer, or mouse event to handle.
  */
 function handleBackdropClick(event) {
     if (event.target === controlsModal) closeControlsModal();
 }
 
-/** DE: Schaltet um Vollbild. EN: Toggles fullscreen. */
+/**
+ * Enters or leaves fullscreen mode.
+ */
 function toggleFullscreen() {
     if (document.fullscreenElement) document.exitFullscreen();
     else requestFullscreenMode();
 }
 
-/** DE: Führt request fullscreen mode im Spiel aus. EN: Runs request fullscreen mode in the game. */
+/**
+ * Requests fullscreen mode for the game area.
+ */
 function requestFullscreenMode() {
     if (canvasShell.requestFullscreen) canvasShell.requestFullscreen().catch(() => {});
 }
 
-/** DE: Verarbeitet Taste down. EN: Handles key down.
- * @param {Event} event - DE: Parameter event. EN: event parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Handles pressed keyboard keys and menu shortcuts.
+ * @param {Event} event - The keyboard, pointer, or mouse event to handle.
+ * @returns {*} The result of handle key down().
  */
 function handleKeyDown(event) {
     if (event.code === "Escape" && world) return exitWithEscape(event);
@@ -217,17 +271,19 @@ function handleKeyDown(event) {
     setKey(event, true);
 }
 
-/** DE: Verlässt with Entkommen. EN: Exits with escape.
- * @param {Event} event - DE: Parameter event. EN: event parameter.
+/**
+ * Returns to the start screen when Escape is pressed.
+ * @param {Event} event - The keyboard, pointer, or mouse event to handle.
  */
 function exitWithEscape(event) {
     event.preventDefault();
     backToStart();
 }
 
-/** DE: Verarbeitet space down. EN: Handles space down.
- * @param {Event} event - DE: Parameter event. EN: event parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Handles the space bar for level selection or bottle charging.
+ * @param {Event} event - The keyboard, pointer, or mouse event to handle.
+ * @returns {*} The result of handle space down().
  */
 function handleSpaceDown(event) {
     event.preventDefault();
@@ -237,8 +293,9 @@ function handleSpaceDown(event) {
     }
 }
 
-/** DE: Verarbeitet Taste up. EN: Handles key up.
- * @param {Event} event - DE: Parameter event. EN: event parameter.
+/**
+ * Handles released keyboard keys, including bottle throws.
+ * @param {Event} event - The keyboard, pointer, or mouse event to handle.
  */
 function handleKeyUp(event) {
     if (event.code === "Space" && world && world.throwChargeStart !== null) {
@@ -250,12 +307,14 @@ function handleKeyUp(event) {
     setKey(event, false);
 }
 
-/** DE: Schaltet um Pause. EN: Toggles pause.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Pauses or resumes the current level and its sounds.
+ * @returns {*} The result of toggle pause().
  */
 function togglePause() {
     if (touchMenuOpen) return setTouchMenuOpen(false);
     if (!world || world.levelIntroActive || world.isGameOver || world.isWin) return;
+    if (isTouchDevice()) return setTouchMenuOpen(true);
     const paused = world.togglePause();
     if (paused) resetTouchControls();
     window.gamePaused = paused;
@@ -263,9 +322,10 @@ function togglePause() {
     updatePauseOverlay();
 }
 
-/** DE: Setzt Taste. EN: Sets key.
- * @param {Event} event - DE: Parameter event. EN: event parameter.
- * @param {boolean} pressed - DE: Parameter pressed. EN: pressed parameter.
+/**
+ * Updates the stored state of a keyboard key.
+ * @param {Event} event - The keyboard, pointer, or mouse event to handle.
+ * @param {boolean} pressed - Whether the control is currently pressed.
  */
 function setKey(event, pressed) {
     const keys = {
@@ -280,70 +340,12 @@ function setKey(event, pressed) {
     keyboard[key] = pressed;
 }
 
-/** DE: Setzt zurück keys. EN: Resets keys. */
+/**
+ * Resets movement and action keys to prevent stuck input.
+ */
 function resetKeys() {
     keyboard.LEFT = false;
     keyboard.RIGHT = false;
     keyboard.SPACE = false;
     keyboard.UP = false;
-}
-
-/** DE: Aktualisiert orientation Zustand. EN: Updates orientation state. */
-function updateOrientationState() {
-    const mobileDevice = isTabletOrMobile() || navigator.maxTouchPoints > 0;
-    const showNotice = mobileDevice && window.innerHeight > window.innerWidth;
-    orientationOverlay.classList.toggle("hidden", !showNotice);
-}
-
-/** DE: Prüft, ob tablet or mobile. EN: Checks whether tablet or mobile.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
-function isTabletOrMobile() {
-    return window.innerWidth <= 1024;
-}
-
-/** DE: Aktualisiert die Knöpfe für Vollbild und Normalansicht. EN: Updates controls for fullscreen and windowed mode. */
-function updateFullscreenUi() {
-    updateOrientationState();
-    updateTouchControls();
-    const fullscreen = !!document.fullscreenElement;
-    setControlIcon(document.getElementById("fullscreenBtn"),
-        getFullscreenIcon(fullscreen), getFullscreenLabel(fullscreen));
-    const startScreen = !world && !menuSelectionOpen;
-    menuButtons.classList.toggle("hidden", !!world);
-    document.getElementById("startBtn").classList.toggle("hidden", !startScreen);
-    document.getElementById("controlsBtn").classList.toggle("hidden", !startScreen);
-    document.getElementById("imprintLink").classList.toggle("hidden", !startScreen);
-    document.getElementById("toolbarBackToStartBtn").classList.toggle("hidden", startScreen);
-    updateMusicButtonVisibility();
-    updatePauseOverlay();
-}
-
-/** DE: Setzt Steuerung Symbol. EN: Sets control icon.
- * @param {HTMLElement} button - DE: Parameter button. EN: button parameter.
- * @param {*} icon - DE: Parameter icon. EN: icon parameter.
- * @param {string} label - DE: Parameter label. EN: label parameter.
- */
-function setControlIcon(button, icon, label) {
-    button.querySelector("img").src = `img/icons_backgrounds/${icon}.svg`;
-    button.setAttribute("aria-label", label);
-    button.dataset.tooltip = label;
-}
-
-/** DE: Ermittelt Vollbild Symbol. EN: Gets fullscreen icon.
- * @param {boolean} fullscreen - DE: Parameter fullscreen. EN: fullscreen parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
-function getFullscreenIcon(fullscreen) {
-    if (fullscreen) return "close_fullscreen";
-    return "fullscreen";
-}
-
-/** DE: Ermittelt Vollbild label. EN: Gets fullscreen label.
- * @param {boolean} fullscreen - DE: Parameter fullscreen. EN: fullscreen parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
-function getFullscreenLabel(fullscreen) {
-    if (fullscreen) return "Exit fullscreen";
-    return "Enter fullscreen";
 }

@@ -769,44 +769,55 @@ body.legal-body {
 .legal-notice-btn:hover,
 .legal-notice-btn:active { transform: translateX(-50%); }
 
-/* Leave room for two side columns in the windowed touch view. */
-.canvas-section.touch-layout:not(:fullscreen) {
-    width: min(720px, calc(100vw - 176px), calc((100dvh - 24px) * 1.5));
+/* Touch controls sit below the windowed canvas and overlay its bottom in fullscreen. */
+@media (any-pointer: coarse) {
+    .canvas-section.touch-layout:not(:fullscreen) {
+        width: min(720px, calc(100vw - 24px), calc((100dvh - 112px - env(safe-area-inset-bottom, 0px)) * 1.5));
+        margin-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    }
+    .canvas-section.touch-layout:not(:fullscreen) .touch-enabled.touch-level .touch-menu-toggle {
+        position: fixed;
+        top: auto;
+        bottom: calc(max(12px, env(safe-area-inset-bottom, 0px)) + 8px);
+        left: 50%;
+        width: 44px;
+        height: 44px;
+    }
+    .canvas-section.touch-layout:not(:fullscreen) .touch-enabled.touch-level.touch-menu-open .icon-menu-panel {
+        position: fixed;
+        top: auto;
+        bottom: calc(max(12px, env(safe-area-inset-bottom, 0px)) + 72px);
+        max-height: calc(100dvh - 108px - env(safe-area-inset-bottom, 0px));
+    }
+    .canvas-section.touch-layout:fullscreen {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    .canvas-section.touch-layout:fullscreen .canvas-shell {
+        width: 100%;
+        height: 100%;
+        aspect-ratio: auto;
+        border-radius: 0;
+    }
+    .canvas-section.touch-layout .touch-enabled.touch-level .touch-controls:not(.hidden) {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: max(12px, env(safe-area-inset-bottom, 0px));
+        padding: 0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px));
+    }
+    .canvas-section.touch-layout .touch-direction,
+    .canvas-section.touch-layout .touch-actions {
+        flex-direction: row;
+        gap: 10px;
+    }
+    .canvas-section.touch-layout .touch-btn {
+        min-width: 60px;
+        min-height: 60px;
+    }
 }
-.canvas-section.touch-layout:not(:fullscreen) .canvas-shell {
-    overflow: visible;
-}
-.canvas-section.touch-layout:not(:fullscreen) canvas {
-    border-radius: inherit;
-}
-.canvas-section.touch-layout:not(:fullscreen) .touch-controls:not(.hidden) {
-    inset: 0;
-    padding: 0;
-    align-items: center;
-}
-.canvas-section.touch-layout:not(:fullscreen) .touch-direction,
-.canvas-section.touch-layout:not(:fullscreen) .touch-actions {
-    position: absolute;
-    top: 50%;
-    flex-direction: column;
-    gap: 12px;
-}
-.canvas-section.touch-layout:not(:fullscreen) .touch-direction {
-    left: calc((100% - 100vw) / 4);
-    transform: translate(-50%, -50%);
-}
-.canvas-section.touch-layout:not(:fullscreen) .touch-actions {
-    right: calc((100% - 100vw) / 4);
-    transform: translate(50%, -50%);
-}
-.canvas-section.touch-layout:not(:fullscreen) .touch-actions [data-touch-key="THROW"] {
-    order: -1;
-}
-.canvas-section.touch-layout:not(:fullscreen) .touch-btn {
-    width: 64px;
-    padding: 8px 4px;
-}
-
 
 /*
  * DE: Zeigt den Pausentext mittig über dem Spielfeld auf Desktop und Mobilgeräten.

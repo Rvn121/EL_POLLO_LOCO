@@ -1,23 +1,22 @@
 let touchMenuOpen = false;
 let touchMenuPausedWorld = null;
 
-/** DE: Verbindet die mobilen Steuertasten mit der Spielsteuerung. EN: Connects mobile control buttons to game input. */
+/**
+ * Registers the mobile movement, jump, and throw buttons.
+ */
 function setupTouchControls() {
     document.querySelectorAll("[data-touch-key]").forEach(bindTouchButton);
     document.getElementById("touchMenuBtn").addEventListener("click", () => setTouchMenuOpen(!touchMenuOpen));
     window.addEventListener("blur", resetTouchControls);
     window.addEventListener("resize", updateTouchControls);
-    window.addEventListener("pointerdown", event => {
-        if (event.pointerType !== "touch") return;
-        document.getElementById("canvasFrame").classList.add("touch-enabled");
-        updateTouchControls();
-    });
+    window.matchMedia("(any-pointer: coarse)").addEventListener("change", updateTouchControls);
     updateTouchControls();
     document.addEventListener("visibilitychange", handleTouchVisibility);
 }
 
-/** DE: Verknüpft einen Touchbutton mit Drücken und Loslassen. EN: Binds touch button press and release actions.
- * @param {HTMLElement} button - DE: Parameter button. EN: button parameter.
+/**
+ * Attaches touch and pointer handlers to one control button.
+ * @param {HTMLElement} button - The HTML button being configured.
  */
 function bindTouchButton(button) {
     button.addEventListener("pointerdown", event => pressTouchButton(event, button));
@@ -27,12 +26,14 @@ function bindTouchButton(button) {
     button.addEventListener("contextmenu", event => event.preventDefault());
 }
 
-/** DE: Markiert eine gedrückte Touch-Taste als aktiv. EN: Marks a pressed touch control as active.
- * @param {Event} event - DE: Parameter event. EN: event parameter.
- * @param {HTMLElement} button - DE: Parameter button. EN: button parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Activates a touch control while the player presses it.
+ * @param {Event} event - The keyboard, pointer, or mouse event to handle.
+ * @param {HTMLElement} button - The HTML button being configured.
+ * @returns {*} The result of press touch button().
  */
 function pressTouchButton(event, button) {
+    if (!isTouchDevice() || event.pointerType !== "touch") return;
     event.preventDefault();
     if (touchMenuOpen || !world || world.isPaused || world.levelIntroActive || world.isGameOver || world.isWin) return;
     if (button.dataset.pointerId !== undefined) return;
@@ -44,10 +45,11 @@ function pressTouchButton(event, button) {
     keyboard[key] = true;
 }
 
-/** DE: Gibt eine berührte Steuertaste wieder frei. EN: Releases a touch control button.
- * @param {Event} event - DE: Parameter event. EN: event parameter.
- * @param {HTMLElement} button - DE: Parameter button. EN: button parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Releases a touch control and clears its pressed state.
+ * @param {Event} event - The keyboard, pointer, or mouse event to handle.
+ * @param {HTMLElement} button - The HTML button being configured.
+ * @returns {*} The result of release touch button().
  */
 function releaseTouchButton(event, button) {
     event.preventDefault();
@@ -60,21 +62,26 @@ function releaseTouchButton(event, button) {
     keyboard[key] = false;
 }
 
-/** DE: Beendet oder verwirft einen Touch-Flaschenwurf. EN: Finishes or cancels a touch bottle throw.
- * @param {Event} event - DE: Parameter event. EN: event parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Releases a charged bottle throw from the touch controls.
+ * @param {Event} event - The keyboard, pointer, or mouse event to handle.
+ * @returns {*} The result of release touch throw().
  */
 function releaseTouchThrow(event) {
     if (event.type === "pointerup") return finishTouchThrow();
     if (world) world.throwChargeStart = null;
 }
 
-/** DE: Beginnt das Aufladen eines Flaschenwurfs per Touch. EN: Starts charging a bottle throw by touch. */
+/**
+ * Starts charging a bottle throw on touch devices.
+ */
 function beginTouchThrow() {
     if (world && world.throwChargeStart === null) world.throwChargeStart = Date.now();
 }
 
-/** DE: Beendet das Aufladen und wirft die Flasche. EN: Ends charging and throws the bottle. */
+/**
+ * Throws the charged bottle when the touch button is released.
+ */
 function finishTouchThrow() {
     if (!world || world.throwChargeStart === null) return;
     const duration = Date.now() - world.throwChargeStart;
@@ -83,7 +90,9 @@ function finishTouchThrow() {
     world.throwBottle(Math.min(1, Math.max(0, duration / 900)));
 }
 
-/** DE: Setzt zurück Touch Steuerung. EN: Resets touch controls. */
+/**
+ * Clears active touch inputs when the game stops or loses focus.
+ */
 function resetTouchControls() {
     document.querySelectorAll("[data-touch-key]").forEach(button => {
         delete button.dataset.pointerId;
@@ -93,33 +102,42 @@ function resetTouchControls() {
     resetKeys();
 }
 
-/** DE: Zeigt die Touchsteuerung nur in geeigneten Spielansichten. EN: Shows touch controls only in suitable game views. */
+/**
+ * Updates the touch controls when screen size or mode changes.
+ */
 function handleTouchVisibility() {
     if (document.hidden) resetTouchControls();
 }
 
-/** DE: Aktualisiert Touch Steuerung. EN: Updates touch controls. */
+/**
+ * Checks whether the current device supports touch input.
+ */
+function isTouchDevice() {
+    return navigator.maxTouchPoints > 0 && window.matchMedia("(any-pointer: coarse)").matches;
+}
+
 function updateTouchControls() {
     const frame = document.getElementById("canvasFrame");
-    const touchDevice = navigator.maxTouchPoints > 0 || window.matchMedia("(any-pointer: coarse)").matches;
-    if (touchDevice) frame.classList.add("touch-enabled");
+    const touchDevice = isTouchDevice();
+    frame.classList.toggle("touch-enabled", touchDevice);
     document.getElementById("canvasShell").classList.toggle("touch-layout", frame.classList.contains("touch-enabled"));
     frame.classList.toggle("touch-level", !!world);
     updateMusicButtonVisibility();
     updatePauseOverlay();
     frame.classList.toggle("level-intro", !!world && world.levelIntroActive);
     updateTouchResultActions(frame);
-    const active = !touchMenuOpen && !!world && !world.isPaused && !world.levelIntroActive && !world.isGameOver && !world.isWin;
+    const active = touchDevice && !touchMenuOpen && !!world && !world.isPaused && !world.levelIntroActive && !world.isGameOver && !world.isWin;
     document.getElementById("touchControls").classList.toggle("hidden", !active);
     if (!active) resetTouchControls();
 }
 
-/** DE: Öffnet oder schließt das mobile Bedienmenü. EN: Opens or closes the mobile control menu.
- * @param {boolean} open - DE: Parameter open. EN: open parameter.
- * @param {boolean} [resume] - DE: Parameter resume. EN: resume parameter.
+/**
+ * Opens or closes the compact mobile control menu.
+ * @param {boolean} open - The open used by this method.
+ * @param {*} resume - The resume used by this method.
  */
 function setTouchMenuOpen(open, resume = true) {
-    open = open && !!world;
+    open = open && isTouchDevice() && !!world;
     touchMenuOpen = open;
     const frame = document.getElementById("canvasFrame");
     frame.classList.toggle("touch-menu-open", open);
@@ -132,8 +150,10 @@ function setTouchMenuOpen(open, resume = true) {
     updatePauseOverlay();
 }
 
-/** DE: Aktualisiert den Zustand der mobilen Menüschaltfläche. EN: Updates the mobile menu button state.
- * @param {boolean} open - DE: Menü geöffnet. EN: Menu open. */
+/**
+ * Updates the icon or label on the mobile menu toggle.
+ * @param {boolean} open - The open used by this method.
+ */
 function updateTouchMenuButton(open) {
     const button = document.getElementById("touchMenuBtn");
     button.setAttribute("aria-expanded", String(open));
@@ -143,8 +163,9 @@ function updateTouchMenuButton(open) {
     button.dataset.tooltip = label;
 }
 
-/** DE: Schließt das mobile Menü und setzt das Spiel bei Bedarf fort. EN: Closes the mobile menu and resumes the game if needed.
- * @param {boolean} resume - DE: Parameter resume. EN: resume parameter.
+/**
+ * Closes the expanded mobile control menu.
+ * @param {boolean} resume - The resume used by this method.
  */
 function closeTouchMenu(resume) {
     if (resume && world && world === touchMenuPausedWorld && world.isPaused &&
@@ -155,16 +176,20 @@ function closeTouchMenu(resume) {
     updatePauseOverlay();
 }
 
-/** DE: Verarbeitet for Touch Menü. EN: Handles for touch menu. */
+/**
+ * Pauses gameplay when the mobile control menu is opened.
+ */
 function pauseForTouchMenu() {
-    if (!touchMenuOpen || !world || world.isPaused || world.levelIntroActive || world.isWin || world.isGameOver) return;
-    window.gamePaused = world.togglePause();
+    if (!touchMenuOpen || !world || world.levelIntroActive || world.isWin || world.isGameOver) return;
     touchMenuPausedWorld = world;
+    if (!world.isPaused) window.gamePaused = world.togglePause();
+    else window.gamePaused = true;
     updatePauseOverlay();
 }
 
-/** DE: Aktualisiert Touch Ergebnis Aktionen. EN: Updates touch result actions.
- * @param {HTMLElement} frame - DE: Spielfeldbereich. EN: Game frame.
+/**
+ * Updates the controls available after winning or losing.
+ * @param {HTMLElement} frame - The animation frame to display.
  */
 function updateTouchResultActions(frame) {
     const finished = frame.classList.contains("touch-enabled") && !!world && (world.isGameOver || world.isWin);

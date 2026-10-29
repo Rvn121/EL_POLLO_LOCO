@@ -12,12 +12,12 @@ class ThrowableBottle extends DrawableObject {
     ROTATION = this.createBottleImages("", "_bottle_rotation", 4);
     SPLASH = this.createBottleImages("bottle_splash/", "_bottle_splash", 6);
 
-    /** DE: Erstellt Bildpfade für eine Flaschenanimation. EN: Builds image paths for a bottle animation.
- * @param {string} folder - DE: Parameter folder. EN: folder parameter.
- * @param {string} suffix - DE: Parameter suffix. EN: suffix parameter.
- * @param {number} count - DE: Parameter count. EN: count parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Builds the image paths for bottle rotation and splash frames.
+     * @param {string} folder - The folder containing the animation images.
+     * @param {*} suffix - The suffix used by this method.
+     * @param {number} count - The count used by this method.
+     */
     createBottleImages(folder, suffix, count) {
         const images = [];
         for (let i = 1; i <= count; i++) {
@@ -26,12 +26,13 @@ class ThrowableBottle extends DrawableObject {
         return images;
     }
 
-    /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values.
- * @param {number} x - DE: Parameter x. EN: x parameter.
- * @param {number} y - DE: Parameter y. EN: y parameter.
- * @param {number} direction - DE: Parameter direction. EN: direction parameter.
- * @param {number} [power] - DE: Parameter power. EN: power parameter.
- */
+    /**
+     * Initializes this object and sets up its required game data.
+     * @param {number} x - The horizontal coordinate.
+     * @param {number} y - The vertical coordinate.
+     * @param {*} direction - The movement direction.
+     * @param {*} power - The power used by this method.
+     */
     constructor(x, y, direction, power = 1) {
         super();
         this.x = x;
@@ -43,10 +44,10 @@ class ThrowableBottle extends DrawableObject {
         this.img = this.imageCache[this.ROTATION[0]];
     }
 
-    /** DE: Aktualisiert update. EN: Updates update.
- * @param {number} delta - DE: Parameter delta. EN: delta parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Updates this game object for the current animation frame.
+     * @param {number} delta - The delta used by this method.
+     */
     update(delta) {
         if (this.state === "done") return;
         this.elapsed += delta;
@@ -59,7 +60,9 @@ class ThrowableBottle extends DrawableObject {
         if (this.y + this.height >= 425) this.splash();
     }
 
-    /** DE: Startet die Spritzanimation der Flasche. EN: Starts the bottle splash animation. */
+    /**
+     * Starts the bottle splash animation after an impact.
+     */
     splash() {
         if (this.state !== "flying") return;
         this.state = "splash";
@@ -70,9 +73,9 @@ class ThrowableBottle extends DrawableObject {
         this.img = this.imageCache[this.SPLASH[0]];
     }
 
-    /** DE: Spielt die Spritzanimation einer zerbrochenen Flasche ab. EN: Advances the splash animation of a broken bottle.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Advances the bottle splash animation and removes it when finished.
+     */
     updateSplash() {
         this.frame = Math.floor(this.elapsed / 65);
         if (this.frame >= 6) return this.state = "done";

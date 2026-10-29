@@ -10,9 +10,10 @@ class CollectibleBottle extends DrawableObject {
         "img/6_salsa_bottle/2_salsa_bottle_on_ground.png"
     ];
 
-    /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values.
- * @param {number} x - DE: Parameter x. EN: x parameter.
- */
+    /**
+     * Initializes this object and sets up its required game data.
+     * @param {number} x - The horizontal coordinate.
+     */
     constructor(x) {
         super();
         this.x = x;
@@ -20,22 +21,27 @@ class CollectibleBottle extends DrawableObject {
         this.img = this.imageCache[this.IMAGES[Math.floor(Math.random() * 2)]];
     }
 
-    /** DE: Markiert ein Sammelobjekt als eingesammelt. EN: Marks a collectible as collected. */
+    /**
+     * Marks the collectible as picked up and starts its collection effect.
+     */
     collect() {
         this.collected = true;
         this.respawnAt = 10000;
     }
 
-    /** DE: Aktualisiert update. EN: Updates update.
- * @param {number} [delta] - DE: Parameter delta. EN: delta parameter.
- */
+    /**
+     * Updates this game object for the current animation frame.
+     * @param {number} delta - The delta used by this method.
+     */
     update(delta = 0) {
         if (!this.collected) return;
         this.respawnAt -= delta;
         if (this.respawnAt <= 0) this.respawn();
     }
 
-    /** DE: Erzeugt erneut respawn. EN: Respawns respawn. */
+    /**
+     * Returns a collected bottle to the map after its delay.
+     */
     respawn() {
         this.collected = false;
         this.img = this.imageCache[this.IMAGES[Math.floor(Math.random() * 2)]];

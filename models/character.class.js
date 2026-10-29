@@ -65,10 +65,11 @@ class Character extends CharacterBase {
         "img/2_character_pepe/1_idle/long_idle/I-13.png"
     ];
 
-    /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values.
- * @param {*} keyboard - DE: Parameter keyboard. EN: keyboard parameter.
- * @param {*} level - DE: Parameter level. EN: level parameter.
- */
+    /**
+     * Initializes this object and sets up its required game data.
+     * @param {*} keyboard - The keyboard input state.
+     * @param {*} level - The level used by this object.
+     */
     constructor(keyboard, level) {
         super();
         this.loadImage(this.IMAGES_IDLE[0]);
@@ -79,7 +80,9 @@ class Character extends CharacterBase {
         this.startAnimationLoop();
     }
 
-    /** DE: Lädt Spielfigur Bilder. EN: Loads character images. */
+    /**
+     * Performs the load character images operation for this game object.
+     */
     loadCharacterImages() {
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages(this.IMAGES_JUMPING);
@@ -88,7 +91,9 @@ class Character extends CharacterBase {
         this.loadImages([this.HURT_IMAGE]);
     }
 
-    /** DE: Startet Animation loop. EN: Starts animation loop. */
+    /**
+     * Performs the start animation loop operation for this game object.
+     */
     startAnimationLoop() {
         this.animationInterval = setInterval(() => {
             if (window.gamePaused) return;
@@ -101,15 +106,17 @@ class Character extends CharacterBase {
         }, 100);
     }
 
-    /** DE: Prüft, ob start Ruhe. EN: Checks whether start idle.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Performs the should start idle operation for this game object.
+     */
     shouldStartIdle() {
         const standingStill = this.keyboard.LEFT === this.keyboard.RIGHT;
         return standingStill && this.y === this.groundY;
     }
 
-    /** DE: Spielt Laufen Animation. EN: Plays walking animation. */
+    /**
+     * Performs the play walking animation operation for this game object.
+     */
     playWalkingAnimation() {
         const path = this.IMAGES_WALKING[this.currentImage];
         this.img = this.imageCache[path];

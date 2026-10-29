@@ -1,13 +1,16 @@
 class WorldBase extends WorldDrawBase {
-    /** DE: Prüft collectible Kollisionen. EN: Checks collectible collisions. */
+    /**
+     * Checks whether the player touches any collectible items.
+     */
     checkCollectibleCollisions() {
         this.bottles.forEach(b => this.pickupBottle(b));
         this.coins.forEach(c => this.pickupCoin(c));
     }
 
-    /** DE: Sammelt ein Flasche. EN: Picks up bottle.
- * @param {*} bottle - DE: Parameter bottle. EN: bottle parameter.
- */
+    /**
+     * Adds collected bottle throws to the inventory and updates the bar.
+     * @param {*} bottle - The bottle being collected or thrown.
+     */
     pickupBottle(bottle) {
         if (bottle.collected || this.bottleCount >= 5) return;
         if (!this.boxesOverlap(this.character, bottle)) return;
@@ -17,7 +20,9 @@ class WorldBase extends WorldDrawBase {
         this.bottleBar.setPercentage(this.getBottlePercentage());
     }
 
-    /** DE: Prüft, ob die Voraussetzungen für den Endboss erfüllt sind. EN: Checks whether the boss unlock requirements are met. */
+    /**
+     * Unlocks the final boss after the required enemies are defeated.
+     */
     updateBossUnlock() {
         const allCoinsCollected = this.coinsCollected === this.coins.length;
         let allChickensDefeated = true;
@@ -28,9 +33,10 @@ class WorldBase extends WorldDrawBase {
         this.bossUnlocked = allCoinsCollected && allChickensDefeated;
     }
 
-    /** DE: Sammelt ein Münze. EN: Picks up coin.
- * @param {*} coin - DE: Parameter coin. EN: coin parameter.
- */
+    /**
+     * Adds a collected coin, restores health, and updates the status bar.
+     * @param {*} coin - The coin to process.
+     */
     pickupCoin(coin) {
         if (coin.collected || !this.boxesOverlap(this.character, coin)) return;
         coin.collect();
@@ -42,11 +48,14 @@ class WorldBase extends WorldDrawBase {
         gameSounds.play("drop_coin");
     }
 
-    /** DE: Erstellt eine geworfene Flasche und verringert den Vorrat. EN: Creates a thrown bottle and decreases the supply.
- * @param {number} [power] - DE: Parameter power. EN: power parameter.
- */
+    /**
+     * Creates a new thrown bottle when the player has ammunition.
+     * @param {*} power - The power used by this method.
+     */
     throwBottle(power = 1) {
-        if (this.isGameOver || this.isWin || this.isPaused || this.bottleCount <= 0) return;
+        if (this.isGameOver || this.isWin || this.isPaused || this.levelIntroActive || this.character.energy <= 0 || this.bottleCount <= 0) return;
+        this.character.markActivity();
+        this.character.showStandingImage();
         let dir = 1;
         if (this.character.otherDirection) dir = -1;
         let offset = 20;
@@ -57,16 +66,16 @@ class WorldBase extends WorldDrawBase {
         this.bottleBar.setPercentage(this.getBottlePercentage());
     }
 
-    /** DE: Berechnet den Flaschenvorrat als Prozentwert. EN: Calculates bottle inventory as a percentage.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Converts bottle inventory into a status bar percentage.
+     */
     getBottlePercentage() {
         return this.bottleCount * 20;
     }
 
-    /** DE: Ermittelt Boss. EN: Gets boss.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Returns the main boss for the current level.
+     */
     getBoss() {
         for (const enemy of this.level.enemies) {
             if (enemy instanceof Endboss && enemy.isMainBoss) return enemy;
@@ -74,9 +83,9 @@ class WorldBase extends WorldDrawBase {
         return undefined;
     }
 
-    /** DE: Schaltet um Pause. EN: Toggles pause.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Pauses or resumes the current level and its sounds.
+     */
     togglePause() {
         if (this.levelIntroActive) return true;
         this.isPaused = !this.isPaused;
@@ -87,38 +96,33 @@ class WorldBase extends WorldDrawBase {
         return this.isPaused;
     }
 
-    /** DE: Prüft Boss attacks. EN: Checks boss attacks.
- * @param {*} bosses - DE: Parameter bosses. EN: bosses parameter.
- */
+    /**
+     * Checks whether a nearby boss can damage the player.
+     * @param {*} bosses - The bosses used by this method.
+     */
     checkBossAttacks(bosses) {
         bosses.forEach(boss => {
             if (boss.isMainBoss && !this.bossUnlocked) return;
-            if (!boss.moving || boss.state !== "attack" || boss.frame !== 4) return;
-            if (boss.attackHitDone || this.character.energy <= 0) return;
-            if (!this.character.isTouchingVisiblePixels(boss)) return;
+            if (!boss.canHitPlayer(this.character)) return;
             boss.attackHitDone = true;
-            let damage = 10;
-            if (this.levelNumber === 2) damage = 20;
-            this.damageCharacter(damage, boss);
+            this.applyBossAttackDamage(boss);
         });
     }
 
-    /** DE: Prüft, ob die Spielfigur den Endboss berührt. EN: Checks main boss contact for the game. */
-    checkMainBossContact() {
-        const boss = this.getBoss();
-        if (!boss || boss.isDead || !this.bossUnlocked) return;
-        if (this.character.energy <= 0 || !this.character.isTouchingVisiblePixels(boss)) return;
-        if (!this.canTakeHitFrom(boss)) return;
+    /**
+     * Applies the existing damage values for a successful boss attack.
+     * @param {Endboss} boss - The boss hitting the character.
+     */
+    applyBossAttackDamage(boss) {
         let damage = 10;
-            if (this.levelNumber === 2) damage = 20;
-            this.damageCharacter(damage, boss);
-        boss.lastHitPosition = { x: this.character.x, y: this.character.y };
+        if (this.levelNumber === 2 && !boss.isMainBoss) damage = 20;
+        this.damageCharacter(damage, boss);
     }
 
-    /** DE: Unterscheidet Sprungtreffer von schädlichen Gegnerkontakten. EN: Distinguishes stomp hits from harmful enemy contact.
- * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Handles collisions between the player and normal enemies.
+     * @param {*} enemy - The enemy involved in the collision.
+     */
     checkEnemyCollision(enemy) {
         if (enemy instanceof MiniBoss && !enemy.isDead) return this.checkMiniBossCollision(enemy);
         const isChicken = enemy instanceof chicken || enemy instanceof chickenSmall;
@@ -134,9 +138,10 @@ class WorldBase extends WorldDrawBase {
         this.statusBar.setPercentage(this.character.energy);
     }
 
-    /** DE: Prüft Mini Boss Kollision. EN: Checks mini boss collision.
- * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
- */
+    /**
+     * Handles collisions between the player and mini-bosses.
+     * @param {*} enemy - The enemy involved in the collision.
+     */
     checkMiniBossCollision(enemy) {
         if (!this.character.isTouchingVisiblePixels(enemy) || !this.canTakeHitFrom(enemy)) return;
         let damage = 10;
@@ -146,10 +151,10 @@ class WorldBase extends WorldDrawBase {
         this.statusBar.setPercentage(this.character.energy);
     }
 
-    /** DE: Prüft, ob die Spielfigur von oben auf einen Gegner fällt. EN: Checks whether the character lands on an enemy from above.
- * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Checks whether the character is hitting an enemy from above.
+     * @param {*} enemy - The enemy involved in the collision.
+     */
     isJumpAttack(enemy) {
         const player = this.character.getHitbox();
         const target = enemy.getHitbox();
@@ -159,10 +164,10 @@ class WorldBase extends WorldDrawBase {
         return startedAbove && feet >= target.y && player.y < target.y;
     }
 
-    /** DE: Prüft, ob ein Huhn seitlichen Schaden verursachen darf. EN: Checks whether a chicken may deal side-contact damage.
- * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Checks whether a chicken has a valid side hit on the character.
+     * @param {*} enemy - The enemy involved in the collision.
+     */
     canChickenDamageCharacter(enemy) {
         const player = this.character.getHitbox();
         const target = enemy.getHitbox();
@@ -172,19 +177,21 @@ class WorldBase extends WorldDrawBase {
             player.y < target.y + target.height;
     }
 
-    /** DE: Zieht Lebensenergie nach einem Gegnertreffer ab. EN: Reduces player energy after an enemy hit.
- * @param {number} amount - DE: Parameter amount. EN: amount parameter.
- */
+    /**
+     * Applies enemy damage to the character and updates health.
+     * @param {*} amount - The amount used by this method.
+     * @param {*} attacker - The attacker used by this method.
+     */
     damageCharacter(amount, attacker) {
         if (this.character.energy <= 0) return;
         this.character.takeDamage(amount, attacker);
         this.statusBar.setPercentage(this.character.energy);
     }
 
-    /** DE: Prüft, ob der Gegner die Spielfigur erneut treffen darf. EN: Checks whether the enemy may hit the character again.
- * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Checks whether an enemy may deal another hit to the player.
+     * @param {*} enemy - The enemy involved in the collision.
+     */
     canTakeHitFrom(enemy) {
         if (!enemy.lastHitPosition) return true;
         const dx = this.character.x - enemy.lastHitPosition.x;
@@ -192,20 +199,21 @@ class WorldBase extends WorldDrawBase {
         return Math.hypot(dx, dy) >= 45;
     }
 
-    /** DE: Verarbeitet Huhn. EN: Handles chicken.
- * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
- */
+    /**
+     * Defeats a chicken and keeps its dead image on the ground.
+     * @param {*} enemy - The enemy involved in the collision.
+     */
     killChicken(enemy) {
         gameSounds.play("hit_chickens");
         enemy.die();
         this.character.bounceFromEnemy();
     }
 
-    /** DE: Erstellt Bildpfade für die sechs Stufen einer Statusleiste. EN: Builds image paths for six status-bar levels.
- * @param {string} folder - DE: Parameter folder. EN: folder parameter.
- * @param {string} ending - DE: Parameter ending. EN: ending parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Builds the image paths for a status bar.
+     * @param {string} folder - The folder containing the animation images.
+     * @param {*} ending - The ending used by this method.
+     */
     createBarImages(folder, ending) {
         const images = [];
         for (let value = 0; value <= 100; value += 20) {
@@ -214,11 +222,11 @@ class WorldBase extends WorldDrawBase {
         return images;
     }
 
-    /** DE: Erstellt Münze. EN: Creates coin.
- * @param {number} index - DE: Parameter index. EN: index parameter.
- * @param {number} count - DE: Parameter count. EN: count parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Creates one collectible coin at its assigned position.
+     * @param {number} index - The position of an item in a list.
+     * @param {number} count - The count used by this method.
+     */
     createCoin(index, count) {
         const x = this.getCoinX(index, count);
         const jumpHeight = this.character.jumpSpeed * this.character.jumpSpeed / (2 * this.character.gravity);
@@ -234,11 +242,11 @@ class WorldBase extends WorldDrawBase {
         return coin;
     }
 
-    /** DE: Bestimmt die horizontale Position einer Münze. EN: Calculates a coin horizontal position.
- * @param {number} index - DE: Parameter index. EN: index parameter.
- * @param {number} count - DE: Parameter count. EN: count parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Calculates the horizontal position of a coin.
+     * @param {number} index - The position of an item in a list.
+     * @param {number} count - The count used by this method.
+     */
     getCoinX(index, count) {
         const minX = this.level.level_start_x + 100;
         if (index === 0) return minX + Math.random() * (50 - minX);
@@ -247,7 +255,9 @@ class WorldBase extends WorldDrawBase {
         const section = (end - start) / (count - 1);
         return start + section * (index - 1 + Math.random() * 0.8);
     }
-    /** Places scenery signs along the route from Pepe's spawn to the boss. */
+    /**
+     * Places the wooden signs used in the level.
+     */
     createLevelSigns() {
         const startX = this.character.x;
         const bossX = this.getBoss().x;
@@ -263,9 +273,9 @@ class WorldBase extends WorldDrawBase {
         return signs;
     }
 
-    /** DE: Erstellt Flaschen. EN: Creates bottles.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Creates the collectible bottles for the level.
+     */
     createBottles() {
         const bossX = this.getBoss().x;
         const keepEnoughX = 200 + (bossX - 200) * 0.75;
@@ -279,7 +289,10 @@ class WorldBase extends WorldDrawBase {
         return this.createBottlesInZones(zones);
     }
 
-    /** DE: Verteilt Flaschen zufällig in den Bereichen. EN: Places bottles randomly in the given zones. */
+    /**
+     * Distributes bottles among the allowed parts of the map.
+     * @param {*} zones - The zones used by this method.
+     */
     createBottlesInZones(zones) {
         const bottles = [];
         for (let i = 0; i < zones.length; i++) {
@@ -290,7 +303,11 @@ class WorldBase extends WorldDrawBase {
         return bottles;
     }
 
-    /** Supplies spaced bottle groups before each level-two encounter and sign. */
+    /**
+     * Places the additional bottles used in level two.
+     * @param {*} keepEnoughX - The keep enough x used by this method.
+     * @param {*} dangerX - The danger x used by this method.
+     */
     createLevelTwoBottles(keepEnoughX, dangerX) {
         const bottles = [new CollectibleBottle(350 + Math.random() * 120)];
         for (let i = 0; i < this.level.enemies.length; i++) {
@@ -302,7 +319,12 @@ class WorldBase extends WorldDrawBase {
         return bottles;
     }
 
-    /** DE: Fügt eine Gruppe von Flaschen hinzu. EN: Adds a group of bottles. */
+    /**
+     * Creates a group of bottles within a map section.
+     * @param {*} bottles - The bottles used by this method.
+     * @param {*} targetX - The target x used by this method.
+     * @param {number} count - The count used by this method.
+     */
     addBottleGroup(bottles, targetX, count) {
         for (let index = 0; index < count; index++) {
             const x = targetX - (count - index) * 130 - 60 + Math.random() * 30;
@@ -311,10 +333,9 @@ class WorldBase extends WorldDrawBase {
     }
 
     /**
-     * DE: Erstellt ein Holzschild aus den angegebenen Positionsdaten.
-     * EN: Creates a wooden sign using the given position data.
-     * @param {Array} placement - DE: Name, Position und Seitenverhältnis. EN: Name, position and aspect ratio.
-     * @returns {DrawableObject} DE: Das neue Schild. EN: The new sign.
+     * Creates one wooden level sign at the given position.
+     * @param {*} placement - The placement used by this method.
+     * @returns {DrawableObject} The result of create level sign().
      */
     createLevelSign(placement) {
         const sign = new DrawableObject();

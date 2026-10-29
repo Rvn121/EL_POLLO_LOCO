@@ -1,12 +1,14 @@
-/** DE: Erstellt das zweite Level mit Gegnern, Wolken und Hintergründen. EN: Creates the second level with enemies, clouds, and backgrounds.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Creates the second level with its enemies, clouds, and background.
+ * @returns {*} The result of create level2().
  */
 function createLevel2() {
     return new Level(createLevel2Enemies(), createLevelClouds(), createLevel2Backgrounds());
 }
 
-/** DE: Erstellt die Gegner und Bosse für Level 2. EN: Creates enemies and bosses for level 2.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Creates the enemies and bosses assigned to the second level.
+ * @returns {*} The result of create level2enemies().
  */
 function createLevel2Enemies() {
     const enemies = [];
@@ -14,13 +16,18 @@ function createLevel2Enemies() {
     enemies.push(new MiniBoss(3800), new MiniBoss(6900));
     const boss = new Endboss(10300, true);
     boss.healthPhases = true;
+    boss.aggressive = true;
+    boss.hitPhases = true;
+    boss.combatPhase = "charge";
+    boss.phaseRemaining = 1800;
     enemies.push(boss);
     return enemies;
 }
 
-/** DE: Erstellt Level 2 Huhn. EN: Creates level 2 chicken.
- * @param {number} index - DE: Parameter index. EN: index parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Creates a chicken of the selected type for level two.
+ * @param {number} index - The position of an item in a list.
+ * @returns {*} The result of create level2chicken().
  */
 function createLevel2Chicken(index) {
     const small = index % 2 === 0;
@@ -36,20 +43,22 @@ function createLevel2Chicken(index) {
     return enemy;
 }
 
-/** DE: Bestimmt die Startposition eines kleinen Huhns. EN: Calculates the start position of a small chicken.
- * @param {number} index - DE: Parameter index. EN: index parameter.
- * @param {*} behindStart - DE: Parameter behindStart. EN: behindStart parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Calculates the starting position of a small chicken.
+ * @param {number} index - The position of an item in a list.
+ * @param {*} behindStart - The behind start used by this method.
+ * @returns {*} The result of get small chicken x().
  */
 function getSmallChickenX(index, behindStart) {
     if (behindStart) return -600 + index * 120 + Math.random() * 20;
     return 1050 + (index - 3) * 335 + Math.random() * 80;
 }
 
-/** DE: Setzt Level 2 Patrouille. EN: Sets level 2 patrol.
- * @param {*} enemy - DE: Parameter enemy. EN: enemy parameter.
- * @param {number} x - DE: Parameter x. EN: x parameter.
- * @param {*} behindStart - DE: Parameter behindStart. EN: behindStart parameter.
+/**
+ * Assigns left and right patrol boundaries to a level-two chicken.
+ * @param {*} enemy - The enemy involved in the collision.
+ * @param {number} x - The horizontal coordinate.
+ * @param {*} behindStart - The behind start used by this method.
  */
 function setLevel2Patrol(enemy, x, behindStart) {
     const range = 140 + Math.random() * 160;
@@ -59,8 +68,9 @@ function setLevel2Patrol(enemy, x, behindStart) {
     enemy.startPatrol(Math.max(minLimit, x - range), Math.min(maxLimit, x + range));
 }
 
-/** DE: Erstellt Level 2 backgrounds. EN: Creates level 2 backgrounds.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Creates the repeating background layers for level two.
+ * @returns {*} The result of create level2backgrounds().
  */
 function createLevel2Backgrounds() {
     const backgrounds = createLevelBackgrounds();

@@ -8,12 +8,16 @@ class MovableObject extends DrawableObject {
     deathInterval;
     hurtTimeout;
 
-    /** DE: Bewegt rechts. EN: Moves right. */
+    /**
+     * Moves this object to the right using its current speed.
+     */
     moveRight() {
         this.x += this.speed;
     }
 
-    /** DE: Bewegt links. EN: Moves left. */
+    /**
+     * Moves this object to the left using its current speed.
+     */
     moveLeft() {
         clearInterval(this.moveInterval);
         this.moveInterval = setInterval(() => {
@@ -22,10 +26,11 @@ class MovableObject extends DrawableObject {
         }, 1000 / 60);
     }
 
-    /** DE: Startet Patrouille. EN: Starts patrol.
- * @param {number} left - DE: Parameter left. EN: left parameter.
- * @param {number} right - DE: Parameter right. EN: right parameter.
- */
+    /**
+     * Moves an enemy back and forth between its patrol boundaries.
+     * @param {*} left - The left used by this method.
+     * @param {*} right - The right used by this method.
+     */
     startPatrol(left, right) {
         this.stopMoving();
         this.patrolDirection = 1;
@@ -38,12 +43,16 @@ class MovableObject extends DrawableObject {
         }, 1000 / 60);
     }
 
-    /** DE: Stoppt moving. EN: Stops moving. */
+    /**
+     * Stops this object from moving.
+     */
     stopMoving() {
         clearInterval(this.moveInterval);
     }
 
-    /** DE: Löscht Zeitgeber. EN: Clears timers. */
+    /**
+     * Stops timers started by this game object.
+     */
     clearTimers() {
         clearInterval(this.moveInterval);
         clearInterval(this.animationInterval);
@@ -52,10 +61,10 @@ class MovableObject extends DrawableObject {
         clearTimeout(this.hurtTimeout);
     }
 
-    /** DE: Prüft, ob sich sichtbare Bildbereiche berühren. EN: Checks whether visible sprite pixels overlap.
- * @param {*} other - DE: Parameter other. EN: other parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Checks whether two objects touch at visible image pixels.
+     * @param {*} other - The other used by this method.
+     */
     isTouchingVisiblePixels(other) {
         if (!this.isColliding(other)) return false;
         const own = this.getHitbox();
@@ -67,14 +76,14 @@ class MovableObject extends DrawableObject {
         return this.checkVisibleOverlap(other, left, top, right, bottom);
     }
 
-    /** DE: Prüft den überlappenden Bildbereich pixelweise. EN: Checks overlapping image pixels.
- * @param {*} other - DE: Parameter other. EN: other parameter.
- * @param {number} left - DE: Parameter left. EN: left parameter.
- * @param {number} top - DE: Parameter top. EN: top parameter.
- * @param {number} right - DE: Parameter right. EN: right parameter.
- * @param {number} bottom - DE: Parameter bottom. EN: bottom parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Checks overlap between the visible parts of two images.
+     * @param {*} other - The other used by this method.
+     * @param {*} left - The left used by this method.
+     * @param {*} top - The top used by this method.
+     * @param {*} right - The right used by this method.
+     * @param {*} bottom - The bottom used by this method.
+     */
     checkVisibleOverlap(other, left, top, right, bottom) {
         const columns = Math.ceil(right - left);
         const rows = Math.ceil(bottom - top);
@@ -88,10 +97,10 @@ class MovableObject extends DrawableObject {
         return false;
     }
 
-    /** DE: Prüft, ob sich zwei Hitboxen überschneiden. EN: Checks whether two hitboxes overlap.
- * @param {*} movableObject - DE: Parameter movableObject. EN: movableObject parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Checks whether this object overlaps another game object.
+     * @param {*} movableObject - The movable object used by this method.
+     */
     isColliding(movableObject) {
         const ownHitbox = this.getHitbox();
         const otherHitbox = movableObject.getHitbox();

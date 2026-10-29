@@ -8,7 +8,9 @@ class StatusBar extends DrawableObject {
         "img/7_statusbars/1_statusbar/2_statusbar_health/blue/100.png"
     ];
 
-    /** DE: Erstellt das Objekt und setzt seine Startwerte. EN: Creates the object and sets its initial values. */
+    /**
+     * Initializes this object and sets up its required game data.
+     */
     constructor() {
         super();
         this.loadImages(this.IMAGES_HEALTH);
@@ -19,17 +21,18 @@ class StatusBar extends DrawableObject {
         this.setPercentage(100);
     }
 
-    /** DE: Setzt Prozentwert. EN: Sets percentage.
- * @param {number} percentage - DE: Parameter percentage. EN: percentage parameter.
- */
+    /**
+     * Updates a status bar to display the specified percentage.
+     * @param {number} percentage - The value to display from 0 to 100.
+     */
     setPercentage(percentage) {
         this.percentage = Math.max(0, percentage);
         this.img = this.imageCache[this.IMAGES_HEALTH[this.resolveImageIndex()]];
     }
 
-    /** DE: Bestimmt das passende Bild für den aktuellen Statuswert. EN: Selects the image matching the current status value.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
- */
+    /**
+     * Returns the image index corresponding to the current percentage.
+     */
     resolveImageIndex() {
         if (this.percentage > 80) return 5;
         if (this.percentage > 60) return 4;

@@ -1,5 +1,6 @@
-/** DE: Erstellt das Tutorial mit Gegnern, Wolken und Hintergründen. EN: Creates the tutorial with enemies, clouds, and backgrounds.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Creates the tutorial level with its enemies, clouds, and background.
+ * @returns {*} The result of create level1().
  */
 function createLevel1() {
     return new Level(
@@ -9,8 +10,9 @@ function createLevel1() {
     );
 }
 
-/** DE: Erstellt Level enemies. EN: Creates level enemies.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Creates the enemies assigned to the tutorial level.
+ * @returns {*} The result of create level enemies().
  */
 function createLevelEnemies() {
     const enemies = createSmallChickens();
@@ -21,13 +23,15 @@ function createLevelEnemies() {
         enemies.push(new chicken(x));
     }
     const boss = new Endboss(6100, true);
-    boss.healthPhases = false;
+    boss.healthPhases = true;
+    boss.hitPhases = true;
     enemies.push(boss);
     return enemies;
 }
 
-/** DE: Erstellt small Hühner. EN: Creates small chickens.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Places small chickens throughout the level.
+ * @returns {*} The result of create small chickens().
  */
 function createSmallChickens() {
     const enemies = [];
@@ -35,9 +39,10 @@ function createSmallChickens() {
     return enemies;
 }
 
-/** DE: Erstellt small Huhn. EN: Creates small chicken.
- * @param {number} index - DE: Parameter index. EN: index parameter.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Creates one small chicken at its assigned start position.
+ * @param {number} index - The position of an item in a list.
+ * @returns {*} The result of create small chicken().
  */
 function createSmallChicken(index) {
     const behindStart = index < 3;
@@ -54,8 +59,9 @@ function createSmallChicken(index) {
     return enemy;
 }
 
-/** DE: Erstellt normal Hühner. EN: Creates normal chickens.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Places normal chickens throughout the level.
+ * @returns {*} The result of create normal chickens().
  */
 function createNormalChickens() {
     const enemies = [];
@@ -66,8 +72,9 @@ function createNormalChickens() {
     return enemies;
 }
 
-/** DE: Erstellt Level Wolken. EN: Creates level clouds.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Distributes clouds across the level sky.
+ * @returns {*} The result of create level clouds().
  */
 function createLevelClouds() {
     const clouds = [];
@@ -79,8 +86,9 @@ function createLevelClouds() {
     return clouds;
 }
 
-/** DE: Erstellt Level backgrounds. EN: Creates level backgrounds.
- * @returns {*} DE: Berechnetes Ergebnis. EN: Computed result.
+/**
+ * Creates the repeating background layers for the tutorial.
+ * @returns {*} The result of create level backgrounds().
  */
 function createLevelBackgrounds() {
     const backgrounds = [];
