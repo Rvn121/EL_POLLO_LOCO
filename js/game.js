@@ -262,7 +262,7 @@ function startSelectedLevel(levelNumber) {
  * Prepares title music and restores the saved music setting.
  */
 function setupMenuMusic() {
-    // Music stays muted until the user enables it.
+    /** Music stays muted until the user enables it. */
     menuMuted = localStorage.getItem("elPolloLocoMusicMuted") !== "false";
     menuMusic.muted = menuMuted;
     pauseMusic.muted = menuMuted;

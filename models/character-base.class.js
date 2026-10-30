@@ -344,7 +344,7 @@ class CharacterBase extends MovableObject {
      * Returns the correct idle frame, including the repeating sequence.
      */
     resolveIdleImage() {
-        // Repeat each opening group six times, then finish idle and loop long idle.
+        /** Repeat each opening group six times, then finish idle and loop long idle. */
         if (this.idleFrame < 18) return this.IMAGES_IDLE[this.idleFrame % 3];
         if (this.idleFrame < 36) return this.IMAGES_IDLE[3 + (this.idleFrame - 18) % 3];
         if (this.idleFrame < 40) return this.IMAGES_IDLE[this.idleFrame - 30];

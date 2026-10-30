@@ -231,7 +231,7 @@ class WorldBase extends WorldDrawBase {
         const x = this.getCoinX(index, count);
         const jumpHeight = this.character.jumpSpeed * this.character.jumpSpeed / (2 * this.character.gravity);
         const ground = this.character.groundY + this.character.height;
-        // Keep the center between belly and jump height, including the 7px bob.
+        /** Keep the center between belly and jump height, including the 7px bob. */
         const bellyHeight = this.character.height * 0.45;
         const minHeight = bellyHeight + 7;
         const maxHeight = Math.max(minHeight, jumpHeight - 7);
@@ -249,7 +249,7 @@ class WorldBase extends WorldDrawBase {
      */
     getCoinX(index, count) {
         const minX = this.level.level_start_x + 100;
-        if (index === 0) return minX + Math.random() * (50 - minX);
+        if (index === 0) return minX + Math.random() * 120;
         const start = 450;
         const end = this.getBoss().x - 250;
         const section = (end - start) / (count - 1);
@@ -281,8 +281,10 @@ class WorldBase extends WorldDrawBase {
         const keepEnoughX = 200 + (bossX - 200) * 0.75;
         const dangerX = bossX - 550;
         if (this.levelNumber === 2) return this.createLevelTwoBottles(keepEnoughX, dangerX);
-        // Keep the final bottle wholly between the two signs. The other
-        // random bottles remain earlier along the route, making this the last.
+        /**
+         * Keep the final bottle wholly between the two signs. The other
+         * random bottles remain earlier along the route, making this the last.
+         */
         const zones = [[350, 470], [600, keepEnoughX - 80],
             [600, keepEnoughX - 80], [600, keepEnoughX - 80],
             [keepEnoughX + 120 + 20, dangerX - 52 - 20]];

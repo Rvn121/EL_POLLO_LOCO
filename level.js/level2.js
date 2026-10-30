@@ -61,10 +61,10 @@ function getSmallChickenX(index, behindStart) {
  * @param {*} behindStart - The behind start used by this method.
  */
 function setLevel2Patrol(enemy, x, behindStart) {
+    if (behindStart) return guardStartCoin(enemy);
     const range = 140 + Math.random() * 160;
     let minLimit = 850;
     let maxLimit = 10100;
-    if (behindStart) { minLimit = -620; maxLimit = -300; }
     enemy.startPatrol(Math.max(minLimit, x - range), Math.min(maxLimit, x + range));
 }
 

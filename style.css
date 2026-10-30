@@ -1,7 +1,4 @@
-/*
- * DE: Schriftarten lokal einbinden.
- * EN: Load local fonts.
- */
+/* Load local fonts. */
 @font-face {
     font-family: "Averia Sans Libre";
     src: url("./fonts/AveriaSansLibre-Regular.ttf") format("truetype");
@@ -14,10 +11,7 @@
     font-weight: 700;
 }
 
-/*
- * DE: Grundlegende Layout-Einstellungen.
- * EN: Basic layout settings.
- */
+/* Basic layout settings. */
 * {
     box-sizing: border-box;
 }
@@ -34,13 +28,11 @@
     border: 0;
 }
 
-/*
- * DE: Grunddesign und Seitenhintergrund.
- * EN: Base design and page background.
- */
+/* Base design and page background. */
 body {
     margin: 0;
     min-height: 100vh;
+    font-size: 16px;
     font-family: "Averia Sans Libre", sans-serif;
     background: #e9bb43 url("./img/icons_backgrounds/background_desert.png") center / cover no-repeat fixed;
     color: #412100;
@@ -51,10 +43,11 @@ canvas {
     font-family: inherit;
 }
 
-/*
- * DE: Anordnung der Spielelemente auf der Seite.
- * EN: Layout of game elements on the page.
- */
+button {
+    font-size: inherit;
+}
+
+/* Layout of game elements on the page. */
 .page-shell {
     min-height: 100vh;
     display: flex;
@@ -96,10 +89,7 @@ canvas {
     justify-content: center;
 }
 
-/*
- * DE: Rahmen und Größe der Zeichenfläche.
- * EN: Canvas frame and size.
- */
+/* Canvas frame and size. */
 .canvas-shell {
     position: relative;
     width: min(720px, calc(100vw - 48px));
@@ -146,10 +136,7 @@ canvas {
     z-index: 3;
 }
 
-/*
- * DE: Gemeinsames Aussehen der Spielbuttons.
- * EN: Shared appearance of game buttons.
- */
+/* Shared appearance of game buttons. */
 .game-btn {
     border: 2px solid #9e6a00;
     border-radius: 30px;
@@ -175,10 +162,7 @@ canvas {
     display: none !important;
 }
 
-/*
- * DE: Hintergründe von Dialog und Drehhinweis.
- * EN: Backdrops for the dialog and orientation notice.
- */
+/* Backdrops for the dialog and orientation notice. */
 .modal-backdrop,
 .orientation-overlay {
     position: fixed;
@@ -212,10 +196,7 @@ canvas {
 }
 
 
-/*
- * DE: Vollbilddarstellung des Spielbereichs.
- * EN: Fullscreen appearance of the game area.
- */
+/* Fullscreen appearance of the game area. */
 :fullscreen .canvas-shell,
 .canvas-shell:fullscreen {
     width: 100vw;
@@ -224,10 +205,7 @@ canvas {
     border-radius: 0;
 }
 
-/*
- * DE: Anpassungen für kleinere Bildschirme.
- * EN: Adjustments for smaller screens.
- */
+/* Adjustments for smaller screens. */
 @media (max-width: 1024px) {
     .page-shell {
         padding: 12px;
@@ -246,30 +224,21 @@ canvas {
     }
 }
 
-/*
- * DE: Anpassungen für schmale Displays.
- * EN: Adjustments for narrow displays.
- */
+/* Adjustments for narrow displays. */
 @media (max-width: 768px) {
     .canvas-top-buttons { top: 12px; gap: 8px; }
     .game-btn { padding: 8px 14px; font-size: 16px; }
     .fullscreen-btn { top: 12px; right: 12px; }
 }
 
-/*
- * DE: Zeigt bei Hochformat den Hinweis zum Drehen des Geräts.
- * EN: Shows the rotate-device notice in portrait mode.
- */
+/* Shows the rotate-device notice in portrait mode. */
 @media (max-width: 1024px) and (orientation: portrait) {
     .orientation-overlay {
         display: flex;
     }
 }
 
-/*
- * DE: Ordnet Spielfeld und seitliche Anleitung ursprünglich in Spalten an.
- * EN: Originally arranges the game area and side instructions in columns.
- */
+/* Originally arranges the game area and side instructions in columns. */
 .page-shell { display: grid; grid-template-columns: 280px 720px 280px; justify-content: center; }
 .control-panel { grid-column: 1; }
 .canvas-section { grid-column: 2; }
@@ -277,10 +246,7 @@ canvas {
 .canvas-shell:fullscreen { width: 100vw; height: 100vh; }
 .canvas-shell:fullscreen .modal-backdrop { z-index: 50; }
 .canvas-shell .modal-backdrop { position: absolute; z-index: 30; }
-/*
- * DE: Zeigt bestimmte Menübuttons nur in der passenden Ansicht.
- * EN: Shows certain menu buttons only in the appropriate view.
- */
+/* Shows certain menu buttons only in the appropriate view. */
 .canvas-top-buttons:not(.hidden) #controlsBtn { display: none; }
 .canvas-top-buttons:not(.hidden) { gap: 0; }
 .canvas-shell:fullscreen .canvas-top-buttons:not(.hidden) #controlsBtn {
@@ -288,16 +254,10 @@ canvas {
 }
 .canvas-shell:fullscreen .canvas-top-buttons:not(.hidden) { gap: 12px; }
 .canvas-shell:fullscreen .fullscreen-btn { top: 16px; right: 16px; }
-/*
- * DE: Hält den einzeln positionierten Restart-Button beim Anklicken mittig.
- * EN: Keeps the individually positioned restart button centered during interaction.
- */
+/* Keeps the individually positioned restart button centered during interaction. */
 .restart-btn:hover, .restart-btn:active { transform: translateX(-50%); }
 
-/*
- * DE: Hält die Button-Gruppe am Spielende an derselben Position.
- * EN: Keeps the end-screen button group in the same position.
- */
+/* Keeps the end-screen button group in the same position. */
 .end-buttons {
     position: absolute;
     z-index: 5;
@@ -314,10 +274,7 @@ canvas {
 .end-buttons .restart-btn:hover,
 .end-buttons .restart-btn:active { transform: none; }
 
-/*
- * DE: Platziert die Spielsteuerung oberhalb der Zeichenfläche.
- * EN: Places the game controls above the canvas.
- */
+/* Places the game controls above the canvas. */
 .canvas-section { display: flex; flex-direction: column; gap: 10px; }
 .game-toolbar { display: flex; justify-content: flex-end; width: 720px; max-width: 100%; gap: 10px; }
 .game-toolbar .pause-btn, .game-toolbar .fullscreen-btn { position: static; }
@@ -330,10 +287,7 @@ canvas {
 .level-announcement { position: absolute; z-index: 6; top: 38%; left: 50%; transform: translateX(-50%); background: #ffd84d; border: 2px solid #9e6a00; border-radius: 30px; padding: 10px 26px; color: #5a3000; font-size: 30px; font-weight: bold; }
 @media(max-width:1024px) { .game-toolbar { width: min(960px, calc(100vw - 24px)); } }
 
-/*
- * DE: Bewegt beim Hover nur einzelne Buttons, nicht die gesamte Gruppe.
- * EN: Moves individual buttons on hover without moving the whole group.
- */
+/* Moves individual buttons on hover without moving the whole group. */
 .end-buttons .game-btn { transition: transform .14s ease, box-shadow .14s ease, background .14s ease; }
 .end-buttons .restart-btn:hover { transform: translateY(-3px); box-shadow: 0 7px 0 rgba(120,80,0,.4); }
 .end-buttons .restart-btn:active { transform: translateY(1px); box-shadow: 0 2px 0 rgba(120,80,0,.35); }
@@ -342,27 +296,18 @@ canvas {
 .legal-page { max-width: 760px; margin: 6vh auto; padding: 30px; border-radius: 30px; background: #fff8db; box-shadow: 0 12px 30px #0003; }
 .legal-page a { color: #603400; }
 
-/*
- * DE: Enthält ältere Menüregeln für die Levelauswahl.
- * EN: Contains older menu rules for level selection.
- */
+/* Contains older menu rules for level selection. */
 .canvas-top-buttons:not(.game-running) #controlsBtn { display: none; }
 .canvas-top-buttons:not(.game-running) { gap: 12px; }
 .canvas-top-buttons.game-running #levelOneBtn { display: none; }
 
-/*
- * DE: Ordnet Steuerung und Audio-Buttons der oberen Bedienleiste zu.
- * EN: Places controls and audio buttons in the top toolbar.
- */
+/* Places controls and audio buttons in the top toolbar. */
 .game-toolbar { align-items: center; flex-wrap: wrap; }
 .game-toolbar .toolbar-controls, .game-toolbar .toolbar-sound { position: static; }
 .canvas-section:fullscreen .game-toolbar { flex-shrink: 0; }
 .canvas-section:fullscreen .canvas-top-buttons { z-index: 3; }
 
-/*
- * DE: Gestaltet die anklickbaren Vorschaubilder der Levelauswahl.
- * EN: Styles the clickable images used to select a level.
- */
+/* Styles the clickable images used to select a level. */
 .canvas-top-buttons:not(.game-running) { position:absolute; inset: 0; display:flex; align-items:center; justify-content:center; gap: 12px; padding: 14px; transform:none; pointer-events:none; }
 .level-choice { cursor:pointer; border:3px solid #9e6a00; padding:0; overflow:hidden; border-radius:16px; background:transparent; width:45%; max-width:330px; aspect-ratio: 16/9; pointer-events:auto; transition:transform .15s ease; }
 .level-choice:hover { transform:translateY(-5px); }
@@ -371,17 +316,11 @@ canvas {
 .level-transition-image { position:absolute; inset:0; z-index:5; display:block; width:100%; height:100%; object-fit:cover; pointer-events:none; }
 .level-announcement { top: auto; bottom: 7%; width: max-content; max-width: 88%; box-sizing: border-box; padding: 10px 18px; text-align: center; font-size: 20px; pointer-events: none; }
 
-/*
- * DE: Legt Abstände der Menübuttons fest.
- * EN: Sets spacing for the menu buttons.
- */
+/* Sets spacing for the menu buttons. */
 .canvas-top-buttons:not(.game-running) { gap: 12px; }
 
 
-/*
- * DE: Zentriert das Spielfeld und blendet die frühere Seitenanleitung aus.
- * EN: Centers the game area and hides the old side instructions.
- */
+/* Centers the game area and hides the old side instructions. */
 .page-shell { display: flex; justify-content: center; }
 .control-panel { display: none !important; }
 .canvas-top-buttons:not(.game-running) { pointer-events: none; }
@@ -398,10 +337,7 @@ canvas {
     .canvas-top-buttons .level-choice { width: 46%; }
 }
 
-/*
- * DE: Verschiebt den Start-Button im Hauptmenü nach oben.
- * EN: Moves the main menu Start button upwards.
- */
+/* Moves the main menu Start button upwards. */
 .canvas-top-buttons .main-start-btn { margin-top: calc(13% - 50px); }
 
 :fullscreen .canvas-top-buttons .main-start-btn {
@@ -409,10 +345,7 @@ canvas {
     padding: 16px 32px;
 }
 
-/*
- * DE: Zeigt Touchbuttons auf geeigneten Touchgeräten im Querformat.
- * EN: Shows touch buttons on supported touch devices in landscape mode.
- */
+/* Shows touch buttons on supported touch devices in landscape mode. */
  .touch-controls { display: none; }
 .touch-enabled .touch-controls:not(.hidden) {
     position: absolute;
@@ -451,10 +384,7 @@ canvas {
     .touch-enabled .touch-controls:not(.hidden) { bottom: 54px; }
 }
 
-/*
- * DE: Passt das Spiellayout an die verfügbare Höhe des Bildschirms an.
- * EN: Fits the game layout into the available screen height.
- */
+/* Fits the game layout into the available screen height. */
 body {
     height: 100vh;
     height: 100dvh;
@@ -702,10 +632,17 @@ body.legal-body {
     display: none !important;
 }
 
-/* DE: Kleine Bildschirme erhalten kompaktere Abstände und Beschriftungen.
- * EN: Small screens use more compact spacing and labels. */
-@media (max-width: 600px) {
-    .level-announcement { font-size: 16px; }
+/* Small screens use more compact spacing and labels. */
+@media (max-width: 600px), (max-height: 500px) {
+    .level-announcement {
+        bottom: 4%;
+        max-width: 92%;
+        padding: 6px 10px;
+        border-radius: 16px;
+        font-size: 16px;
+        line-height: 1.25;
+        text-wrap: balance;
+    }
 }
 
 /* The rotation notice must cover dialogs inside the fullscreen subtree as well. */
@@ -769,6 +706,17 @@ body.legal-body {
 .legal-notice-btn:hover,
 .legal-notice-btn:active { transform: translateX(-50%); }
 
+/* Compact phone controls while keeping the label at 16px. */
+@media (max-width: 600px), (max-height: 500px) {
+    .legal-notice-btn {
+        bottom: 6px;
+        padding: 4px 8px;
+        border-radius: 16px;
+        line-height: 1.25;
+        box-shadow: 0 2px 0 rgba(120, 80, 0, 0.4);
+    }
+}
+
 /* Touch controls sit below the windowed canvas and overlay its bottom in fullscreen. */
 @media (any-pointer: coarse) {
     .canvas-section.touch-layout:not(:fullscreen) {
@@ -819,10 +767,7 @@ body.legal-body {
     }
 }
 
-/*
- * DE: Zeigt den Pausentext mittig über dem Spielfeld auf Desktop und Mobilgeräten.
- * EN: Centers the pause message over the game on desktop and mobile devices.
- */
+/* Centers the pause message over the game on desktop and mobile devices. */
 .paused-overlay {
     position: absolute;
     inset: 0;
@@ -837,16 +782,10 @@ body.legal-body {
     text-shadow: 2px 3px 2px #5a3000;
 }
 
-/*
- * DE: Versteckt den Musikschalter während eines laufenden Levels.
- * EN: Hides the music toggle during active gameplay.
- */
+/* Hides the music toggle during active gameplay. */
 .music-hidden { display: none !important; }
 
-/*
- * DE: Hält den Musikschalter im aufgeklappten mobilen Bedienmenü erreichbar.
- * EN: Keeps the music switch available in the open mobile controls menu.
- */
+/* Keeps the music switch available in the open mobile controls menu. */
 .touch-enabled .touch-menu-open #menuMuteBtn.music-hidden { display: inline-flex !important; }
 
 @media (max-width: 600px) {

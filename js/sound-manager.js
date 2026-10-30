@@ -5,9 +5,9 @@ class SoundManager {
      * Initializes this object and sets up its required game data.
      */
     constructor() {
-        // Sound effects are enabled on the first visit.
+        /** Sound effects are enabled on the first visit. */
         this.muted = localStorage.getItem("elPolloLocoEffectsMuted") === "true";
-        // Music is muted on the first visit.
+        /** Music is muted on the first visit. */
         this.musicMuted = localStorage.getItem("elPolloLocoMusicMuted") !== "false";
         this.sounds = {};
         this.pendingSequence = null;

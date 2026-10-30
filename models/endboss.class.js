@@ -1,4 +1,4 @@
-class Endboss extends MovableObject {
+class Endboss extends EndbossBase {
     height = 400;
     width = 250;
     y = 50;
@@ -8,6 +8,9 @@ class Endboss extends MovableObject {
     isMainBoss = true;
     isDead = false;
     attackCooldown = 0;
+    attackInterval = 1600;
+    attackSpeed = 0.20;
+    chargeSpeed = 0.18;
     healthPhases = false;
     aggressive = false;
     hitPhases = false;
@@ -137,7 +140,7 @@ class Endboss extends MovableObject {
      */
     updateChargePhase(delta, player) {
         this.facePlayer(player);
-        const feinting = this.bottleHits < (this.aggressive ? 1 : 2);
+        const feinting = this.isFeinting();
         const own = this.getHitbox();
         const target = player.getHitbox();
         if (!own || !target) return;
@@ -148,10 +151,23 @@ class Endboss extends MovableObject {
         this.walk(delta);
     }
 
+    /** Returns whether the boss should retreat instead of committing to an attack. */
+    isFeinting() {
+        let hitLimit = 2;
+        if (this.aggressive) {
+            hitLimit = 1;
+        }
+        return this.bottleHits < hitLimit;
+    }
+
     /** Resumes patrol after early level-one hits, otherwise starts the next charge. */
     finishRetreat() {
         this.patrolCenter = this.x;
-        this.combatPhase = this.aggressive || this.bottleHits >= 3 ? "charge" : "patrol";
+        if (this.aggressive || this.bottleHits >= 3) {
+            this.combatPhase = "charge";
+        } else {
+            this.combatPhase = "patrol";
+        }
         this.phaseRemaining = this.getChargeDuration();
     }
 
@@ -164,7 +180,10 @@ class Endboss extends MovableObject {
      * @param {number} delta - The delta used by this method.
      */
     patrolAfterRetreat(delta) {
-        const center = this.patrolCenter === null ? this.originX : this.patrolCenter;
+        let center = this.patrolCenter;
+        if (center === null) {
+            center = this.originX;
+        }
         if (this.x <= center - 210) this.direction = 1;
         if (this.x >= center + 210) this.direction = -1;
         this.walk(delta);
@@ -257,9 +276,25 @@ class Endboss extends MovableObject {
      * @returns {number} The result of get hit phase speed().
      */
     getHitPhaseSpeed() {
-        if (this.combatPhase === "patrol") return 0.09;
-        if (this.combatPhase === "retreat") return this.aggressive ? 0.16 : 0.14;
-        return this.aggressive ? 0.21 : 0.18;
+        if (this.combatPhase === "patrol") {
+            return 0.09;
+        }
+        if (this.combatPhase === "retreat") {
+            return this.getRetreatSpeed();
+        }
+        if (this.aggressive) {
+            return 0.23;
+        } else {
+            return this.chargeSpeed;
+        }
+    }
+    /** Returns the retreat speed for the current aggression setting. */
+    getRetreatSpeed() {
+        if (this.aggressive) {
+            return 0.16;
+        } else {
+            return 0.14;
+        }
     }
     /**
      * Returns the boss speed during its final attack phase.
@@ -299,7 +334,11 @@ class Endboss extends MovableObject {
         const target = player.getHitbox();
         if (!own || !target) return false;
         const offset = target.x + target.width / 2 - (own.x + own.width / 2);
-        return this.direction > 0 ? offset > 0 : offset < 0;
+        if (this.direction > 0) {
+            return offset > 0;
+        } else {
+            return offset < 0;
+        }
     }
 
     /** A strike lands only during G16-G18 and only where visible pixels touch. */
@@ -312,72 +351,12 @@ class Endboss extends MovableObject {
     beginAttack(player) {
         if (player) this.facePlayer(player);
         this.attackHitDone = false;
-        this.attackCooldown = 1600;
-        if (this.aggressive) this.attackCooldown = 1250;
-        if (this.aggressive && this.energy <= 20) this.attackCooldown = 950;
+        this.attackCooldown = this.attackInterval;
+        if (this.aggressive) this.attackCooldown = 1100;
+        if (this.aggressive && this.energy <= 20) this.attackCooldown = 850;
         this.setState("attack");
     }
-    /**
-     * Changes the current boss animation state.
-     * @param {*} state - The animation or game state to apply.
-     */
-    setState(state) {
-        this.state = state;
-        this.frame = 0;
-        this.frameElapsed = 0;
-        this.updateImage();
-    }
-    /** Displays the appropriate boss animation frame. */
-    updateImage() {
-        const images = this.getStateImages();
-        if (this.frame >= images.length) return this.finishAnimation();
-        this.img = this.imageCache[images[this.frame]];
-    }
-    /** Returns the image sequence for the current boss state. */
-    getStateImages() {
-        if (this.state === "hurt") return this.IMAGES_HURT;
-        if (this.state === "dead") return this.IMAGES_DEAD;
-        if (this.state === "attack") return this.IMAGES_ATTACK;
-        if (this.moving) return this.IMAGES_WALKING;
-        return this.IMAGES_ALERT;
-    }
-    /**
-     * Advances the current boss animation using elapsed time.
-     * @param {number} delta - Time since the previous update in milliseconds.
-     */
-    updateAnimationFrame(delta) {
-        this.frameElapsed += delta;
-        if (this.frameElapsed < 150) return;
-        this.frameElapsed -= 150;
-        this.frame++;
-        const images = this.getStateImages();
-        if (this.frame >= images.length && this.state === "walking") this.frame = 0;
-        if (this.frame >= images.length && this.state === "idle") this.frame = 0;
-        if (this.frame >= images.length && this.state === "alert") this.frame = 0;
-        this.updateImage();
-    }
-    /**
-     * Returns the movement speed while the boss attacks.
-     * @returns {number} The current attack speed.
-     */
-    getAttackSpeed() {
-        return this.aggressive ? 0.22 : 0.20;
-    }
-    /**
-     * Moves a defeated mini-boss down and out of the canvas.
-     * @param {number} delta - The delta used by this method.
-     */
-    updateFalling(delta) {
-        this.fallSpeed += 0.0012 * delta;
-        this.y += this.fallSpeed * delta;
-        if (this.y > 480) this.state = "finished";
-    }
-    /** Finishes the current boss animation sequence. */
-    finishAnimation() {
-        if (this.state === "dead") return this.finishDeath();
-        if (this.state === "attack" && this.hitPhases) this.beginRetreat();
-        this.setState("walking");
-    }
+
 }
 /** Smaller static boss using the same animation set. */
 class MiniBoss extends Endboss {

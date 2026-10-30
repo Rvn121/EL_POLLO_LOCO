@@ -22,11 +22,22 @@ function createLevelEnemies() {
         const x = 1120 + i * 640 + Math.random() * 100;
         enemies.push(new chicken(x));
     }
+    enemies.push(createLevel1Boss());
+    return enemies;
+}
+
+/**
+ * Creates the first boss with a faster charge and shorter attack cooldown.
+ * @returns {Endboss} The boss assigned to level one.
+ */
+function createLevel1Boss() {
     const boss = new Endboss(6100, true);
     boss.healthPhases = true;
     boss.hitPhases = true;
-    enemies.push(boss);
-    return enemies;
+    boss.chargeSpeed = 0.20;
+    boss.attackSpeed = 0.215;
+    boss.attackInterval = 1400;
+    return boss;
 }
 
 /**
@@ -49,13 +60,23 @@ function createSmallChicken(index) {
     let x = 1050 + (index - 3) * 190 + Math.random() * 70;
     if (behindStart) x = -600 + index * 120 + Math.random() * 20;
     const enemy = new chickenSmall(x);
+    if (behindStart) return guardStartCoin(enemy);
     if (index % 4 !== 3) {
         const range = 110 + Math.random() * 100;
         let minLimit = 850;
         let maxLimit = 5900;
-        if (behindStart) { minLimit = -620; maxLimit = -300; }
         enemy.startPatrol(Math.max(minLimit, x - range), Math.min(maxLimit, x + range));
     }
+    return enemy;
+}
+
+/**
+ * Keeps a chicken in the patrol area surrounding the coin behind the player.
+ * @param {chickenSmall} enemy - The chicken assigned to guard the starting coin.
+ * @returns {chickenSmall} The guarding chicken.
+ */
+function guardStartCoin(enemy) {
+    enemy.startPatrol(-620, -300);
     return enemy;
 }
 
