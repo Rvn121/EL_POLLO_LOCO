@@ -720,8 +720,10 @@ body.legal-body {
 /* Touch controls sit below the windowed canvas and overlay its bottom in fullscreen. */
 @media (any-pointer: coarse) {
     .canvas-section.touch-layout:not(:fullscreen) {
-        width: min(720px, calc(100vw - 24px), calc((100dvh - 112px - env(safe-area-inset-bottom, 0px)) * 1.5));
-        margin-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+        width: min(720px,
+            calc(100vw - 12px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)),
+            calc((100dvh - 88px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) * 1.5));
+        margin-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
     }
     .canvas-section.touch-layout:not(:fullscreen) .touch-enabled.touch-level .touch-menu-toggle {
         position: fixed;
@@ -764,6 +766,15 @@ body.legal-body {
     .canvas-section.touch-layout .touch-btn {
         min-width: 60px;
         min-height: 60px;
+    }
+
+    @media (max-height: 340px) and (orientation: landscape) {
+        .canvas-section.touch-layout:not(:fullscreen) {
+            width: min(720px,
+                calc(100vw - 12px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)),
+                calc((100dvh - 80px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) * 1.5));
+            margin-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+        }
     }
 }
 

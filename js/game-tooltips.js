@@ -11,6 +11,7 @@ function setupIconTooltips() {
     bindIconTooltips(frame);
 }
 
+
 /**
  * Registers hover and focus handlers for icon tooltips.
  * @param {HTMLElement} frame - The animation frame to display.
@@ -27,6 +28,7 @@ function bindIconTooltips(frame) {
     document.addEventListener("fullscreenchange", hideIconTooltip);
 }
 
+
 /**
  * Hides the currently visible icon tooltip.
  */
@@ -35,6 +37,7 @@ function hideIconTooltip() {
     currentTooltipControl = null;
     document.getElementById("canvasTooltip").classList.add("hidden");
 }
+
 
 /**
  * Displays the tooltip for the selected control.
@@ -49,6 +52,7 @@ function showIconTooltip(control) {
     control.setAttribute("aria-describedby", tooltip.id);
     positionIconTooltip(control, tooltip);
 }
+
 
 /**
  * Positions a tooltip near its associated button.
@@ -65,4 +69,3 @@ function positionIconTooltip(control, tooltip) {
     tooltip.style.left = `${Math.max(inset, Math.min(left, frame.clientWidth - tooltip.offsetWidth - inset))}px`;
     tooltip.style.top = `${Math.max(inset, Math.min(top, frame.clientHeight - tooltip.offsetHeight - inset))}px`;
 }
-

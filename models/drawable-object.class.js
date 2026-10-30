@@ -1,7 +1,7 @@
 class DrawableObject {
     static sharedImages = new Map();
 
-/** Reuses decoded graphics across actors and level restarts. */
+    /** Reuses decoded graphics across actors and level restarts. */
     static getImage(path) {
         if (!this.sharedImages.has(path)) {
             const image = new Image();
@@ -11,7 +11,8 @@ class DrawableObject {
         return this.sharedImages.get(path);
     }
 
-/**
+
+    /**
      * Waits for all cached images to load.
      * @returns {Promise<void>} Loading completion.
      */
@@ -39,6 +40,7 @@ class DrawableObject {
         this.img = DrawableObject.getImage(path);
     }
 
+
     /**
      * Loads several animation images into the image cache.
      * @param {*} images - The image paths to load or draw.
@@ -48,6 +50,7 @@ class DrawableObject {
             this.imageCache[path] = DrawableObject.getImage(path);
         });
     }
+
 
     /**
      * Returns the collision area of the object image.
@@ -59,6 +62,7 @@ class DrawableObject {
         if (!bounds) return null;
         return this.scaleHitbox(bounds);
     }
+
 
     /**
      * Checks whether the image pixel at a given position is visible.
@@ -75,6 +79,7 @@ class DrawableObject {
         return image.collisionPixels[(sourceY * image.naturalWidth + sourceX) * 4 + 3] > 0;
     }
 
+
     /**
      * Saves the visible image boundaries for later collision checks.
      */
@@ -82,6 +87,7 @@ class DrawableObject {
         this.img.visibleBounds = this.measureImageBounds();
         this.img.visibleBoundsCalculated = true;
     }
+
 
     /**
      * Converts image pixel boundaries into on-screen coordinates.
@@ -100,6 +106,7 @@ class DrawableObject {
         };
     }
 
+
     /**
      * Measures the visible pixel boundaries of the current image.
      */
@@ -112,6 +119,7 @@ class DrawableObject {
         return this.findOpaqueBounds(pixels, canvas.width, canvas.height);
     }
 
+
     /**
      * Creates a temporary canvas for reading image pixels.
      */
@@ -121,6 +129,7 @@ class DrawableObject {
         canvas.height = this.img.naturalHeight;
         return canvas;
     }
+
 
     /**
      * Finds the smallest rectangle containing visible image pixels.
@@ -138,6 +147,7 @@ class DrawableObject {
         if (bounds.right > bounds.left) return bounds;
         return null;
     }
+
 
     /**
      * Expands the measured rectangle to include another visible pixel.

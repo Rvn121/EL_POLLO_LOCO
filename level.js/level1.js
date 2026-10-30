@@ -10,6 +10,7 @@ function createLevel1() {
     );
 }
 
+
 /**
  * Creates the enemies assigned to the tutorial level.
  * @returns {*} The result of create level enemies().
@@ -26,6 +27,7 @@ function createLevelEnemies() {
     return enemies;
 }
 
+
 /**
  * Creates the first boss with a faster charge and shorter attack cooldown.
  * @returns {Endboss} The boss assigned to level one.
@@ -40,6 +42,7 @@ function createLevel1Boss() {
     return boss;
 }
 
+
 /**
  * Places small chickens throughout the level.
  * @returns {*} The result of create small chickens().
@@ -49,6 +52,7 @@ function createSmallChickens() {
     for (let index = 0; index < 28; index++) enemies.push(createSmallChicken(index));
     return enemies;
 }
+
 
 /**
  * Creates one small chicken at its assigned start position.
@@ -70,6 +74,7 @@ function createSmallChicken(index) {
     return enemy;
 }
 
+
 /**
  * Keeps a chicken in the patrol area surrounding the coin behind the player.
  * @param {chickenSmall} enemy - The chicken assigned to guard the starting coin.
@@ -79,6 +84,7 @@ function guardStartCoin(enemy) {
     enemy.startPatrol(-620, -300);
     return enemy;
 }
+
 
 /**
  * Places normal chickens throughout the level.
@@ -93,6 +99,7 @@ function createNormalChickens() {
     return enemies;
 }
 
+
 /**
  * Distributes clouds across the level sky.
  * @returns {*} The result of create level clouds().
@@ -106,6 +113,7 @@ function createLevelClouds() {
     }
     return clouds;
 }
+
 
 /**
  * Creates the repeating background layers for the tutorial.

@@ -13,9 +13,7 @@ class World extends WorldBase {
     isWin = false;
     isPaused = false;
     throwChargeStart = null;
-    bottleCount = 0;
-    coinValue = 0;
-    coinsCollected = 0;
+    bottleCount = 0;    coinsCollected = 0;
     coinInventory = 0;
     minibossSoundIds = [];
     minibossDeadIds = [];
@@ -41,6 +39,8 @@ class World extends WorldBase {
         this.startCollisionLoop();
         this.draw();
     }
+
+
     /**
      * Stores the canvas and its drawing context.
      * @param {*} canvas - The canvas used for drawing.
@@ -57,6 +57,8 @@ class World extends WorldBase {
         this.winImage = new Image();
         this.winImage.src = "img/You won, you lost/You won A.png";
     }
+
+
     /**
      * Creates the player, level objects, and status bars.
      * @param {number} levelNumber - The level number used by this method.
@@ -82,6 +84,8 @@ class World extends WorldBase {
     startGameLoop() {
         this.gameLoopInterval = setInterval(() => this.updateGame(), 1000 / 60);
     }
+
+
     /**
      * Runs one update cycle for the current game state.
      */
@@ -94,6 +98,8 @@ class World extends WorldBase {
         if (this.checkChickenEscape()) return;
         this.updateActiveGame();
     }
+
+
     /**
      * Checks whether a living chicken has passed the level boundary.
      */
@@ -108,12 +114,15 @@ class World extends WorldBase {
         return escaped;
     }
 
+
     /**
      * Checks whether the character has died and triggers Game Over.
      */
     checkCharacterDeath() {
         if (this.character.deathFinished) this.triggerGameOver();
     }
+
+
     /**
      * Updates player movement, camera, collectibles, and boss behavior.
      */
@@ -124,8 +133,10 @@ class World extends WorldBase {
         this.updateCamera();
         this.checkBossApproach();
         this.updateCollectibles();
-        this.updateMiniBossSounds();
+        this.level.enemies.forEach(boss => this.checkMiniBossSound(boss));
     }
+
+
     /**
      * Starts or stops background sounds based on active enemies.
      */
@@ -142,6 +153,8 @@ class World extends WorldBase {
         if (anyChickensAlive) gameSounds.play("chicken_background");
         else gameSounds.stop("chicken_background");
     }
+
+
     /**
      * Plays footsteps only while the character is walking on the ground.
      */
@@ -151,12 +164,7 @@ class World extends WorldBase {
         if (moving && onGround) gameSounds.play("steps");
         else gameSounds.stop("steps");
     }
-    /**
-     * Starts mini-boss sounds when mini-bosses become visible.
-     */
-    updateMiniBossSounds() {
-        this.level.enemies.forEach(boss => this.checkMiniBossSound(boss));
-    }
+
 
     /**
      * Checks whether a mini-boss needs an entrance or death sound.
@@ -175,6 +183,8 @@ class World extends WorldBase {
             gameSounds.play("miniboss_dead");
         }
     }
+
+
     /**
      * Starts the main boss audio when the player approaches it.
      */
@@ -190,6 +200,8 @@ class World extends WorldBase {
             gameSounds.stop("chicken_boss");
         }
     }
+
+
     /**
      * Starts regular collision checks for enemies and collectibles.
      */
@@ -201,6 +213,8 @@ class World extends WorldBase {
             this.checkCollectibleCollisions();
         }, 1000 / 60);
     }
+
+
     /**
      * Creates the coins and bottles for the current level.
      */
@@ -212,6 +226,7 @@ class World extends WorldBase {
         this.coins = this.createCoins();
     }
 
+
     /**
      * Creates the bottle inventory status bar.
      */
@@ -221,6 +236,8 @@ class World extends WorldBase {
         this.bottleBar.y = 42;
         this.bottleBar.setPercentage(0);
     }
+
+
     /**
      * Creates the collected-coin status bar.
      */
@@ -230,6 +247,8 @@ class World extends WorldBase {
         this.coinBar.y = 84;
         this.coinBar.setPercentage(0);
     }
+
+
     /**
      * Creates the main boss health status bar.
      */
@@ -241,7 +260,6 @@ class World extends WorldBase {
         this.bossBar.x = this.canvas.width - this.bossBar.width - 20;
         this.bossBar.y = 0;
     }
-
 
 
     /**
@@ -263,6 +281,7 @@ class World extends WorldBase {
         this.coinBar.setPercentage(percentage);
     }
 
+
     /**
      * Starts normal gameplay after the level introduction.
      */
@@ -272,6 +291,7 @@ class World extends WorldBase {
         this.lastUpdate = Date.now();
         this.character.lastActivity = Date.now();
     }
+
 
     /**
      * Updates coins and bottles that are active in the level.
@@ -285,6 +305,7 @@ class World extends WorldBase {
         this.coins.forEach(c => c.update(delta));
         this.updateThrownBottles(delta);
     }
+
 
     /**
      * Updates the movements and animations of living bosses.
@@ -304,6 +325,7 @@ class World extends WorldBase {
         if (this.character.energy <= 0 && this.character.deathFinished) this.triggerGameOver();
     }
 
+
     /**
      * Updates all bottles that are currently flying or splashing.
      * @param {number} delta - The delta used by this method.
@@ -317,6 +339,7 @@ class World extends WorldBase {
         this.thrownBottles = activeBottles;
     }
 
+
     /**
      * Updates one thrown bottle and checks its impact.
      * @param {*} bottle - The bottle being collected or thrown.
@@ -329,6 +352,7 @@ class World extends WorldBase {
         if (bottle.state !== "flying") return;
         this.level.enemies.forEach(enemy => this.hitEnemyWithBottle(bottle, enemy));
     }
+
 
     /**
      * Damages enemies within range of a bottle impact.
@@ -346,6 +370,7 @@ class World extends WorldBase {
         });
     }
 
+
     /**
      * Checks whether a target overlaps the bottle impact radius.
      * @param {number} x - The horizontal coordinate.
@@ -359,6 +384,7 @@ class World extends WorldBase {
         const dy = y - nearestY;
         return dx * dx + dy * dy <= 13 * 13;
     }
+
 
     /**
      * Returns the area in which a bottle can damage a target.

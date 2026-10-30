@@ -9,6 +9,7 @@ class CharacterBase extends MovableObject {
         return this.y;
     }
 
+
     /**
      * Updates character movement, jumping, and gravity.
      */
@@ -19,6 +20,7 @@ class CharacterBase extends MovableObject {
         this.applyGravity();
     }
 
+
     /**
      * Moves the character left or right using the pressed keys.
      */
@@ -26,6 +28,7 @@ class CharacterBase extends MovableObject {
         if (this.keyboard.RIGHT && !this.keyboard.LEFT) this.moveCharacterRight();
         if (this.keyboard.LEFT && !this.keyboard.RIGHT) this.moveCharacterLeft();
     }
+
 
     /**
      * Moves the character right without crossing the level boundary.
@@ -43,6 +46,7 @@ class CharacterBase extends MovableObject {
         this.markActivity();
     }
 
+
     /**
      * Moves the character left without crossing the level boundary.
      */
@@ -53,6 +57,7 @@ class CharacterBase extends MovableObject {
         this.markActivity();
     }
 
+
     /**
      * Checks jump keys and starts a jump when allowed.
      */
@@ -61,6 +66,7 @@ class CharacterBase extends MovableObject {
         if (jumpKeyPressed && !this.jumpPressed) this.jump();
         this.jumpPressed = jumpKeyPressed;
     }
+
 
     /**
      * Checks whether a jump began above the enemy.
@@ -73,6 +79,7 @@ class CharacterBase extends MovableObject {
         return previousFeet <= target.y + 12;
     }
 
+
     /**
      * Checks whether the character is landing on an enemy from above.
      * @param {*} enemy - The enemy involved in the collision.
@@ -83,6 +90,7 @@ class CharacterBase extends MovableObject {
         if (!box || !target || this.speedY >= 0) return false;
         return this.jumpStartedAboveEnemy(enemy) || box.y < target.y;
     }
+
 
     /**
      * Updates vertical movement and returns the character to the ground.
@@ -96,6 +104,7 @@ class CharacterBase extends MovableObject {
         this.landOnGround();
     }
 
+
     /**
      * Updates vertical speed and the jump animation while airborne.
      */
@@ -103,6 +112,7 @@ class CharacterBase extends MovableObject {
         this.speedY -= this.gravity;
         this.animateJump();
     }
+
 
     /**
      * Stops downward movement and returns the character to ground level.
@@ -118,6 +128,7 @@ class CharacterBase extends MovableObject {
         if (this.landingFrames > 0) this.showLandingFrame();
     }
 
+
     /**
      * Displays the appropriate image when the character lands.
      */
@@ -131,14 +142,6 @@ class CharacterBase extends MovableObject {
         if (this.landingFrames === 0 && !this.isHurt()) this.showStandingImage();
     }
 
-    /**
-     * Restores the first walking image after a jump.
-     */
-    resetWalkingImage() {
-        this.currentImage = 0;
-        this.jumpFrame = 0;
-        this.showStandingImage();
-    }
 
     /**
      * Selects the current jump animation frame.
@@ -158,6 +161,7 @@ class CharacterBase extends MovableObject {
         this.jumpFrame++;
     }
 
+
     /**
      * Starts a jump if the character is standing on the ground.
      */
@@ -173,6 +177,7 @@ class CharacterBase extends MovableObject {
         if (!this.isHurt()) this.img = this.imageCache[this.IMAGES_JUMPING[0]];
     }
 
+
     /**
      * Makes the character bounce upward after defeating a chicken.
      */
@@ -183,6 +188,7 @@ class CharacterBase extends MovableObject {
         this.jumpFrame = 0;
         this.markActivity();
     }
+
 
     /**
      * Reduces character health and starts the hurt or death response.
@@ -200,6 +206,7 @@ class CharacterBase extends MovableObject {
         this.showHurtImage();
     }
 
+
     /**
      * Starts the death sequence when the character loses its last health.
      * @param {*} attacker - The attacker used by this method.
@@ -213,6 +220,7 @@ class CharacterBase extends MovableObject {
         return this.die();
     }
 
+
     /**
      * Marks the character as dead and stops normal movement.
      */
@@ -222,6 +230,7 @@ class CharacterBase extends MovableObject {
         this.startDeathAnimation();
     }
 
+
     /**
      * Builds the image paths for the character death animation.
      */
@@ -230,6 +239,7 @@ class CharacterBase extends MovableObject {
         for (let i = 51; i <= 56; i++) images.push("img/2_character_pepe/5_dead/D-" + i + ".png");
         return images;
     }
+
 
     /**
      * Starts the sequence of character death images.
@@ -246,6 +256,7 @@ class CharacterBase extends MovableObject {
         this.deathInterval = setInterval(() => this.updateDeathAnimation(), 1000 / 60);
     }
 
+
     /**
      * Advances the death animation and falling movement.
      */
@@ -258,6 +269,7 @@ class CharacterBase extends MovableObject {
         if (this.deathIndex < 2) return;
         this.moveDyingCharacter();
     }
+
 
     /**
      * Moves the dying character below the canvas.
@@ -272,6 +284,7 @@ class CharacterBase extends MovableObject {
         }
     }
 
+
     /**
      * Displays the next frame of the death animation.
      */
@@ -280,12 +293,14 @@ class CharacterBase extends MovableObject {
         this.img = this.imageCache[this.deathImages[this.deathIndex]];
     }
 
+
     /**
      * Checks whether the character is still showing its hurt reaction.
      */
     isHurt() {
         return Date.now() - this.lastHit < 270;
     }
+
 
     /**
      * Displays the character image used after taking damage.
@@ -299,6 +314,7 @@ class CharacterBase extends MovableObject {
         }, 270);
     }
 
+
     /**
      * Restores the standing image after a hurt reaction.
      */
@@ -309,6 +325,7 @@ class CharacterBase extends MovableObject {
         else this.startIdleAnimation();
     }
 
+
     /**
      * Records player activity and interrupts the idle animation.
      */
@@ -316,6 +333,7 @@ class CharacterBase extends MovableObject {
         this.lastActivity = Date.now();
         if (this.idleStarted) this.stopIdleAnimation();
     }
+
 
     /**
      * Starts the idle animation after the player stops moving.
@@ -330,6 +348,7 @@ class CharacterBase extends MovableObject {
         }, 350);
     }
 
+
     /**
      * Displays the next image of the idle animation.
      */
@@ -339,6 +358,7 @@ class CharacterBase extends MovableObject {
         this.img = this.imageCache[path];
         this.idleFrame++;
     }
+
 
     /**
      * Returns the correct idle frame, including the repeating sequence.
@@ -351,6 +371,7 @@ class CharacterBase extends MovableObject {
         return this.IMAGES_IDLE[10 + (this.idleFrame - 40) % 10];
     }
 
+
     /**
      * Stops the idle animation when the player moves or takes damage.
      */
@@ -360,6 +381,7 @@ class CharacterBase extends MovableObject {
         this.idleFrame = 0;
         clearInterval(this.idleInterval);
     }
+
 
     /**
      * Stops timers started by this game object.

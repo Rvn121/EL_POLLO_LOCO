@@ -6,6 +6,7 @@ class WorldDrawBase {
         this.level.clouds.forEach(cloudObject => this.recycleCloud(cloudObject));
     }
 
+
     /**
      * Repositions one cloud beyond the right edge of the screen.
      * @param {*} cloudObject - The cloud object used by this method.
@@ -15,6 +16,7 @@ class WorldDrawBase {
         if (cloudObject.x + cloudObject.width >= leftEdge) return;
         cloudObject.resetPosition(this.getNextCloudX());
     }
+
 
     /**
      * Calculates a new cloud position to the right of the current clouds.
@@ -29,6 +31,7 @@ class WorldDrawBase {
         return Math.max(rightEdge, furthestCloud) + gap;
     }
 
+
     /**
      * Keeps the camera within level boundaries while following the player.
      */
@@ -38,6 +41,7 @@ class WorldDrawBase {
         const targetX = this.characterScreenX - this.character.x;
         this.camera_x = Math.max(minCameraX, Math.min(maxCameraX, targetX));
     }
+
 
     /**
      * Switches the world into the Game Over state.
@@ -53,6 +57,7 @@ class WorldDrawBase {
         if (typeof this.onGameOver === "function") this.onGameOver();
     }
 
+
     /**
      * Draws the current game frame on the canvas.
      */
@@ -67,6 +72,7 @@ class WorldDrawBase {
         requestAnimationFrame(() => this.draw());
     }
 
+
     /**
      * Draws background layers and moving clouds.
      */
@@ -78,6 +84,7 @@ class WorldDrawBase {
         this.ctx.restore();
     }
 
+
     /**
      * Draws the active game world and status bars.
      */
@@ -88,6 +95,7 @@ class WorldDrawBase {
         this.ctx.restore();
         this.drawStatusBars();
     }
+
 
     /**
      * Draws the player, enemies, and other level actors.
@@ -104,6 +112,7 @@ class WorldDrawBase {
         this.addObjectsToMap(this.thrownBottles);
     }
 
+
     /**
      * Draws coins that are still visible.
      * @param {*} behindCharacter - The behind character used by this method.
@@ -113,6 +122,7 @@ class WorldDrawBase {
             if (coin.isVisible() && coin.behindCharacter === behindCharacter) this.addToMap(coin);
         }
     }
+
 
     /**
      * Draws enemies that are currently visible in the level.
@@ -124,6 +134,7 @@ class WorldDrawBase {
         }
     }
 
+
     /**
      * Draws the player inventory and health indicators.
      */
@@ -133,6 +144,7 @@ class WorldDrawBase {
         this.addToMap(this.coinBar);
         if (this.bossUnlocked && this.character.x >= this.getBoss().x - 600) this.addToMap(this.bossBar);
     }
+
 
     /**
      * Draws the loss screen after the player dies.
@@ -150,6 +162,7 @@ class WorldDrawBase {
         }
     }
 
+
     /**
      * Switches the world into the victory state.
      */
@@ -164,6 +177,7 @@ class WorldDrawBase {
         if (this.onGameOver) this.onGameOver(true);
     }
 
+
     /**
      * Draws the victory screen after the boss is defeated.
      */
@@ -175,6 +189,7 @@ class WorldDrawBase {
         this.drawWinCoinText();
         this.ctx.restore();
     }
+
 
     /**
      * Sets the font and drawing style for victory text.
@@ -189,6 +204,7 @@ class WorldDrawBase {
         this.ctx.fillStyle = "#ffd84d";
     }
 
+
     /**
      * Shows collected coin information on the victory screen.
      */
@@ -198,6 +214,7 @@ class WorldDrawBase {
         this.ctx.fillText(coinText, this.canvas.width / 2, this.canvas.height * 0.26);
     }
 
+
     /**
      * Draws each object from the supplied array on the canvas.
      * @param {*} objects - The objects used by this method.
@@ -205,6 +222,7 @@ class WorldDrawBase {
     addObjectsToMap(objects) {
         objects.forEach(object => this.addToMap(object));
     }
+
 
     /**
      * Draws one game object with its current facing direction.
@@ -218,6 +236,7 @@ class WorldDrawBase {
         this.drawFrame(movableObject);
     }
 
+
     /**
      * Draws a game object image at its current position and size.
      * @param {*} drawableObject - The drawable object used by this method.
@@ -228,6 +247,7 @@ class WorldDrawBase {
         this.ctx.drawImage(drawableObject.img, drawableObject.x, drawableObject.y,
             drawableObject.width, drawableObject.height);
     }
+
 
     /**
      * Draws a character or enemy facing the opposite direction.
@@ -240,6 +260,7 @@ class WorldDrawBase {
         this.ctx.scale(-1, 1);
         this.ctx.drawImage(movableObject.img, 0, 0, movableObject.width, movableObject.height);
     }
+
 
     /**
      * Draws a debug collision frame when debugging is enabled.
@@ -256,6 +277,7 @@ class WorldDrawBase {
         this.ctx.stroke();
     }
 
+
     /**
      * Checks whether a game object needs a debug collision frame.
      * @param {*} movableObject - The movable object used by this method.
@@ -264,6 +286,7 @@ class WorldDrawBase {
         return movableObject instanceof Character || movableObject instanceof chicken ||
             movableObject instanceof chickenSmall || movableObject instanceof Endboss;
     }
+
 
     /**
      * Stops timers and releases the objects of the current world.
@@ -281,6 +304,8 @@ class WorldDrawBase {
             if (cloudObject.clearTimers) cloudObject.clearTimers();
         });
     }
+
+
     /**
      * Applies a thrown bottle hit to the selected enemy.
      * @param {*} enemy - The enemy involved in the collision.
@@ -292,14 +317,23 @@ class WorldDrawBase {
         bottle.damagedEnemies.push(enemy);
         if (enemy instanceof chicken || enemy instanceof chickenSmall) enemy.die();
         else if (enemy instanceof Endboss) {
-            gameSounds.play("boss_hit");
-            enemy.takeBottleHit();
-            if (enemy.isMainBoss) {
-                this.bossBar.setPercentage(enemy.energy);
-                if (enemy.energy <= 0) gameSounds.stop("chicken_boss");
-            }
+            this.damageBossWithBottle(enemy);
         }
     }
+
+
+    /**
+     * Updates boss feedback only when a bottle passes the temporary hit protection.
+     * @param {Endboss} boss - The boss struck by a bottle.
+     */
+    damageBossWithBottle(boss) {
+        if (!boss.takeBottleHit()) return;
+        gameSounds.play("boss_hit");
+        if (!boss.isMainBoss) return;
+        this.bossBar.setPercentage(boss.energy);
+        if (boss.energy <= 0) gameSounds.stop("chicken_boss");
+    }
+
 
     /**
      * Checks whether the thrown bottle can hit an enemy.
@@ -317,6 +351,7 @@ class WorldDrawBase {
         this.damageEnemyWithBottle(enemy, bottle);
     }
 
+
     /**
      * Moves a bottle to the detected impact position before it breaks.
      * @param {*} bottle - The bottle being collected or thrown.
@@ -331,6 +366,7 @@ class WorldDrawBase {
         bottle.x = x - bottle.width / 2;
         bottle.y = y - bottle.height / 2;
     }
+
 
     /**
      * Checks whether two rectangular hitboxes overlap.

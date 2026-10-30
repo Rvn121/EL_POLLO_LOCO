@@ -16,7 +16,8 @@ class SoundManager {
         this.addBossSounds();
     }
 
-    /**
+
+/**
      * Registers looping footsteps, wind, chickens, and sleeping sounds.
      */
     addBackgroundSounds() {
@@ -26,7 +27,8 @@ class SoundManager {
         this.addSound("snoring", "audio/snoring.mp3", 0.32, true);
     }
 
-    /**
+
+/**
      * Registers short sounds for jumping, collecting items, and impacts.
      */
     addActionSounds() {
@@ -38,7 +40,8 @@ class SoundManager {
         this.addSound("hit_chickens", "audio/hit_chickens.mp3", 0.65);
     }
 
-    /**
+
+/**
      * Registers sounds played during boss fights and result screens.
      */
     addBossSounds() {
@@ -53,7 +56,8 @@ class SoundManager {
         this.addSound("boss_hit", "audio/hit.mp3", 0.65);
     }
 
-    /**
+
+/**
      * Creates an audio object and saves it under the supplied name.
      * @param {string} name - The identifier of the sound or game object.
      * @param {string} path - The file path of the image or audio asset.
@@ -69,7 +73,8 @@ class SoundManager {
         this.sounds[name] = sound;
     }
 
-    /**
+
+/**
      * Starts the named sound if the current audio settings allow it.
      * @param {string} name - The identifier of the sound or game object.
      */
@@ -81,7 +86,8 @@ class SoundManager {
         sound.play().catch(() => {});
     }
 
-    /**
+
+/**
      * Plays the first sound and starts the next sound when it ends.
      * @param {number} first - The first sound or frame in the sequence.
      * @param {*} next - The sound or frame played next.
@@ -100,7 +106,8 @@ class SoundManager {
         this.play(first);
     }
 
-    /**
+
+/**
      * Removes the event handler for a scheduled sound sequence.
      */
     cancelSequence() {
@@ -109,6 +116,7 @@ class SoundManager {
         sound.removeEventListener("ended", onEnded);
         this.pendingSequence = null;
     }
+
 
 /**
  * Pauses the named sound and resets it to the beginning.
@@ -122,7 +130,8 @@ stop(name) {
         sound.currentTime = 0;
     }
 
-    /**
+
+/**
      * Stops every registered game sound.
      */
     stopAll() {
@@ -132,7 +141,8 @@ stop(name) {
         }
     }
 
-    /**
+
+/**
      * Enables or disables sound effects without changing music mute settings.
      * @param {boolean} muted - Whether audio should be muted.
      */
@@ -145,7 +155,8 @@ stop(name) {
         }
     }
 
-    /**
+
+/**
      * Checks whether a sound exists and is allowed by the mute settings.
      * @param {string} name - The identifier of the sound or game object.
      * @returns {boolean} The result of can play().
@@ -154,7 +165,8 @@ stop(name) {
         return !!this.sounds[name] && (this.musicNames.has(name) || !this.muted);
     }
 
-    /**
+
+/**
      * Mutes or unmutes registered music tracks.
      * @param {boolean} muted - Whether audio should be muted.
      */

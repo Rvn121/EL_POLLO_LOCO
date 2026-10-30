@@ -27,6 +27,7 @@ class chicken extends MovableObject {
         this.animate();
     }
 
+
     /**
      * Performs the animate operation for this game object.
      */
@@ -40,6 +41,7 @@ class chicken extends MovableObject {
             this.currentImage = (this.currentImage + 1) % this.IMAGES_WALKING.length;
         }, 200);
     }
+
 
     /**
      * Marks the character as dead and stops normal movement.

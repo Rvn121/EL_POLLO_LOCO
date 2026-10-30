@@ -12,6 +12,7 @@ function updatePauseMusic() {
     if (pauseMusic.paused) pauseMusic.play().catch(() => {});
 }
 
+
 /**
  * Stops music associated with the paused game.
  */
@@ -29,6 +30,7 @@ function updateMusicButtonVisibility() {
     const show = !world || world.isPaused || world.isWin || world.isGameOver;
     menuMuteBtn.classList.toggle("music-hidden", !show);
 }
+
 
 /**
  * Shows or hides the paused message over the game canvas.

@@ -80,6 +80,7 @@ class Character extends CharacterBase {
         this.startAnimationLoop();
     }
 
+
     /**
      * Performs the load character images operation for this game object.
      */
@@ -90,6 +91,7 @@ class Character extends CharacterBase {
         this.loadImages(this.createDeathImages());
         this.loadImages([this.HURT_IMAGE]);
     }
+
 
     /**
      * Performs the start animation loop operation for this game object.
@@ -106,6 +108,7 @@ class Character extends CharacterBase {
         }, 100);
     }
 
+
     /**
      * Performs the should start idle operation for this game object.
      */
@@ -113,6 +116,7 @@ class Character extends CharacterBase {
         const standingStill = this.keyboard.LEFT === this.keyboard.RIGHT;
         return standingStill && this.y === this.groundY;
     }
+
 
     /**
      * Performs the play walking animation operation for this game object.

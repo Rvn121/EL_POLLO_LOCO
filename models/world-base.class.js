@@ -7,6 +7,7 @@ class WorldBase extends WorldDrawBase {
         this.coins.forEach(c => this.pickupCoin(c));
     }
 
+
     /**
      * Adds collected bottle throws to the inventory and updates the bar.
      * @param {*} bottle - The bottle being collected or thrown.
@@ -19,6 +20,7 @@ class WorldBase extends WorldDrawBase {
         this.bottleCount++;
         this.bottleBar.setPercentage(this.getBottlePercentage());
     }
+
 
     /**
      * Unlocks the final boss after the required enemies are defeated.
@@ -33,6 +35,7 @@ class WorldBase extends WorldDrawBase {
         this.bossUnlocked = allCoinsCollected && allChickensDefeated;
     }
 
+
     /**
      * Adds a collected coin, restores health, and updates the status bar.
      * @param {*} coin - The coin to process.
@@ -41,12 +44,11 @@ class WorldBase extends WorldDrawBase {
         if (coin.collected || !this.boxesOverlap(this.character, coin)) return;
         coin.collect();
         this.coinsCollected++;
-        this.coinInventory++;
-        this.coinValue = Math.min(100, this.coinsCollected * 20);
-        this.updateBossUnlock();
+        this.coinInventory++;        this.updateBossUnlock();
         this.updateCoinBar();
         gameSounds.play("drop_coin");
     }
+
 
     /**
      * Creates a new thrown bottle when the player has ammunition.
@@ -66,12 +68,14 @@ class WorldBase extends WorldDrawBase {
         this.bottleBar.setPercentage(this.getBottlePercentage());
     }
 
+
     /**
      * Converts bottle inventory into a status bar percentage.
      */
     getBottlePercentage() {
         return this.bottleCount * 20;
     }
+
 
     /**
      * Returns the main boss for the current level.
@@ -82,6 +86,7 @@ class WorldBase extends WorldDrawBase {
         }
         return undefined;
     }
+
 
     /**
      * Pauses or resumes the current level and its sounds.
@@ -96,6 +101,7 @@ class WorldBase extends WorldDrawBase {
         return this.isPaused;
     }
 
+
     /**
      * Checks whether a nearby boss can damage the player.
      * @param {*} bosses - The bosses used by this method.
@@ -109,6 +115,7 @@ class WorldBase extends WorldDrawBase {
         });
     }
 
+
     /**
      * Applies the existing damage values for a successful boss attack.
      * @param {Endboss} boss - The boss hitting the character.
@@ -118,6 +125,7 @@ class WorldBase extends WorldDrawBase {
         if (this.levelNumber === 2 && !boss.isMainBoss) damage = 20;
         this.damageCharacter(damage, boss);
     }
+
 
     /**
      * Handles collisions between the player and normal enemies.
@@ -138,6 +146,7 @@ class WorldBase extends WorldDrawBase {
         this.statusBar.setPercentage(this.character.energy);
     }
 
+
     /**
      * Handles collisions between the player and mini-bosses.
      * @param {*} enemy - The enemy involved in the collision.
@@ -150,6 +159,7 @@ class WorldBase extends WorldDrawBase {
         enemy.lastHitPosition = { x: this.character.x, y: this.character.y };
         this.statusBar.setPercentage(this.character.energy);
     }
+
 
     /**
      * Checks whether the character is hitting an enemy from above.
@@ -164,6 +174,7 @@ class WorldBase extends WorldDrawBase {
         return startedAbove && feet >= target.y && player.y < target.y;
     }
 
+
     /**
      * Checks whether a chicken has a valid side hit on the character.
      * @param {*} enemy - The enemy involved in the collision.
@@ -177,6 +188,7 @@ class WorldBase extends WorldDrawBase {
             player.y < target.y + target.height;
     }
 
+
     /**
      * Applies enemy damage to the character and updates health.
      * @param {*} amount - The amount used by this method.
@@ -187,6 +199,7 @@ class WorldBase extends WorldDrawBase {
         this.character.takeDamage(amount, attacker);
         this.statusBar.setPercentage(this.character.energy);
     }
+
 
     /**
      * Checks whether an enemy may deal another hit to the player.
@@ -199,6 +212,7 @@ class WorldBase extends WorldDrawBase {
         return Math.hypot(dx, dy) >= 45;
     }
 
+
     /**
      * Defeats a chicken and keeps its dead image on the ground.
      * @param {*} enemy - The enemy involved in the collision.
@@ -208,6 +222,7 @@ class WorldBase extends WorldDrawBase {
         enemy.die();
         this.character.bounceFromEnemy();
     }
+
 
     /**
      * Builds the image paths for a status bar.
@@ -221,6 +236,7 @@ class WorldBase extends WorldDrawBase {
         }
         return images;
     }
+
 
     /**
      * Creates one collectible coin at its assigned position.
@@ -242,6 +258,7 @@ class WorldBase extends WorldDrawBase {
         return coin;
     }
 
+
     /**
      * Calculates the horizontal position of a coin.
      * @param {number} index - The position of an item in a list.
@@ -255,6 +272,8 @@ class WorldBase extends WorldDrawBase {
         const section = (end - start) / (count - 1);
         return start + section * (index - 1 + Math.random() * 0.8);
     }
+
+
     /**
      * Places the wooden signs used in the level.
      */
@@ -272,6 +291,7 @@ class WorldBase extends WorldDrawBase {
         }
         return signs;
     }
+
 
     /**
      * Creates the collectible bottles for the level.
@@ -291,6 +311,7 @@ class WorldBase extends WorldDrawBase {
         return this.createBottlesInZones(zones);
     }
 
+
     /**
      * Distributes bottles among the allowed parts of the map.
      * @param {*} zones - The zones used by this method.
@@ -304,6 +325,7 @@ class WorldBase extends WorldDrawBase {
         }
         return bottles;
     }
+
 
     /**
      * Places the additional bottles used in level two.
@@ -321,6 +343,7 @@ class WorldBase extends WorldDrawBase {
         return bottles;
     }
 
+
     /**
      * Creates a group of bottles within a map section.
      * @param {*} bottles - The bottles used by this method.
@@ -333,6 +356,7 @@ class WorldBase extends WorldDrawBase {
             bottles.push(new CollectibleBottle(x));
         }
     }
+
 
     /**
      * Creates one wooden level sign at the given position.

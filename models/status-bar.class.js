@@ -21,6 +21,7 @@ class StatusBar extends DrawableObject {
         this.setPercentage(100);
     }
 
+
     /**
      * Updates a status bar to display the specified percentage.
      * @param {number} percentage - The value to display from 0 to 100.
@@ -29,6 +30,7 @@ class StatusBar extends DrawableObject {
         this.percentage = Math.max(0, percentage);
         this.img = this.imageCache[this.IMAGES_HEALTH[this.resolveImageIndex()]];
     }
+
 
     /**
      * Returns the image index corresponding to the current percentage.

@@ -9,6 +9,7 @@ function stopMenuMusic() {
     menuMusic.currentTime = 0;
 }
 
+
 /**
  * Begins the selected level and removes the start menu.
  */
@@ -25,6 +26,7 @@ function startGame() {
     document.getElementById("canvasFrame").classList.add("level-loading");
     prepareGameView();
 }
+
 
 /**
  * Prepares the canvas and controls for the selected level.
@@ -43,12 +45,14 @@ async function prepareGameView() {
     finishPreparingGame(loadingWorld);
 }
 
+
 /**
  * Waits until the game screen is ready for the next step.
  */
 async function waitForGameFrame() {
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 }
+
 
 /**
  * Loads the level images before gameplay begins.
@@ -59,6 +63,7 @@ async function loadLevelImages(loadingWorld, transition) {
     await Promise.allSettled([DrawableObject.waitForImages(), transition.decode(),
         loadingWorld.gameOverImage.decode(), loadingWorld.winImage.decode()]);
 }
+
 
 /**
  * Completes level setup after its images are ready.
@@ -72,6 +77,7 @@ function finishPreparingGame(loadingWorld) {
     document.getElementById("canvasFrame").classList.remove("level-loading");
 }
 
+
 /**
  * Displays the level name before the player can move.
  */
@@ -84,6 +90,7 @@ function showLevelAnnouncement() {
     announcement.textContent = "Collect all coins and defeat all chickens to unlock the final boss!";
     announcement.classList.remove("hidden");
 }
+
 
 /**
  * Enables gameplay after the level introduction.
@@ -99,6 +106,7 @@ function finishLevelLoading(currentWorld) {
     updateTouchControls();
 }
 
+
 /**
  * Advances from the completed level to the next level.
  */
@@ -108,6 +116,7 @@ function nextLevel() {
     startGame();
 }
 
+
 /**
  * Restarts the current level without reloading the page.
  */
@@ -115,6 +124,7 @@ function restartGame() {
     disposeWorld();
     startGame();
 }
+
 
 /**
  * Stops the current game and returns to the title screen.
@@ -132,6 +142,7 @@ function backToStart() {
     playMenuMusic();
 }
 
+
 /**
  * Restores the menu buttons and images to their initial state.
  */
@@ -141,6 +152,7 @@ function resetMenuElements() {
     closeControlsModal();
     showStartMenu();
 }
+
 
 /**
  * Stops the previous game world and clears its running timers.
@@ -157,6 +169,7 @@ function disposeWorld() {
     window.gamePaused = false;
 }
 
+
 /**
  * Displays the result screen after the player loses.
  * @param {*} won - The won used by this method.
@@ -169,6 +182,7 @@ function handleGameOver(won = false) {
     const finishedWorld = world;
     window.setTimeout(() => showResultButtons(finishedWorld, won), 2000);
 }
+
 
 /**
  * Shows the available actions after a win or loss.
@@ -184,12 +198,14 @@ function showResultButtons(finishedWorld, won) {
     document.getElementById("toolbarBackToStartBtn").classList.toggle("icon-pulse", won && currentLevel === 2);
 }
 
+
 /**
  * Makes the restart button visible on the result screen.
  */
 function showRestartButton() {
     restartBtn.classList.remove("hidden");
 }
+
 
 /**
  * Hides the restart button outside the result screen.
@@ -202,6 +218,7 @@ function hideRestartButton() {
     restartBtn.classList.add("hidden");
 }
 
+
 /**
  * Hides the start menu when gameplay begins.
  */
@@ -210,6 +227,7 @@ function hideStartMenu() {
     menuButtons.classList.add("hidden");
     menuButtons.classList.add("game-running");
 }
+
 
 /**
  * Displays the title menu again after leaving the game.
@@ -222,6 +240,7 @@ function showStartMenu() {
     menuButtons.classList.remove("game-running");
 }
 
+
 /**
  * Opens the dialog explaining keyboard and touch controls.
  */
@@ -229,12 +248,14 @@ function openControlsModal() {
     controlsModal.classList.remove("hidden");
 }
 
+
 /**
  * Closes the controls explanation dialog.
  */
 function closeControlsModal() {
     controlsModal.classList.add("hidden");
 }
+
 
 /**
  * Closes the controls dialog when the backdrop is clicked.
@@ -244,6 +265,7 @@ function handleBackdropClick(event) {
     if (event.target === controlsModal) closeControlsModal();
 }
 
+
 /**
  * Enters or leaves fullscreen mode.
  */
@@ -252,12 +274,14 @@ function toggleFullscreen() {
     else requestFullscreenMode();
 }
 
+
 /**
  * Requests fullscreen mode for the game area.
  */
 function requestFullscreenMode() {
     if (canvasShell.requestFullscreen) canvasShell.requestFullscreen().catch(() => {});
 }
+
 
 /**
  * Handles pressed keyboard keys and menu shortcuts.
@@ -271,6 +295,7 @@ function handleKeyDown(event) {
     setKey(event, true);
 }
 
+
 /**
  * Returns to the start screen when Escape is pressed.
  * @param {Event} event - The keyboard, pointer, or mouse event to handle.
@@ -279,6 +304,7 @@ function exitWithEscape(event) {
     event.preventDefault();
     backToStart();
 }
+
 
 /**
  * Handles the space bar for level selection or bottle charging.
@@ -292,6 +318,7 @@ function handleSpaceDown(event) {
         world.throwChargeStart = Date.now();
     }
 }
+
 
 /**
  * Handles released keyboard keys, including bottle throws.
@@ -307,6 +334,7 @@ function handleKeyUp(event) {
     setKey(event, false);
 }
 
+
 /**
  * Pauses or resumes the current level and its sounds.
  * @returns {*} The result of toggle pause().
@@ -321,6 +349,7 @@ function togglePause() {
     updateTouchControls();
     updatePauseOverlay();
 }
+
 
 /**
  * Updates the stored state of a keyboard key.
@@ -339,6 +368,7 @@ function setKey(event, pressed) {
     event.preventDefault();
     keyboard[key] = pressed;
 }
+
 
 /**
  * Resets movement and action keys to prevent stuck input.

@@ -7,13 +7,6 @@ function updateOrientationState() {
     orientationOverlay.classList.toggle("hidden", !showNotice);
 }
 
-/**
- * Checks whether the viewport uses the tablet or mobile layout.
- * @returns {*} The result of is tablet or mobile().
- */
-function isTabletOrMobile() {
-    return window.innerWidth <= 1024;
-}
 
 /**
  * Shows the correct buttons for the current menu state.
@@ -25,6 +18,7 @@ function updateStartScreenButtons(startScreen) {
     document.getElementById("imprintLink").classList.toggle("hidden", !startScreen);
     document.getElementById("toolbarBackToStartBtn").classList.toggle("hidden", startScreen);
 }
+
 
 /**
  * Updates button visibility and labels for fullscreen mode.
@@ -42,6 +36,7 @@ function updateFullscreenUi() {
     updatePauseOverlay();
 }
 
+
 /**
  * Sets the icon used for a control button.
  * @param {HTMLElement} button - The HTML button being configured.
@@ -54,6 +49,7 @@ function setControlIcon(button, icon, label) {
     button.dataset.tooltip = label;
 }
 
+
 /**
  * Returns the icon matching the current fullscreen state.
  * @param {boolean} fullscreen - The fullscreen used by this method.
@@ -63,6 +59,7 @@ function getFullscreenIcon(fullscreen) {
     if (fullscreen) return "close_fullscreen";
     return "fullscreen";
 }
+
 
 /**
  * Returns the label matching the current fullscreen state.

@@ -6,6 +6,7 @@ function createLevel2() {
     return new Level(createLevel2Enemies(), createLevelClouds(), createLevel2Backgrounds());
 }
 
+
 /**
  * Creates the enemies and bosses assigned to the second level.
  * @returns {*} The result of create level2enemies().
@@ -23,6 +24,7 @@ function createLevel2Enemies() {
     enemies.push(boss);
     return enemies;
 }
+
 
 /**
  * Creates a chicken of the selected type for level two.
@@ -43,6 +45,7 @@ function createLevel2Chicken(index) {
     return enemy;
 }
 
+
 /**
  * Calculates the starting position of a small chicken.
  * @param {number} index - The position of an item in a list.
@@ -53,6 +56,7 @@ function getSmallChickenX(index, behindStart) {
     if (behindStart) return -600 + index * 120 + Math.random() * 20;
     return 1050 + (index - 3) * 335 + Math.random() * 80;
 }
+
 
 /**
  * Assigns left and right patrol boundaries to a level-two chicken.
@@ -68,6 +72,7 @@ function setLevel2Patrol(enemy, x, behindStart) {
     enemy.startPatrol(Math.max(minLimit, x - range), Math.min(maxLimit, x + range));
 }
 
+
 /**
  * Creates the repeating background layers for level two.
  * @returns {*} The result of create level2backgrounds().
@@ -78,7 +83,7 @@ function createLevel2Backgrounds() {
     for (let i = 16; i < 18; i++) {
         const images = ["air.png", "3_third_layer/1.png", "2_second_layer/1.png", "1_first_layer/1.png"];
         images.forEach(path => extra.push(new BackgroundObject(
-            "img/5_background/layers/" + path.replace("air.png", "air.png"), i * 720)));
+            "img/5_background/layers/" + path, i * 720)));
     }
     for (let i = 0; i < extra.length; i++) backgrounds.push(extra[i]);
     return backgrounds;

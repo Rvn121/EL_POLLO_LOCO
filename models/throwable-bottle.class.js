@@ -26,6 +26,7 @@ class ThrowableBottle extends DrawableObject {
         return images;
     }
 
+
     /**
      * Initializes this object and sets up its required game data.
      * @param {number} x - The horizontal coordinate.
@@ -44,6 +45,7 @@ class ThrowableBottle extends DrawableObject {
         this.img = this.imageCache[this.ROTATION[0]];
     }
 
+
     /**
      * Updates this game object for the current animation frame.
      * @param {number} delta - The delta used by this method.
@@ -60,6 +62,7 @@ class ThrowableBottle extends DrawableObject {
         if (this.y + this.height >= 425) this.splash();
     }
 
+
     /**
      * Starts the bottle splash animation after an impact.
      */
@@ -72,6 +75,7 @@ class ThrowableBottle extends DrawableObject {
         if (this.y + this.height >= 425) this.y = 425 - this.height;
         this.img = this.imageCache[this.SPLASH[0]];
     }
+
 
     /**
      * Advances the bottle splash animation and removes it when finished.

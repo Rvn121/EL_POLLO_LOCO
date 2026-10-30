@@ -8,12 +8,6 @@ class MovableObject extends DrawableObject {
     deathInterval;
     hurtTimeout;
 
-    /**
-     * Moves this object to the right using its current speed.
-     */
-    moveRight() {
-        this.x += this.speed;
-    }
 
     /**
      * Moves this object to the left using its current speed.
@@ -25,6 +19,7 @@ class MovableObject extends DrawableObject {
             this.x -= this.speed;
         }, 1000 / 60);
     }
+
 
     /**
      * Moves an enemy back and forth between its patrol boundaries.
@@ -43,12 +38,14 @@ class MovableObject extends DrawableObject {
         }, 1000 / 60);
     }
 
+
     /**
      * Stops this object from moving.
      */
     stopMoving() {
         clearInterval(this.moveInterval);
     }
+
 
     /**
      * Stops timers started by this game object.
@@ -60,6 +57,7 @@ class MovableObject extends DrawableObject {
         clearInterval(this.deathInterval);
         clearTimeout(this.hurtTimeout);
     }
+
 
     /**
      * Checks whether two objects touch at visible image pixels.
@@ -75,6 +73,7 @@ class MovableObject extends DrawableObject {
         const bottom = Math.min(own.y + own.height, target.y + target.height);
         return this.checkVisibleOverlap(other, left, top, right, bottom);
     }
+
 
     /**
      * Checks overlap between the visible parts of two images.
@@ -96,6 +95,7 @@ class MovableObject extends DrawableObject {
         }
         return false;
     }
+
 
     /**
      * Checks whether this object overlaps another game object.

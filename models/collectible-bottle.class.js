@@ -21,6 +21,7 @@ class CollectibleBottle extends DrawableObject {
         this.img = this.imageCache[this.IMAGES[Math.floor(Math.random() * 2)]];
     }
 
+
     /**
      * Marks the collectible as picked up and starts its collection effect.
      */
@@ -28,6 +29,7 @@ class CollectibleBottle extends DrawableObject {
         this.collected = true;
         this.respawnAt = 10000;
     }
+
 
     /**
      * Updates this game object for the current animation frame.
@@ -38,6 +40,7 @@ class CollectibleBottle extends DrawableObject {
         this.respawnAt -= delta;
         if (this.respawnAt <= 0) this.respawn();
     }
+
 
     /**
      * Returns a collected bottle to the map after its delay.

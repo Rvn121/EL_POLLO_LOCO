@@ -14,6 +14,7 @@ function setupTouchControls() {
     document.addEventListener("visibilitychange", handleTouchVisibility);
 }
 
+
 /**
  * Attaches touch and pointer handlers to one control button.
  * @param {HTMLElement} button - The HTML button being configured.
@@ -25,6 +26,7 @@ function bindTouchButton(button) {
     button.addEventListener("lostpointercapture", event => releaseTouchButton(event, button));
     button.addEventListener("contextmenu", event => event.preventDefault());
 }
+
 
 /**
  * Activates a touch control while the player presses it.
@@ -45,6 +47,7 @@ function pressTouchButton(event, button) {
     keyboard[key] = true;
 }
 
+
 /**
  * Releases a touch control and clears its pressed state.
  * @param {Event} event - The keyboard, pointer, or mouse event to handle.
@@ -62,6 +65,7 @@ function releaseTouchButton(event, button) {
     keyboard[key] = false;
 }
 
+
 /**
  * Releases a charged bottle throw from the touch controls.
  * @param {Event} event - The keyboard, pointer, or mouse event to handle.
@@ -72,12 +76,14 @@ function releaseTouchThrow(event) {
     if (world) world.throwChargeStart = null;
 }
 
+
 /**
  * Starts charging a bottle throw on touch devices.
  */
 function beginTouchThrow() {
     if (world && world.throwChargeStart === null) world.throwChargeStart = Date.now();
 }
+
 
 /**
  * Throws the charged bottle when the touch button is released.
@@ -89,6 +95,7 @@ function finishTouchThrow() {
     if (world.isPaused || world.isGameOver || world.isWin) return;
     world.throwBottle(Math.min(1, Math.max(0, duration / 900)));
 }
+
 
 /**
  * Clears active touch inputs when the game stops or loses focus.
@@ -102,12 +109,14 @@ function resetTouchControls() {
     resetKeys();
 }
 
+
 /**
  * Updates the touch controls when screen size or mode changes.
  */
 function handleTouchVisibility() {
     if (document.hidden) resetTouchControls();
 }
+
 
 /**
  * Checks whether the current device supports touch input.
@@ -116,6 +125,7 @@ function isTouchDevice() {
     return navigator.maxTouchPoints > 0 && window.matchMedia("(any-pointer: coarse)").matches;
 }
 
+/** Updates mobile controls and overlays for the current game state. */
 function updateTouchControls() {
     const frame = document.getElementById("canvasFrame");
     const touchDevice = isTouchDevice();
@@ -130,6 +140,7 @@ function updateTouchControls() {
     document.getElementById("touchControls").classList.toggle("hidden", !active);
     if (!active) resetTouchControls();
 }
+
 
 /**
  * Opens or closes the compact mobile control menu.
@@ -150,6 +161,7 @@ function setTouchMenuOpen(open, resume = true) {
     updatePauseOverlay();
 }
 
+
 /**
  * Updates the icon or label on the mobile menu toggle.
  * @param {boolean} open - The open used by this method.
@@ -162,6 +174,7 @@ function updateTouchMenuButton(open) {
     button.setAttribute("aria-label", label);
     button.dataset.tooltip = label;
 }
+
 
 /**
  * Closes the expanded mobile control menu.
@@ -176,6 +189,7 @@ function closeTouchMenu(resume) {
     updatePauseOverlay();
 }
 
+
 /**
  * Pauses gameplay when the mobile control menu is opened.
  */
@@ -186,6 +200,7 @@ function pauseForTouchMenu() {
     else window.gamePaused = true;
     updatePauseOverlay();
 }
+
 
 /**
  * Updates the controls available after winning or losing.

@@ -25,12 +25,14 @@ class cloud extends MovableObject {
         this.moveLeft();
     }
 
+
     /**
      * Performs the get random y operation for this game object.
      */
     getRandomY() {
         return 5 + Math.random() * 110;
     }
+
 
     /**
      * Performs the reset position operation for this game object.

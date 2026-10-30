@@ -8,13 +8,14 @@ class Endboss extends EndbossBase {
     isMainBoss = true;
     isDead = false;
     attackCooldown = 0;
+    bottleHitCooldown = 0;
+    combatEngaged = false;
     attackInterval = 1600;
     attackSpeed = 0.20;
     chargeSpeed = 0.18;
     healthPhases = false;
     aggressive = false;
     hitPhases = false;
-    bottleHits = 0;
     combatPhase = "patrol";
     phaseRemaining = 0;
     patrolCenter = null;
@@ -42,6 +43,8 @@ class Endboss extends EndbossBase {
         }
         return images;
     }
+
+
     /**
      * Initializes this object and sets up its required game data.
      * @param {number} x - The horizontal coordinate.
@@ -59,20 +62,21 @@ class Endboss extends EndbossBase {
         this.loadImages(this.IMAGES_DEAD);
         this.img = this.imageCache[this.IMAGES_ALERT[0]];
     }
+
+
     /** Reduces boss health after a valid bottle hit. */
     takeBottleHit() {
-        if (this.energy <= 0) return;
+        if (this.energy <= 0) return false;
+        if (this.isMainBoss && this.bottleHitCooldown > 0) return false;
         let damage = 100 / 3;
         if (this.isMainBoss) damage = 20;
         this.energy = Math.max(0, this.energy - damage);
-        if (this.hitPhases && this.energy > 0) this.reactToBottleHit();
-        if (!this.hitPhases && this.isMainBoss && this.healthPhases && this.energy > 0) {
-            this.approachUntil = Date.now() + 1400;
-            this.retreatUntil = Date.now() + 2800;
-        }
-        if (this.energy) this.setState("hurt");
-        else this.setState("dead");
+        if (this.isMainBoss) this.bottleHitCooldown = 1200;
+        this.reactToBottleDamage();
+        return true;
     }
+
+
     /**
      * Updates this game object for the current animation frame.
      * @param {number} delta - The delta used by this method.
@@ -82,10 +86,13 @@ class Endboss extends EndbossBase {
         if (this.state === "finished") return;
         if (this.state === "falling") return this.updateFalling(delta);
         this.attackCooldown = Math.max(0, this.attackCooldown - delta);
+        this.bottleHitCooldown = Math.max(0, this.bottleHitCooldown - delta);
         if (this.state === "walking" && this.moving) this.moveAndAttack(delta, player);
         if (this.state === "attack") this.advanceAttack(delta, player);
         this.updateAnimationFrame(delta);
     }
+
+
     /**
      * Updates boss movement and close-range attacks.
      * @param {number} delta - The delta used by this method.
@@ -103,12 +110,7 @@ class Endboss extends EndbossBase {
         this.chooseWalkingDirection(player);
         this.walk(delta);
     }
-    /** Changes boss movement after being hit by a bottle. */
-    reactToBottleHit() {
-        this.bottleHits++;
-        this.combatPhase = "charge";
-        this.phaseRemaining = this.getChargeDuration();
-    }
+
 
     /**
      * Updates patrol, retreat, and charge movement after a bottle hit.
@@ -116,12 +118,13 @@ class Endboss extends EndbossBase {
      * @param {Character} player - The player character.
      */
     updateHitPhases(delta, player) {
-        if (this.combatPhase === "patrol") return this.patrolAfterRetreat(delta);
+        if (!this.noticePlayer(player)) return this.patrolAfterRetreat(delta);
         const stepTime = Math.min(delta, Math.max(0, this.phaseRemaining));
         this.phaseRemaining = Math.max(0, this.phaseRemaining - delta);
         if (this.combatPhase === "retreat") return this.updateRetreatPhase(stepTime, player);
         this.updateChargePhase(delta, player);
     }
+
 
     /**
      * Moves away from the player until the retreat is finished.
@@ -133,6 +136,7 @@ class Endboss extends EndbossBase {
         if (!this.phaseRemaining) this.finishRetreat();
     }
 
+
     /**
      * Moves toward the player and may attack or start a retreat.
      * @param {number} delta - Time passed since the previous update.
@@ -140,41 +144,25 @@ class Endboss extends EndbossBase {
      */
     updateChargePhase(delta, player) {
         this.facePlayer(player);
-        const feinting = this.isFeinting();
-        const own = this.getHitbox();
-        const target = player.getHitbox();
-        if (!own || !target) return;
-        const gap = Math.max(target.x - own.x - own.width, own.x - target.x - target.width, 0);
-        if (feinting && gap <= 90) return this.beginRetreat();
-        if (!feinting && this.canReachPlayer(player) && !this.attackCooldown) return this.beginAttack(player);
+        if (this.canReachPlayer(player) && !this.attackCooldown) return this.beginAttack(player);
+        if (this.canReachPlayer(player)) return;
         if (!this.phaseRemaining) return this.beginRetreat();
         this.walk(delta);
     }
 
-    /** Returns whether the boss should retreat instead of committing to an attack. */
-    isFeinting() {
-        let hitLimit = 2;
-        if (this.aggressive) {
-            hitLimit = 1;
-        }
-        return this.bottleHits < hitLimit;
+
+    /** Starts another charge after the player has had a short recovery break. */
+    finishRetreat() {
+        this.startCombat();
     }
 
-    /** Resumes patrol after early level-one hits, otherwise starts the next charge. */
-    finishRetreat() {
-        this.patrolCenter = this.x;
-        if (this.aggressive || this.bottleHits >= 3) {
-            this.combatPhase = "charge";
-        } else {
-            this.combatPhase = "patrol";
-        }
-        this.phaseRemaining = this.getChargeDuration();
-    }
 
     /** Keeps each chase limited, so the player gets regular breaks. */
     getChargeDuration() {
         return 2400 + Math.random() * 1400;
     }
+
+
     /**
      * Resumes boss patrol after moving away from the player.
      * @param {number} delta - The delta used by this method.
@@ -188,11 +176,15 @@ class Endboss extends EndbossBase {
         if (this.x >= center + 210) this.direction = -1;
         this.walk(delta);
     }
-    /** Starts the boss movement away from the player. */
+
+
+    /** Briefly turns away before the boss starts its next charge. */
     beginRetreat() {
         this.combatPhase = "retreat";
-        this.phaseRemaining = 1000 + Math.random() * 400;
+        this.phaseRemaining = 400 + Math.random() * 200;
     }
+
+
     /**
      * Moves the boss away from the character.
      * @param {number} delta - The delta used by this method.
@@ -203,6 +195,8 @@ class Endboss extends EndbossBase {
         this.direction *= -1;
         this.walk(delta);
     }
+
+
     /**
      * Moves the boss one step in its current direction.
      * @param {number} delta - The delta used by this method.
@@ -211,6 +205,8 @@ class Endboss extends EndbossBase {
         this.x += this.direction * delta * this.getMovementSpeed();
         this.otherDirection = this.direction > 0;
     }
+
+
     /**
      * Moves the boss in response to a bottle hit.
      * @param {number} delta - The delta used by this method.
@@ -223,6 +219,8 @@ class Endboss extends EndbossBase {
         if (!approaching) this.direction *= -1;
         this.walk(delta);
     }
+
+
     /**
      * Moves the boss toward the player during its aggressive phase.
      * @param {number} delta - The delta used by this method.
@@ -233,6 +231,8 @@ class Endboss extends EndbossBase {
         if (this.canReachPlayer(player) && !this.attackCooldown) return this.beginAttack(player);
         if (!this.canReachPlayer(player)) this.walk(delta);
     }
+
+
     /**
      * Turns the boss to face the player.
      * @param {Character} player - The character controlled by the player.
@@ -242,6 +242,8 @@ class Endboss extends EndbossBase {
         else this.direction = -1;
         this.otherDirection = this.direction > 0;
     }
+
+
     /**
      * Chooses the boss walking direction within patrol boundaries.
      * @param {Character} player - The character controlled by the player.
@@ -252,6 +254,8 @@ class Endboss extends EndbossBase {
         if (this.x <= this.originX - range) this.direction = 1;
         if (this.x >= this.originX + range) this.direction = -1;
     }
+
+
     /** Ends a defeated boss animation without changing its original result. */
     finishDeath() {
         this.isDead = true;
@@ -261,50 +265,7 @@ class Endboss extends EndbossBase {
         this.fallSpeed = 0;
     }
 
-    /** Returns the movement speed for the current boss phase. */
-    getMovementSpeed() {
-        if (this.hitPhases) return this.getHitPhaseSpeed();
-        if (this.aggressive) return this.getAggressiveSpeed();
-        if (!this.healthPhases) return 0.09;
-        if (this.energy <= 20) return 0.23;
-        if (this.energy <= 40) return 0.20;
-        if (this.energy <= 60) return 0.18;
-        return 0.16;
-    }
-    /**
-     * Returns the boss speed after it has been hit.
-     * @returns {number} The result of get hit phase speed().
-     */
-    getHitPhaseSpeed() {
-        if (this.combatPhase === "patrol") {
-            return 0.09;
-        }
-        if (this.combatPhase === "retreat") {
-            return this.getRetreatSpeed();
-        }
-        if (this.aggressive) {
-            return 0.23;
-        } else {
-            return this.chargeSpeed;
-        }
-    }
-    /** Returns the retreat speed for the current aggression setting. */
-    getRetreatSpeed() {
-        if (this.aggressive) {
-            return 0.16;
-        } else {
-            return 0.14;
-        }
-    }
-    /**
-     * Returns the boss speed during its final attack phase.
-     * @returns {number} The result of get aggressive speed().
-     */
-    getAggressiveSpeed() {
-        if (this.energy <= 20) return 0.215;
-        if (this.energy <= 40) return 0.20;
-        return 0.18;
-    }
+
     /** Moves forward during an attack without turning around or cancelling its frames. */
     advanceAttack(delta, player) {
         if (!this.moving || this.frame > 5 || !this.isPlayerInFront(player)) return;
@@ -318,6 +279,7 @@ class Endboss extends EndbossBase {
         this.x += this.direction * step;
     }
 
+
     /** Visible bounds determine when to start winding up, never whether damage lands. */
     canReachPlayer(player) {
         if (!player || player.energy <= 0) return false;
@@ -327,6 +289,7 @@ class Endboss extends EndbossBase {
         const gap = Math.max(target.x - (own.x + own.width), own.x - (target.x + target.width), 0);
         return gap <= 40 && own.y < target.y + target.height && target.y < own.y + own.height;
     }
+
 
     /** Uses the committed attack direction, so dodging behind the boss is safe. */
     isPlayerInFront(player) {
@@ -341,12 +304,15 @@ class Endboss extends EndbossBase {
         }
     }
 
+
     /** A strike lands only during G16-G18 and only where visible pixels touch. */
     canHitPlayer(player) {
         if (this.energy <= 0 || this.isDead || this.state !== "attack" || this.attackHitDone) return false;
         if (!player || player.energy <= 0 || this.frame < 3 || this.frame > 5) return false;
         return this.isPlayerInFront(player) && this.isTouchingVisiblePixels(player);
     }
+
+
     /** Starts the boss attack sequence when the player is close. */
     beginAttack(player) {
         if (player) this.facePlayer(player);
@@ -358,6 +324,8 @@ class Endboss extends EndbossBase {
     }
 
 }
+
+
 /** Smaller static boss using the same animation set. */
 class MiniBoss extends Endboss {
     height = 250;

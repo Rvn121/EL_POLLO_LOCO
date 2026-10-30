@@ -22,12 +22,14 @@ class Coin extends DrawableObject {
         this.img = this.imageCache[this.IMAGES[0]];
     }
 
+
     /**
      * Marks the collectible as picked up and starts its collection effect.
      */
     collect() {
         this.collected = true;
     }
+
 
     /**
      * Updates this game object for the current animation frame.
@@ -41,6 +43,7 @@ class Coin extends DrawableObject {
         this.img = this.imageCache[this.IMAGES[Math.abs(frame)]];
     }
 
+
     /**
      * Moves a collected coin upward until it leaves the screen.
      * @param {number} delta - The delta used by this method.
@@ -48,6 +51,7 @@ class Coin extends DrawableObject {
     flyAway(delta) {
         this.y -= delta * 0.7;
     }
+
 
     /**
      * Checks whether this object should still be drawn.

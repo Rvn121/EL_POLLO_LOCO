@@ -40,6 +40,7 @@ async function init() {
     setLoading(false);
 }
 
+
 /**
  * Waits for the menu images to finish loading before showing the menu.
  * @returns {Promise<void>} The result of wait for menu images().
@@ -52,6 +53,7 @@ async function waitForMenuImages() {
     await Promise.allSettled(promises);
 }
 
+
 /**
  * Shows or hides the loading indicator while assets are prepared.
  * @param {*} loading - The loading used by this method.
@@ -61,6 +63,7 @@ function setLoading(loading) {
     screen.classList.toggle("hidden", !loading);
     canvasShell.setAttribute("aria-busy", String(loading));
 }
+
 
 /**
  * Stores the HTML elements needed by the game interface.
@@ -78,6 +81,7 @@ function cacheDomElements() {
     menuEffectsBtn = document.getElementById("menuEffectsBtn");
 }
 
+
 /**
  * Loads the images used on the title screen.
  */
@@ -85,6 +89,7 @@ function loadTitleAssets() {
     titleBackground.src = "img/5_background/layers/air.png";
     startScreenImage.src = "img/9_intro_outro_screens/start/startscreen_1.png";
 }
+
 
 /**
  * Connects the menu and gameplay buttons to their event handlers.
@@ -96,6 +101,7 @@ function bindUiEvents() {
     updateOrientationState();
     updateFullscreenUi();
 }
+
 
 /**
  * Connects the start menu buttons to their actions.
@@ -113,6 +119,7 @@ function bindMenuButtons() {
     bindLevelMenuButtons();
 }
 
+
 /**
  * Connects the level selection buttons to their actions.
  */
@@ -125,6 +132,7 @@ function bindLevelMenuButtons() {
     controlsModal.addEventListener("click", handleBackdropClick);
 }
 
+
 /**
  * Connects gameplay buttons to pause, sound, and fullscreen controls.
  */
@@ -134,6 +142,7 @@ function bindGameplayButtons() {
     document.getElementById("toolbarBackToStartBtn").addEventListener("click", backToStart);
     document.getElementById("fullscreenBtn").addEventListener("click", toggleFullscreen);
 }
+
 
 /**
  * Registers keyboard input and key release handlers.
@@ -146,6 +155,7 @@ function bindKeyboardEvents() {
     window.addEventListener("resize", updateOrientationState);
     window.addEventListener("orientationchange", updateOrientationState);
 }
+
 
 /**
  * Creates clouds at random starting positions for the title screen.
@@ -163,6 +173,7 @@ function initTitleClouds() {
     }
 }
 
+
 /**
  * Starts the animation of the title screen.
  */
@@ -171,6 +182,7 @@ function startTitleScreen() {
     cancelAnimationFrame(titleLoopId);
     titleLoopId = requestAnimationFrame(drawTitleScreen);
 }
+
 
 /**
  * Draws the title background and animated clouds for the current frame.
@@ -187,6 +199,7 @@ function drawTitleScreen() {
     titleLoopId = requestAnimationFrame(drawTitleScreen);
 }
 
+
 /**
  * Draws the background picture of the start menu.
  * @param {*} ctx - The canvas drawing context.
@@ -198,6 +211,7 @@ function drawTitleBackground(ctx) {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 }
+
 
 /**
  * Draws the moving clouds above the start menu.
@@ -217,6 +231,7 @@ function drawTitleClouds(ctx) {
     });
 }
 
+
 /**
  * Moves the title screen clouds and replaces clouds that leave the screen.
  */
@@ -227,6 +242,7 @@ function updateTitleClouds() {
     });
 }
 
+
 /**
  * Moves a cloud back to the right side of the title screen.
  * @param {*} cloudObject - The cloud object used by this method.
@@ -235,6 +251,7 @@ function resetTitleCloud(cloudObject) {
     cloudObject.x = canvas.width + 120 + Math.random() * 120;
     cloudObject.y = 10 + Math.random() * 95;
 }
+
 
 /**
  * Hides the start button and displays the tutorial and level selection images.
@@ -248,6 +265,7 @@ function openLevelSelection() {
     updateFullscreenUi();
 }
 
+
 /**
  * Starts the level chosen by the player.
  * @param {number} levelNumber - The level number used by this method.
@@ -258,21 +276,22 @@ function startSelectedLevel(levelNumber) {
     startGame();
 }
 
+
 /**
  * Prepares title music and restores the saved music setting.
+ * Music stays muted until the user enables it.
  */
 function setupMenuMusic() {
-    /** Music stays muted until the user enables it. */
     menuMuted = localStorage.getItem("elPolloLocoMusicMuted") !== "false";
     menuMusic.muted = menuMuted;
     pauseMusic.muted = menuMuted;
     gameSounds.setMusicMuted(menuMuted);
     updateMenuMuteButton();
-    updateAllSoundsButton();
     updateEffectsMuteButton();
     menuMusic.volume = 0.45;
     startMenuMusicEvents();
 }
+
 
 /**
  * Registers user interactions that can start the title music.
@@ -283,6 +302,7 @@ function startMenuMusicEvents() {
     bindMenuMusicEvents();
 }
 
+
 /**
  * Connects the menu music button to its mute control.
  */
@@ -292,6 +312,7 @@ function bindMenuMusicEvents() {
     document.addEventListener("keydown", playMenuMusicOnInteraction);
 }
 
+
 /**
  * Tries to start menu music after the player interacts with the page.
  */
@@ -300,6 +321,7 @@ function playMenuMusicOnInteraction() {
     playMenuMusic();
 }
 
+
 /**
  * Plays the title music unless playback is blocked by the browser.
  */
@@ -307,6 +329,7 @@ function playMenuMusic() {
     if (!titleActive || world || !menuMusic.paused) return;
     menuMusic.play().catch(() => {});
 }
+
 
 /**
  * Switches menu music between muted and unmuted and saves the setting.
@@ -322,6 +345,7 @@ function toggleMenuMute() {
     updatePauseMusic();
 }
 
+
 /**
  * Updates the menu music button to show its current state.
  */
@@ -333,6 +357,7 @@ function updateMenuMuteButton() {
     menuMuteBtn.setAttribute("aria-pressed", String(menuMuted));
 }
 
+
 /**
  * Switches sound effects on or off and saves the setting.
  */
@@ -341,8 +366,8 @@ function toggleEffectsMute() {
     localStorage.setItem("elPolloLocoEffectsMuted", String(gameSounds.muted));
     if (!gameSounds.muted && world && !world.isPaused) world.updateAmbientSounds();
     updateEffectsMuteButton();
-    updateAllSoundsButton();
 }
+
 
 /**
  * Displays the current sound effects setting on the button.
@@ -353,18 +378,4 @@ function updateEffectsMuteButton() {
     if (gameSounds.muted) { icon = "sfx_off"; label = "Turn sound effects on"; }
     setControlIcon(menuEffectsBtn, icon, label);
     menuEffectsBtn.setAttribute("aria-pressed", String(gameSounds.muted));
-}
-
-/**
- * Enables or disables all game audio from the gameplay controls.
- */
-function toggleAllSounds() {
-    toggleEffectsMute();
-}
-
-/**
- * Updates the text or icon of the all-sounds button.
- */
-function updateAllSoundsButton() {
-
 }
